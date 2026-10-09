@@ -1,3 +1,13 @@
-body { margin: 0; height: 100vh; display: grid; place-items: center;
+body { margin: 0; display: grid; place-items: start center; padding: 3rem 1rem;
        font-family: system-ui, sans-serif; background: #f5f5f7; color: #222; }
-h1 { font-size: 4rem; }
+main { width: min(720px, 100%); }
+h1 { font-size: 2rem; margin: 0 0 1.5rem; }
+.toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+.toolbar input { flex: 1; padding: .6rem .8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+th, td { padding: .75rem 1rem; text-align: left; }
+th { background: #eee; font-size: .85rem; }
+tbody tr:nth-child(even) { background: #fafafa; }
+.muted { color: #888; }
+.error { color: #c00; }
