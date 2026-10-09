@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { supabase } from './lib/supabase'
+import { supabase, missingEnv } from './lib/supabase'
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -8,6 +8,7 @@ export default function Users() {
   const [query, setQuery] = useState('')
 
   useEffect(() => {
+    if (missingEnv) return
     supabase.from('users').select('*').order('id').then(({ data, error }) => {
       setError(error?.message ?? null)
       setUsers(data ?? [])
@@ -20,6 +21,8 @@ export default function Users() {
     u => u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
   )
 
+  if (missingEnv)
+    return <p className="error">Supabase 환경 변수(SUPABASE_URL, SUPABASE_ANON_KEY)가 설정되지 않았습니다.</p>
   if (loading) return <p className="muted">불러오는 중…</p>
   if (error) return <p className="error">오류: {error}</p>
 
