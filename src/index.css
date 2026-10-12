@@ -1,13 +1,76 @@
-body { margin: 0; display: grid; place-items: start center; padding: 3rem 1rem;
-       font-family: system-ui, sans-serif; background: #f5f5f7; color: #222; }
-main { width: min(720px, 100%); }
-h1 { font-size: 2rem; margin: 0 0 1.5rem; }
-.toolbar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
-.toolbar input { flex: 1; padding: .6rem .8rem; border: 1px solid #ccc; border-radius: 8px; font-size: 1rem; }
-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,.1); }
-th, td { padding: .75rem 1rem; text-align: left; }
-th { background: #eee; font-size: .85rem; }
-tbody tr:nth-child(even) { background: #fafafa; }
-.muted { color: #888; }
-.error { color: #c00; }
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Noto Sans KR', 'Noto Sans', system-ui, sans-serif;
+
+  --color-primary: #006780;
+  --color-primary-container: #35c5f0;
+  --color-on-primary-container: #004e63;
+  --color-brand-sky-light: #edfafe;
+  --color-brand-sky-hover: #2bb5de;
+  --color-brand-sky-border: #c4ebf8;
+
+  --color-surface: #faf9fe;
+  --color-surface-base: #ffffff;
+  --color-surface-alt: #f7f8fa;
+  --color-surface-subtle: #f4f5f7;
+  --color-surface-muted: #eef0f3;
+
+  --color-text-primary: #292a2e;
+  --color-text-secondary: #656e75;
+  --color-text-muted: #828c94;
+  --color-border-default: #e4e6ea;
+  --color-border-subtle: #eceff3;
+
+  --color-status-discount: #f75656;
+  --color-status-rating: #ffa927;
+  --color-status-rating-bg: #fff9ed;
+  --color-status-success: #10b981;
+  --color-status-success-bg: #e8f8f2;
+  --color-status-warn: #f59e0b;
+  --color-status-warn-bg: #fff7e6;
+  --color-status-bad: #f75656;
+  --color-status-bad-bg: #fff0f0;
+
+  --color-inverse-surface: #2f3034;
+  --color-inverse-on-surface: #f1f0f5;
+
+  /* 오늘의집 상품 페이지 색 */
+  --color-oh-blue: #00a1ff;
+  --color-oh-ink: #141414;
+  --color-oh-gray: #8c8c8c;
+  --color-oh-light: #c1c1c1;
+  --color-oh-line: #e0e0e0;
+  --color-oh-line2: #eaedef;
+  --color-oh-bg: #f5f5f5;
+  --color-oh-red: #ff4650;
+  --color-oh-dark: #2f3438;
+  --color-oh-foot: #f7f9fa;
+  --color-oh-foot-ink: #828c94;
+}
+
+body {
+  margin: 0;
+  overscroll-behavior: none;
+  @apply bg-surface-base font-sans text-text-primary antialiased;
+}
+
+
+/* 상품 페이지 본문(모달 제외)에만 적용하는 글꼴 */
+.ohou {
+  font-family: 'Pretendard Variable', Pretendard, -apple-system, 'Noto Sans KR', sans-serif;
+  letter-spacing: -0.3px;
+  color: #141414;
+}
+
+.ohou button {
+  font-family: inherit;
+  letter-spacing: inherit;
+}
+
+.oh-check:checked {
+  border-color: #00a1ff;
+  background-color: #00a1ff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 6.8' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
