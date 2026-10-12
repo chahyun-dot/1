@@ -58,8 +58,8 @@ export default function PurchasePanel({ purchase, variant }: { purchase: Purchas
   const hasOptions = purchase.options.length > 0 || purchase.addonQty > 0
 
   return (
-    <div className="flex flex-col">
-      <div className={hero ? 'flex flex-col' : 'flex h-[452px] flex-col'}>
+    <div className={hero ? 'flex flex-col' : 'flex h-full flex-col'}>
+      <div className={hero ? 'flex flex-col' : 'flex min-h-0 flex-1 flex-col'}>
       <div className="flex flex-col gap-3 pb-3">
         <Select label="색상" value="" onChange={(id) => id && purchase.addColor(id as ColorId)}>
           <option value="">색상</option>

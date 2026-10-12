@@ -91,6 +91,7 @@ export type ProductCard = {
   badgeImage?: string
   todayShip?: string
   specialPrice?: boolean
+  ohouDelivery?: boolean
   tags: string[]
   coupon?: string
   pay?: string
@@ -123,7 +124,7 @@ export const AD_PRODUCTS: ProductCard[] = [
 ]
 
 export const SUGGESTED_PRODUCTS: ProductCard[] = [
-  { id: '1096010', brand: '오늘의집 layer', name: 'basic / 바른 3단 와이드 서랍장, 400/800/1200/2000', discount: 40, price: '89,900', rating: '4.7', reviews: '7,980', image: th(`${PRS}any/uploads/productions/v1-532850625695808.jpg`), badgeImage: `${IMG}uploads/admins/thumbnail_badges/177158985348246766.png?w=144`, specialPrice: true, tags: ['무료배송'], coupon: '최대 7% 쿠폰' },
+  { id: '1096010', brand: '오늘의집 layer', name: 'basic / 바른 3단 와이드 서랍장, 400/800/1200/2000', discount: 40, price: '89,900', rating: '4.7', reviews: '7,980', image: th(`${PRS}any/uploads/productions/v1-532850625695808.jpg`), badgeImage: `${IMG}uploads/admins/thumbnail_badges/177158985348246766.png?w=144`, specialPrice: true, ohouDelivery: true, tags: ['무료배송'], coupon: '최대 7% 쿠폰' },
   { id: '2541179', brand: '유에라가구', name: '캐슬 하이그로시 1200 와이드 수납 4단 서랍장 E0', discount: 18, price: '179,000', rating: '4.8', reviews: '1,073', image: th(`${PRS}any/uploads/productions/v1-198448279363712.jpg`), tags: ['배송비 별도'] },
   { id: '13097', brand: '마켓비', name: 'MKB 캐비넷 모던세로중 2문 수납장 8001015', discount: 16, price: '149,000', rating: '4.5', reviews: '1,799', image: th(`${PRS}any/uploads/productions/v1-227836073648128.jpg`), tags: ['무료배송', '설치비 별도'], coupon: '최대 14% 쿠폰', pay: '최대 8% 결제할인' },
   { id: '13150', brand: '마켓비', name: 'OLLSON 책상', discount: 16, price: '52,000', rating: '4.5', reviews: '8,910', image: th(`${PRS}any/uploads/productions/v1-234398668505152.jpg`), tags: ['무료배송', '설치비 별도'], coupon: '최대 12% 쿠폰', pay: '최대 8% 결제할인' },
