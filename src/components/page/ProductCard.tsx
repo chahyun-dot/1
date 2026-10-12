@@ -67,7 +67,7 @@ export default function ProductCard({ card }: { card: Card }) {
           <span>리뷰 {card.reviews}</span>
         </p>
 
-        <div className="mt-1 flex flex-col">
+        <div className={`flex flex-col ${card.ohouDelivery || card.todayShip ? 'mt-2' : 'mt-1'}`}>
           {card.ohouDelivery && <img src={TODAY_DELIVERY_BADGE} alt="오늘의집배송뱃지" className="h-[15px] w-[83px]" />}
           {card.todayShip && (
             <>

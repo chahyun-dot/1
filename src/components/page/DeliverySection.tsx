@@ -25,7 +25,7 @@ function NumberList({ children }: { children: React.ReactNode[] }) {
 
 export default function DeliverySection() {
   return (
-    <div id="goods-detail-section-delivery" className="w-[692px]">
+    <div id="goods-detail-section-delivery" className="mb-20 w-[692px]">
       <div className="mb-20">
         <Title>배송</Title>
         <div className="mt-7">
