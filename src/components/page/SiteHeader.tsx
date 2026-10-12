@@ -203,10 +203,15 @@ export type HeaderMode = 'static' | 'top' | 'full'
 
 export function useHeaderMode() {
   const [mode, setMode] = useState<HeaderMode>('static')
+  const pinnedUntil = useRef(0)
   useEffect(() => {
     let last = window.scrollY
     const onScroll = () => {
       const y = window.scrollY
+      if (Date.now() < pinnedUntil.current) {
+        last = y
+        return
+      }
       if (y < 100) setMode('static')
       else if (y < last - 4) setMode('full')
       else if (y > last + 4) setMode('top')
@@ -216,7 +221,12 @@ export function useHeaderMode() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-  return mode
+  // 탭으로 위쪽 영역에 이동할 때 "올리는 중"으로 읽혀 카테고리 줄이 나와 제목을 가리지 않도록, 잠깐 상단 줄만 고정한 채로 둔다.
+  const pin = () => {
+    pinnedUntil.current = Date.now() + 800
+    setMode('top')
+  }
+  return { mode, pin }
 }
 
 export default function SiteHeader({ mode }: { mode: HeaderMode }) {

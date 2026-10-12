@@ -36,12 +36,15 @@ export function useActiveSection(ratio: number) {
   return active
 }
 
-export default function StickyTabs({ top, active }: { top: number; active: string }) {
+export default function StickyTabs({ top, active, onGo }: { top: number; active: string; onGo: () => void }) {
   const go = (id: string) => {
     const el = document.getElementById(id)
     if (!el) return
-    const y = el.getBoundingClientRect().top + window.scrollY - TAB_TOP_HIDDEN - TAB_HEIGHT - 20
-    window.scrollTo({ top: y, behavior: 'smooth' })
+    onGo()
+    const target = () => el.getBoundingClientRect().top + window.scrollY - TAB_TOP_HIDDEN - TAB_HEIGHT - 20
+    window.scrollTo({ top: target() })
+    // 이동 중에 위쪽 이미지가 불러와져 높이가 바뀌면 영역이 밀리므로 한 번 더 맞춘다.
+    window.setTimeout(() => window.scrollTo({ top: target() }), 400)
   }
 
   return (

@@ -33,7 +33,7 @@ export default function App() {
   const [colorId, setColorId] = useState<ColorId>('white')
   const [fitOpen, setFitOpen] = useState(false)
   const purchase = usePurchase(setColorId)
-  const headerMode = useHeaderMode()
+  const { mode: headerMode, pin: pinHeader } = useHeaderMode()
   const tabTop = headerMode === 'full' ? TAB_TOP_WITH_HEADER : TAB_TOP_HIDDEN
   const active = useActiveSection(0.25)
   const openFit = () => setFitOpen(true)
@@ -49,7 +49,7 @@ export default function App() {
             <ProductHero purchase={purchase} onOpenFit={openFit} />
           </div>
 
-          <StickyTabs top={tabTop} active={active} />
+          <StickyTabs top={tabTop} active={active} onGo={pinHeader} />
 
           <div className="mx-auto flex w-full max-w-[1256px] px-[60px]">
             <div className="w-[757px] shrink-0 pr-[65px] pt-[80px]">
