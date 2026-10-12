@@ -2,6 +2,8 @@ import { Suspense, lazy, useState } from 'react'
 import AdCarousel from '@/components/page/AdCarousel'
 import DeliverySection from '@/components/page/DeliverySection'
 import DetailInfo from '@/components/page/DetailInfo'
+import Qna from '@/components/page/Qna'
+import Reviews from '@/components/page/Reviews'
 import ProductHero, { Breadcrumb } from '@/components/page/ProductHero'
 import PurchasePanel from '@/components/page/PurchasePanel'
 import SiteHeader, { useHeaderVisible } from '@/components/page/SiteHeader'
@@ -61,8 +63,8 @@ export default function App() {
               <StylingShots />
               <AdCarousel />
               <DetailInfo />
-              <Placeholder id="goods-detail-section-reviews" label="리뷰" />
-              <Placeholder id="goods-detail-section-question" label="문의" />
+              <Reviews />
+              <Qna />
               <DeliverySection />
               <Placeholder id="goods-detail-section-suggestion" label="추천" />
             </div>

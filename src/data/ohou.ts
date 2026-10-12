@@ -47,6 +47,7 @@ export const ICONS = {
   couponBadge: `${IMG}static/productions/goods-coupon-badge.png?w=72&h=32`,
   cardBadge: `${IMG}static/productions/card-promotion-badge.png?w=72&h=32`,
   avatar: `${IMG}uploads/default_images/avatar.png?w=144&h=144&c=c`,
+  sparkles: 'https://asset.ohousecdn.com/static/AssetSparklesSmall/sparkles-small.svg',
 }
 
 export const BENEFITS = {
@@ -252,7 +253,7 @@ export const REVIEWS: Review[] = [
   {
     user: '로즈쉽',
     avatar: `${PROFILE}1731924047_naver_3129c9dfad815ce2b5fdca52b2081d9388194206dd3d809cf86b36dde05c5e73.jpg?w=144&h=144&c=c`,
-    rating: 5,
+    rating: 4,
     date: '2026.10.12',
     option: '핑크 6562.0674',
     image: `${PRS}content/community/v1-553500642885632.jpg?w=288&h=288&c=c`,
