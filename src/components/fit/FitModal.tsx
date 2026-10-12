@@ -259,8 +259,11 @@ export default function FitModal({ colorId, onColor, onClose, onDone }: FitModal
               </span>
             </div>
             <p className="flex flex-wrap items-center gap-x-3 text-[13px] text-text-secondary">
-              <span>{PRODUCT.shortName}를 우리 집 치수에 놓고 돌려 보세요.</span>
+              <span>3D로 가구를 배치하고, 내 공간에 맞는지 확인해 보세요.</span>
               <span className="font-semibold text-text-primary">① 책상 치수 입력 → ② 서랍장 위치 조정 → ③ 설치 조건 확인</span>
+            </p>
+            <p className="text-[13px] font-medium text-primary-container">
+              {inDetail ? '책상 치수와 서랍장 위치를 조정하고, 설치 조건을 확인해 보세요.' : '방을 둘러보고, 가구를 배치해 보세요.'}
             </p>
           </div>
           <div className="flex items-center gap-2">

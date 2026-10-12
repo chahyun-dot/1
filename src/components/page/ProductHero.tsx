@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Osset, { Stars } from '@/components/page/Osset'
+import character from '@/assets/oh-character-new.webp'
 import PurchasePanel from '@/components/page/PurchasePanel'
 import type { Purchase } from '@/components/page/usePurchase'
 import { PRODUCT } from '@/data/catalog'
@@ -44,12 +45,9 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
         <button
           type="button"
           onClick={onOpenFit}
-          className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full border border-oh-line2 bg-white/95 px-[14px] py-2 text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
+          className="absolute bottom-4 right-4 flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 px-[14px] py-2 text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00a1ff" strokeWidth="1.8" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
-            <path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z" />
-            <path d="M3.5 7.4L12 12.3l8.5-4.9M12 12.3v9.2" />
-          </svg>
+          <img src={character} alt="" width={32} height={32} className="-my-1 h-8 w-8 shrink-0 object-contain" />
           <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
           <Osset name="chevronRight" size={14} />
         </button>
