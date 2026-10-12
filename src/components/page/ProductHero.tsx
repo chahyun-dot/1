@@ -47,7 +47,7 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
           onClick={onOpenFit}
           className="absolute bottom-4 right-4 flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 px-[14px] py-2 text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
         >
-          <img src={character} alt="" width={32} height={32} className="-my-1 h-8 w-8 shrink-0 object-contain" />
+          <img src={character} alt="" width={52} height={52} className="-my-[14px] -ml-1 h-[52px] w-[52px] shrink-0 object-contain" />
           <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
           <Osset name="chevronRight" size={14} />
         </button>

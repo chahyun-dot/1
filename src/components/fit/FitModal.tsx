@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import Icon from '@/components/Icon'
 import DetailScene from '@/components/fit/DetailScene'
 import Scene, { type View } from '@/components/fit/Scene'
-import { DESK_TOP, FOOT_W, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
+import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
 import { COLORS, DEFAULT_ROOM, PRODUCT, ROOM_PRESETS, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, createFurniture, createProduct, type ColorId } from '@/data/catalog'
 import { DRAWER_PULL, backToWall, clampToRoom, cm, evaluate } from '@/lib/fit'
 import type { FitResult, Item, Level, Room, Rot } from '@/lib/types'
@@ -71,38 +71,49 @@ function StageButton({ icon, label, onClick, active = false, disabled = false }:
   )
 }
 
-function NumberField({ label, value, min, max, onCommit }: {
+function NumberField({ label, value, min, max, onCommit, pill = false }: {
   label: string
   value: number
   min: number
   max: number
   onCommit: (value: number) => void
+  pill?: boolean
 }) {
   const [draft, setDraft] = useState<string | null>(null)
   const parsed = draft === null ? value : Number(draft)
   const invalid = draft !== null && !(parsed >= min && parsed <= max)
+  const input = (
+    <input
+      type="number"
+      step={10}
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(event) => {
+        const next = Number(event.target.value)
+        setDraft(event.target.value)
+        if (next >= min && next <= max) onCommit(Math.round(next))
+      }}
+      onBlur={() => setDraft(null)}
+      className={`border bg-surface-base text-text-primary outline-none focus:ring-2 ${
+        pill ? 'h-10 min-w-0 flex-1 rounded-full px-4 text-[15px]' : 'h-9 w-full rounded-lg pl-2.5 pr-9 text-[14px]'
+      } ${invalid ? 'border-status-bad focus:ring-status-bad/20' : 'border-border-default focus:border-primary-container focus:ring-primary-container/20'}`}
+    />
+  )
   return (
-    <label className="text-[12px] text-text-secondary">
+    <label className={pill ? 'text-[13px] text-text-secondary' : 'text-[12px] text-text-secondary'}>
       {label}
-      <div className="relative mt-1">
-        <input
-          type="number"
-          step={10}
-          min={min}
-          max={max}
-          value={draft ?? value}
-          onChange={(event) => {
-            const next = Number(event.target.value)
-            setDraft(event.target.value)
-            if (next >= min && next <= max) onCommit(Math.round(next))
-          }}
-          onBlur={() => setDraft(null)}
-          className={`h-9 w-full rounded-lg border bg-surface-base pl-2.5 pr-9 text-[14px] text-text-primary outline-none focus:ring-2 ${
-            invalid ? 'border-status-bad focus:ring-status-bad/20' : 'border-border-default focus:border-primary-container focus:ring-primary-container/20'
-          }`}
-        />
-        <span className="pointer-events-none absolute right-2.5 top-2 text-[12px] text-text-muted">mm</span>
-      </div>
+      {pill ? (
+        <div className="mt-1 flex items-center gap-1.5">
+          {input}
+          <span className="text-[13px] text-text-muted">mm</span>
+        </div>
+      ) : (
+        <div className="relative mt-1">
+          {input}
+          <span className="pointer-events-none absolute right-2.5 top-2 text-[12px] text-text-muted">mm</span>
+        </div>
+      )}
       {invalid && <span className="mt-0.5 block text-[11px] text-status-bad">{min.toLocaleString()}~{max.toLocaleString()}mm</span>}
     </label>
   )
@@ -121,6 +132,7 @@ export default function FitModal({ colorId, onColor, onClose, onDone }: FitModal
   const [expanded, setExpanded] = useState(false)
   const [gapsOpen, setGapsOpen] = useState(false)
   const [tab, setTab] = useState<'space' | 'furniture' | 'cabinet' | 'color'>('space')
+  const [deskSizeOpen, setDeskSizeOpen] = useState(true)
   const [detailId, setDetailId] = useState<string | null>(null)
   const [autoRotate, setAutoRotate] = useState(true)
   const [showDims, setShowDims] = useState(true)
@@ -258,10 +270,6 @@ export default function FitModal({ colorId, onColor, onClose, onDone }: FitModal
                 </span>
               </span>
             </div>
-            <p className="flex flex-wrap items-center gap-x-3 text-[13px] text-text-secondary">
-              <span>3D로 가구를 배치하고, 내 공간에 맞는지 확인해 보세요.</span>
-              <span className="font-semibold text-text-primary">① 책상 치수 입력 → ② 서랍장 위치 조정 → ③ 설치 조건 확인</span>
-            </p>
             <p className="text-[13px] font-medium text-primary-container">
               {inDetail ? '책상 치수와 서랍장 위치를 조정하고, 설치 조건을 확인해 보세요.' : '방을 둘러보고, 가구를 배치해 보세요.'}
             </p>
@@ -410,46 +418,82 @@ export default function FitModal({ colorId, onColor, onClose, onDone }: FitModal
 
             {activeTab === 'space' && (inDetail && detailDesk && product ? (
               <Step step={1} title="내 책상 치수">
-                <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">
-                  줄자로 잰 우리 집 책상 치수를 넣으면 3D와 간격이 바로 바뀌어요.
-                </p>
-                <div className="grid grid-cols-2 gap-2">
-                  <NumberField
-                    label="책상 가로"
-                    value={detailDesk.w}
-                    min={600}
-                    max={room.w}
-                    onCommit={(w) => {
-                      const gap = legInner(detailDesk) * 2 + (w - detailDesk.w)
-                      updateDesk({ w, legGap: Math.max(300, Math.min(gap, maxLegGap(w))) })
-                    }}
-                  />
-                  <NumberField label="책상 깊이" value={detailDesk.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
-                  <NumberField
-                    label="책상 높이"
-                    value={detailDesk.h}
-                    min={500}
-                    max={1200}
-                    onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(detailDesk) + h - detailDesk.h, h - DESK_TOP) })}
-                  />
-                  <NumberField
-                    label="상판 아래 높이"
-                    value={undersideOf(detailDesk)}
-                    min={300}
-                    max={detailDesk.h - DESK_TOP}
-                    onCommit={(underClearance) => updateDesk({ underClearance })}
-                  />
-                  <NumberField
-                    label="다리 안쪽 폭"
-                    value={legInner(detailDesk) * 2}
-                    min={300}
-                    max={maxLegGap(detailDesk.w)}
-                    onCommit={(legGap) => updateDesk({ legGap })}
-                  />
+                <p className="text-[13px] leading-relaxed text-text-secondary">책상 아래 공간을 기준으로 서랍장 배치를 확인해요.</p>
+
+                <div className="mt-4 border-t border-border-subtle pt-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[17px] font-bold text-text-primary">설치 공간 치수</h4>
+                    <span className="rounded-full bg-surface-subtle px-2.5 py-1 text-[11px] font-medium text-text-secondary">중요</span>
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
+                    <NumberField
+                      pill
+                      label="상판 아래 높이"
+                      value={undersideOf(detailDesk)}
+                      min={300}
+                      max={detailDesk.h - DESK_TOP}
+                      onCommit={(underClearance) => updateDesk({ underClearance })}
+                    />
+                    <NumberField
+                      pill
+                      label="다리 안쪽 폭"
+                      value={legInner(detailDesk) * 2}
+                      min={300}
+                      max={maxLegGap(detailDesk.w)}
+                      onCommit={(legGap) => updateDesk({ legGap })}
+                    />
+                  </div>
                 </div>
-                <p className="mt-2 text-[11px] leading-relaxed text-text-muted">
-                  상판 아래 높이는 바닥에서 상판(또는 서랍·프레임) 아랫면까지예요. 다리 안쪽 폭은 양쪽 다리 받침({FOOT_W}mm) 안쪽 사이 거리예요.
-                </p>
+
+                <div className="mt-5 border-t border-border-subtle pt-4">
+                  <button
+                    type="button"
+                    aria-expanded={deskSizeOpen}
+                    onClick={() => setDeskSizeOpen((v) => !v)}
+                    className="flex w-full items-start justify-between text-left"
+                  >
+                    <span>
+                      <span className="block text-[17px] font-bold text-text-primary">책상 전체 크기</span>
+                      <span className="mt-1 block text-[13px] text-text-secondary">
+                        가로 {detailDesk.w} · 깊이 {detailDesk.d} · 높이 {detailDesk.h}mm
+                      </span>
+                    </span>
+                    <Icon name={deskSizeOpen ? 'expand_less' : 'expand_more'} className="text-[24px] text-text-secondary" />
+                  </button>
+                  {deskSizeOpen && (
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
+                      <NumberField
+                        pill
+                        label="책상 가로"
+                        value={detailDesk.w}
+                        min={600}
+                        max={room.w}
+                        onCommit={(w) => {
+                          const gap = legInner(detailDesk) * 2 + (w - detailDesk.w)
+                          updateDesk({ w, legGap: Math.max(300, Math.min(gap, maxLegGap(w))) })
+                        }}
+                      />
+                      <NumberField pill label="책상 깊이" value={detailDesk.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
+                      <NumberField
+                        pill
+                        label="책상 높이"
+                        value={detailDesk.h}
+                        min={500}
+                        max={1200}
+                        onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(detailDesk) + h - detailDesk.h, h - DESK_TOP) })}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-5 rounded-xl bg-surface-subtle px-4 py-3">
+                  <p className="flex items-center gap-1.5 text-[13px] font-semibold text-text-primary">
+                    <Icon name="info" className="text-[18px] text-primary-container" /> 치수 입력 안내
+                  </p>
+                  <p className="mt-1.5 text-[12px] leading-relaxed text-text-secondary">
+                    상판 아래 높이는 바닥에서 상판 밑면까지, 다리 안쪽 폭은 양쪽 다리 사이의 거리예요.
+                  </p>
+                </div>
               </Step>
             ) : (
             <Step step={1} title="내 공간 치수">
