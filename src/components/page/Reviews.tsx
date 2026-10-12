@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Osset, { Stars } from '@/components/page/Osset'
+import { REVIEW_PAGES } from '@/data/reviewPages'
 import { ICONS, REVIEWS, REVIEW_KEYWORDS, REVIEW_STATS, type Review } from '@/data/ohou'
 
 // 원본(Lottie 애니메이션)의 첫 프레임과 눌렀을 때 채워지는 모양을 66×66 좌표 그대로 옮겼다.
@@ -49,9 +50,11 @@ function ReviewItem({ review }: { review: Review }) {
         <span className="text-[13px] leading-[18px] text-oh-gray">{review.option}</span>
       </div>
 
-      <button type="button" aria-label="리뷰 사진 크게 보기" className="h-[112px] w-[112px] overflow-hidden rounded">
-        <img src={review.image} alt={`${review.user}님의 리뷰 사진`} loading="lazy" className="h-full w-full bg-oh-bg object-cover" />
-      </button>
+      {review.image && (
+        <button type="button" aria-label="리뷰 사진 크게 보기" className="h-[112px] w-[112px] overflow-hidden rounded">
+          <img src={review.image} alt={`${review.user}님의 리뷰 사진`} loading="lazy" className="h-full w-full bg-oh-bg object-cover" />
+        </button>
+      )}
 
       <div>
         <p className="whitespace-pre-wrap text-[15px] leading-6 text-oh-ink">{review.text}</p>
@@ -73,9 +76,10 @@ function ReviewItem({ review }: { review: Review }) {
   )
 }
 
-function Pagination() {
-  const [page, setPage] = useState(1)
-  const pages = Array.from({ length: 9 }, (_, i) => i + 1)
+const PAGE_COUNT = REVIEW_PAGES.length + 1
+
+function Pagination({ page, setPage }: { page: number; setPage: (page: number) => void }) {
+  const pages = Array.from({ length: PAGE_COUNT }, (_, i) => i + 1)
   return (
     <div className="flex h-8 justify-center gap-[10px]">
       <button
@@ -99,7 +103,7 @@ function Pagination() {
       <button
         type="button"
         aria-label="다음 페이지"
-        onClick={() => setPage(Math.min(9, page + 1))}
+        onClick={() => setPage(Math.min(PAGE_COUNT, page + 1))}
         className="flex h-8 w-8 items-center justify-center rounded border border-oh-line bg-white text-oh-dark"
       >
         <Osset name="chevronRight" size={18} />
@@ -112,6 +116,14 @@ const FILTER = 'flex h-8 w-[62px] items-center justify-center rounded-md border 
 
 export default function Reviews() {
   const [sort, setSort] = useState<'best' | 'latest'>('best')
+  const [page, setPage] = useState(1)
+  const reviews = page === 1 ? REVIEWS : REVIEW_PAGES[page - 2]
+  const goPage = (next: number) => {
+    setPage(next)
+    // 새 쪽의 첫 리뷰가 고정 탭 바 바로 아래(제목 154px)에 오도록 목록 맨 위로 올린다.
+    const top = document.getElementById('goods-detail-section-reviews')!.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top: top - 154 })
+  }
   return (
     <section id="goods-detail-section-reviews" className="mb-20 w-[692px]">
       <header className="flex h-7 items-center justify-between">
@@ -194,13 +206,13 @@ export default function Reviews() {
       </div>
 
       <div className="mt-5">
-        {REVIEWS.map((review, index) => (
-          <ReviewItem key={`${review.user}-${index}`} review={review} />
+        {reviews.map((review, index) => (
+          <ReviewItem key={`${page}-${review.user}-${index}`} review={review} />
         ))}
       </div>
 
       <div className="mt-10">
-        <Pagination />
+        <Pagination page={page} setPage={goPage} />
       </div>
 
       <div className="mt-9 rounded bg-oh-bg p-3">

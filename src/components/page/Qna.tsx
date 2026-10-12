@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import Osset from '@/components/page/Osset'
+import { QNA_PAGES } from '@/data/qnaPages'
 import { QNAS } from '@/data/ohou'
 
-function Pagination() {
-  const [page, setPage] = useState(1)
-  const pages = Array.from({ length: 9 }, (_, i) => i + 1)
+const PAGE_COUNT = QNA_PAGES.length + 1
+
+function Pagination({ page, setPage }: { page: number; setPage: (page: number) => void }) {
+  const pages = Array.from({ length: PAGE_COUNT }, (_, i) => i + 1)
   return (
     <div className="flex h-8 justify-center gap-[10px]">
       <button
@@ -28,7 +30,7 @@ function Pagination() {
       <button
         type="button"
         aria-label="다음 페이지"
-        onClick={() => setPage(Math.min(9, page + 1))}
+        onClick={() => setPage(Math.min(PAGE_COUNT, page + 1))}
         className="flex h-8 w-8 items-center justify-center rounded border border-oh-line bg-white text-oh-dark"
       >
         <Osset name="chevronRight" size={18} />
@@ -38,6 +40,13 @@ function Pagination() {
 }
 
 export default function Qna() {
+  const [page, setPage] = useState(1)
+  const qnas = page === 1 ? QNAS : QNA_PAGES[page - 2]
+  const goPage = (next: number) => {
+    setPage(next)
+    const top = document.getElementById('goods-detail-section-question')!.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top: top - 154 })
+  }
   return (
     <section id="goods-detail-section-question" className="mb-20 w-[692px]">
       <header className="flex h-7 items-center justify-between">
@@ -50,8 +59,8 @@ export default function Qna() {
       </header>
 
       <div className="mt-5">
-        {QNAS.map((qna) => (
-          <article key={qna.asked} className="mb-10">
+        {qnas.map((qna) => (
+          <article key={`${qna.asked}-${qna.author}`} className="mb-10">
             <header className="text-[12px] leading-[19px]">
               <span className="text-oh-ink">{qna.tags}</span> <span className="text-oh-blue">답변완료</span>
             </header>
@@ -82,7 +91,7 @@ export default function Qna() {
       </div>
 
       <div className="mt-[40px]">
-        <Pagination />
+        <Pagination page={page} setPage={goPage} />
       </div>
     </section>
   )
