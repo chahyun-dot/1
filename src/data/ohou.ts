@@ -8,19 +8,79 @@ export const TOP_BANNER = {
   image: 'https://prs.ohouse.com/apne2/commerce/uploads/store/banners/store_top_banners/v1-454626313498688.png',
 }
 
-export const GNB = [
-  { label: '집구경', active: false },
-  { label: '쇼핑', active: true },
-  { label: '인테리어/생활', active: false },
-]
+export const GNB = ['집구경', '쇼핑', '인테리어/생활'] as const
+export type GnbLabel = (typeof GNB)[number]
+
+export const GNB_MENUS: Record<Exclude<GnbLabel, '쇼핑'>, { label: string; href: string }[]> = {
+  집구경: [
+    { label: '홈', href: 'https://ohou.se/' },
+    { label: '추천', href: 'https://contents.ohou.se/topics/recommend' },
+    { label: '집들이', href: 'https://contents.ohou.se/projects' },
+    { label: '집사진', href: 'https://ohou.se/contents/card_collections' },
+    { label: '커뮤니티', href: 'https://contents.ohou.se/community' },
+    { label: '3D인테리어', href: 'https://ohou.se/interior3ds' },
+  ],
+  '인테리어/생활': [
+    { label: '홈', href: 'https://ohou.se/experts' },
+    { label: '전체시공', href: 'https://o2o.ohou.se/remodeling/home/discovery' },
+    { label: '부분시공', href: 'https://o2o.ohou.se/remodeling/part' },
+    { label: '아파트시공사례', href: 'https://ohou.se/experts/town' },
+    { label: '이사', href: 'https://ohou.se/experts/moving' },
+    { label: '제품설치', href: 'https://o2o.ohou.se/repair' },
+    { label: '시공자재랭킹', href: 'https://o2o.ohou.se/remodeling/goods/ranks' },
+  ],
+}
 
 export const CATEGORY_NAV = ['쇼핑홈', '카테고리', '베스트', '오늘의딜', '단독상품', '식탁위예술', '오마트', '원하는날도착', '오!쇼룸', '기획전']
 
-export const HOT_KEYWORDS = [
-  { rank: 6, text: '잭슨카멜레온' },
-  { rank: 7, text: '무선 청소기', isNew: true },
-  { rank: 4, text: '바이너리삽', up: true },
-  { rank: 10, text: '제빵', isNew: true },
+const CATEGORY_IMG = 'https://prs.ohouse.com/apne2/commerce/uploads/category/store_hamburger_categories/'
+
+export const STORE_CATEGORIES = [
+  ['가구', 10000000, 'v1-484634278838272'],
+  ['가전·디지털', 14000000, 'v1-484634298495104'],
+  ['패브릭', 18000000, 'v1-484634315501568'],
+  ['주방용품', 16000000, 'v1-484634333909120'],
+  ['식품', 31000000, 'v1-484634353033280'],
+  ['데코·식물', 11000000, 'v1-484634373091328'],
+  ['조명', 28000000, 'v1-485389660414080'],
+  ['수납·정리', 13000000, 'v1-484634412826752'],
+  ['생활용품', 12000000, 'v1-484634428547136'],
+  ['생필품', 23000000, 'v1-484634451369984'],
+  ['유아·아동', 27000000, 'v1-484634472935424'],
+  ['반려동물', 15000000, 'v1-485353010577408'],
+  ['캠핑·레저', 32000000, 'v1-484634521288768'],
+  ['공구·DIY', 19000000, 'v1-484634541781120'],
+  ['인테리어시공', 17000000, 'v1-484634560954368'],
+  ['렌탈·구독', 26000000, 'v1-484634580844544'],
+  ['장보기', 33000000, 'v1-484634600026240'],
+].map(([label, id, file]) => ({
+  label: label as string,
+  href: `https://ohou.se/store/category?affect_type=StoreHamburger&category_id=${id}`,
+  image: `${CATEGORY_IMG}${file}.png?w=1280`,
+}))
+
+const ASSET = 'https://asset.ohousecdn.com/static/'
+
+export const WRITE_MENU = [
+  { title: '사진/동영상', desc: '우리 집의 공간과 나의 일상을 기록해보세요.', icon: `${ASSET}AssetPhotoSmallGenuineBlue/photo-small-genuine-blue.svg` },
+  { title: '커뮤니티', desc: '쇼핑 고민부터 일상 이야기까지 함께 나눠보세요.', icon: `${ASSET}AssetPencilLineSmallCoralRed/pencil-line-small-coral-red.svg` },
+  { title: '집들이', desc: '집에 관한 이야기를 글로 작성해보세요.', icon: `${ASSET}AssetMagnifyingGlassHouseSmallGenuineBlue/magnifying-glass-house-small-genuine-blue.svg` },
+  { title: '노하우', desc: '다양한 인테리어 노하우를 공유해주세요.', icon: `${ASSET}AssetEllipsisBubbleSmallJadeGreen/ellipsis-bubble-small-jade-green.svg` },
+  { title: '리뷰', desc: '상품 리뷰를 작성하고 포인트도 받아보세요.', icon: `${ASSET}AssetStarSmallMangoOrange/star-small-mango-orange.svg` },
+  { title: '인테리어시공 리뷰', desc: '시공 리뷰를 작성하고 포인트도 받아보세요.', icon: `${ASSET}AssetStarHouseSmallDarkBlue/star-house-small-dark-blue.svg` },
+]
+
+export const HOT_KEYWORDS: { rank: number; text: string; isNew?: boolean; up?: boolean }[] = [
+  { rank: 1, text: '땡스소윤', isNew: true },
+  { rank: 2, text: '약정리함', isNew: true },
+  { rank: 3, text: '반타원테이블', up: true },
+  { rank: 4, text: '바이너리샵', up: true },
+  { rank: 5, text: '다이슨 거치대', isNew: true },
+  { rank: 6, text: '템바보드수납장', isNew: true },
+  { rank: 7, text: '잭슨카멜레온', isNew: true },
+  { rank: 8, text: '트롤리이동식', isNew: true },
+  { rank: 9, text: '무선 청소기', isNew: true },
+  { rank: 10, text: '침대 틈새 선반', isNew: true },
 ]
 
 export const BREADCRUMB = ['가구', '서랍·수납장', '서랍장']
