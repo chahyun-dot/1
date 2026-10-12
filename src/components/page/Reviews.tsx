@@ -2,16 +2,27 @@ import { useState } from 'react'
 import Osset, { Stars } from '@/components/page/Osset'
 import { ICONS, REVIEWS, REVIEW_KEYWORDS, REVIEW_STATS, type Review } from '@/data/ohou'
 
+// 원본(Lottie 애니메이션)의 첫 프레임과 눌렀을 때 채워지는 모양을 66×66 좌표 그대로 옮겼다.
 function ThumbUp({ on }: { on: boolean }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill={on ? '#00a1ff' : 'none'} aria-hidden="true">
-      <path
-        d="M5.5 7.2V13.5H3a.9.9 0 0 1-.9-.9V8.1c0-.5.4-.9.9-.9h2.5Zm0 0 2.2-4.4c.3-.6 1-.9 1.6-.6.6.3.9 1 .7 1.6L9.4 6.2h3.1c.9 0 1.5.8 1.3 1.7l-.9 4.2c-.1.8-.8 1.4-1.7 1.4H5.5"
-        stroke={on ? '#00a1ff' : '#2e3337'}
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
+    <svg width="16" height="16" viewBox="0 0 66 66" aria-hidden="true">
+      {on ? (
+        <>
+          <path
+            fill="#009ecd"
+            transform="translate(38.86 32.62) scale(.69)"
+            d="M9.7-10.5H4.8C1.9-10.5-.2-13.3.6-16L1.2-18.2C2.7-23.2-1.1-28-6.3-28c-2.6 0-5 1.2-6.4 3.4L-21-12.4c-.7 1-1 2.2-1 3.4v31c0 3.4 2.7 6 6 6H6.5c5.4 0 10.1-3.8 11.1-9L20.7 2.7C22-4.2 16.7-10.5 9.7-10.5z"
+          />
+          <path fill="#009ecd" transform="translate(16.58 39.66) scale(.69)" d="M-4.9-12.1V12.1c0 3.2 2.6 5.7 5.8 5.7h4v-35.6h-4c-3.2 0-5.8 2.5-5.8 5.7z" />
+        </>
+      ) : (
+        <path
+          fill="#2e3337"
+          fillRule="evenodd"
+          transform="translate(33.35 32.53)"
+          d="M11.5-8H8.1C6.4-8 5.3-9.5 5.7-11.1L6.1-12.6C7.2-16.5 4.3-20.3.3-20.3c-2 0-3.9 1-5.1 2.7L-11.7-7.3c-.4.6-.7 1.3-1 1.9h-3.9c-2.2 0-4.1 1.8-4.1 4v17.7c0 2.2 1.9 4 4.1 4H9.3c4 0 7.5-2.9 8.3-6.8L19.8 2C20.8-3.2 16.8-8 11.5-8zM-13.2 15.5h-2.6V-.6h2.6zM15 1.1 12.8 12.5C12.5 14.2 11 15.5 9.3 15.5H-8.3V-2.7c0-.7.2-1.4.6-2L-.7-14.9c.2-.4.6-.6 1-.6.8 0 1.4.8 1.2 1.6L1-12.4C-.3-7.8 3.2-3.2 8.1-3.2h3.4c2.2 0 4 2.1 3.5 4.3z"
+        />
+      )}
     </svg>
   )
 }
