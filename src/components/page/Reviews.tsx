@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Osset, { Stars } from '@/components/page/Osset'
 import { REVIEW_PAGES } from '@/data/reviewPages'
 import { ICONS, REVIEWS, REVIEW_KEYWORDS, REVIEW_STATS, type Review } from '@/data/ohou'
@@ -76,10 +76,12 @@ function ReviewItem({ review }: { review: Review }) {
   )
 }
 
-const PAGE_COUNT = REVIEW_PAGES.length + 1
+const PER_PAGE = 5
+// 옮겨 둔 리뷰 전체(1~9쪽, 베스트순). 정렬·필터는 이 안에서만 적용된다.
+const ALL_REVIEWS = [...REVIEWS, ...REVIEW_PAGES.flat()]
 
-function Pagination({ page, setPage }: { page: number; setPage: (page: number) => void }) {
-  const pages = Array.from({ length: PAGE_COUNT }, (_, i) => i + 1)
+function Pagination({ page, pageCount, setPage }: { page: number; pageCount: number; setPage: (page: number) => void }) {
+  const pages = Array.from({ length: pageCount }, (_, i) => i + 1)
   return (
     <div className="flex h-8 justify-center gap-[10px]">
       <button
@@ -103,7 +105,7 @@ function Pagination({ page, setPage }: { page: number; setPage: (page: number) =
       <button
         type="button"
         aria-label="다음 페이지"
-        onClick={() => setPage(Math.min(PAGE_COUNT, page + 1))}
+        onClick={() => setPage(Math.min(pageCount, page + 1))}
         className="flex h-8 w-8 items-center justify-center rounded border border-oh-line bg-white text-oh-dark"
       >
         <Osset name="chevronRight" size={18} />
@@ -112,17 +114,95 @@ function Pagination({ page, setPage }: { page: number; setPage: (page: number) =
   )
 }
 
-const FILTER = 'flex h-8 w-[62px] items-center justify-center rounded-md border border-oh-line bg-white text-[14px] leading-[18px] text-oh-ink'
+type FilterItem = { key: string; label: React.ReactNode }
+
+function FilterMenu({ label, title, items, selected, onToggle }: { label: string; title?: string; items: FilterItem[]; selected: Set<string>; onToggle: (key: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent) => {
+      if (!ref.current?.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+  const active = selected.size > 0
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className={`flex h-8 min-w-[62px] items-center justify-center rounded-md border bg-white px-2 text-[14px] leading-[18px] ${active ? 'border-oh-blue text-oh-blue' : 'border-oh-line text-oh-ink'}`}
+      >
+        {label}
+        {active && <span className="ml-1">{selected.size}</span>}
+        <Osset name="chevronDown" size={14} className={`ml-1 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-[38px] z-10 w-[240px] rounded-md border border-oh-line bg-white py-2 shadow-[0_4px_10px_rgba(63,71,77,0.2)]">
+          {title && <p className="px-4 pb-2 pt-1 text-[13px] font-bold leading-[18px] text-oh-ink">{title}</p>}
+          <ul className="max-h-[320px] overflow-y-auto">
+            {items.map((item) => (
+              <li key={item.key}>
+                <label className="flex cursor-pointer items-center gap-2 px-4 py-[7px] text-[14px] leading-5 text-oh-ink hover:bg-oh-bg">
+                  <input
+                    type="checkbox"
+                    checked={selected.has(item.key)}
+                    onChange={() => onToggle(item.key)}
+                    className="oh-check h-5 w-5 shrink-0 cursor-pointer appearance-none rounded border border-oh-line bg-white"
+                  />
+                  <span className="min-w-0 truncate">{item.label}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const OPTIONS = [...new Set(ALL_REVIEWS.map((r) => r.option))]
+  .map((option) => ({ option, count: ALL_REVIEWS.filter((r) => r.option === option).length }))
+  .sort((a, b) => b.count - a.count)
+  .map((o) => o.option)
+
+function toggled<T>(set: Set<T>, key: T) {
+  const next = new Set(set)
+  if (!next.delete(key)) next.add(key)
+  return next
+}
 
 export default function Reviews() {
   const [sort, setSort] = useState<'best' | 'latest'>('best')
+  const [stars, setStars] = useState<Set<number>>(new Set())
+  const [options, setOptions] = useState<Set<string>>(new Set())
   const [page, setPage] = useState(1)
-  const reviews = page === 1 ? REVIEWS : REVIEW_PAGES[page - 2]
-  const goPage = (next: number) => {
-    setPage(next)
-    // 새 쪽의 첫 리뷰가 고정 탭 바 바로 아래(제목 154px)에 오도록 목록 맨 위로 올린다.
+
+  const filtered = ALL_REVIEWS.filter((r) => (stars.size === 0 || stars.has(r.rating)) && (options.size === 0 || options.has(r.option)))
+  const sorted = sort === 'latest' ? [...filtered].sort((a, b) => b.date.localeCompare(a.date)) : filtered
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PER_PAGE))
+  const reviews = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+
+  const scrollToTop = () => {
+    // 새 목록의 첫 리뷰가 고정 탭 바 바로 아래(제목 154px)에 오도록 맨 위로 올린다.
     const top = document.getElementById('goods-detail-section-reviews')!.getBoundingClientRect().top + window.scrollY
     window.scrollTo({ top: top - 154 })
+  }
+  const goPage = (next: number) => {
+    setPage(next)
+    scrollToTop()
+  }
+  const change = <T,>(set: (value: T) => void, value: T) => {
+    set(value)
+    setPage(1)
   }
   return (
     <section id="goods-detail-section-reviews" className="mb-20 w-[692px]">
@@ -164,7 +244,7 @@ export default function Reviews() {
             <button
               key={key}
               type="button"
-              onClick={() => setSort(key)}
+              onClick={() => change(setSort, key)}
               className={`h-7 rounded-md border border-transparent px-2 text-[14px] font-medium leading-[18px] ${sort === key ? 'text-oh-blue' : 'text-oh-gray'}`}
             >
               {label}
@@ -172,14 +252,27 @@ export default function Reviews() {
           ))}
         </div>
         <div className="flex gap-2">
-          <button type="button" className={FILTER}>
-            별점
-            <Osset name="chevronDown" size={14} className="ml-1" />
-          </button>
-          <button type="button" className={FILTER}>
-            옵션
-            <Osset name="chevronDown" size={14} className="ml-1" />
-          </button>
+          <FilterMenu
+            label="별점"
+            items={REVIEW_STATS.bars.map((bar) => ({
+              key: String(bar.score),
+              label: (
+                <span className="flex items-center gap-1">
+                  <Stars value={bar.score} size={14} />
+                  <span className="text-oh-gray">({bar.count})</span>
+                </span>
+              ),
+            }))}
+            selected={new Set([...stars].map(String))}
+            onToggle={(key) => change(setStars, toggled(stars, Number(key)))}
+          />
+          <FilterMenu
+            label="옵션"
+            title="옵션"
+            items={OPTIONS.map((option) => ({ key: option, label: option }))}
+            selected={options}
+            onToggle={(key) => change(setOptions, toggled(options, key))}
+          />
         </div>
       </div>
 
@@ -206,13 +299,14 @@ export default function Reviews() {
       </div>
 
       <div className="mt-5">
+        {reviews.length === 0 && <p className="py-20 text-center text-[15px] text-oh-gray">조건에 맞는 리뷰가 없어요</p>}
         {reviews.map((review, index) => (
-          <ReviewItem key={`${page}-${review.user}-${index}`} review={review} />
+          <ReviewItem key={`${sort}-${page}-${review.user}-${index}`} review={review} />
         ))}
       </div>
 
       <div className="mt-10">
-        <Pagination page={page} setPage={goPage} />
+        <Pagination page={page} pageCount={pageCount} setPage={goPage} />
       </div>
 
       <div className="mt-9 rounded bg-oh-bg p-3">
