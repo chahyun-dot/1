@@ -14,6 +14,8 @@ const OPPOSITE: Record<Dir, Dir> = { '+x': '-x', '-x': '+x', '+z': '-z', '-z': '
 const LEVEL_RANK: Record<Level, number> = { ok: 0, warn: 1, bad: 2 }
 
 export const cm = (mm: number) => `${Math.round(mm / 10).toLocaleString()}cm`
+// 제품·책상 높이처럼 5mm 단위로 정해진 값(예: 685mm)은 68.5cm 로 소수 한 자리까지 보여 준다. 거리 라벨에는 쓰지 않는다.
+const cmH = (mm: number) => `${(mm % 5 === 0 ? mm / 10 : Math.round(mm / 10)).toLocaleString()}cm`
 
 export const frontDir = (rot: Rot) => FRONT[rot]
 
@@ -131,14 +133,14 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
   }
 
   const caster = item.caster ?? 0
-  const wheelNote = caster > 0 ? `바퀴 ${cm(caster)} 포함` : '바퀴 없음'
+  const wheelNote = caster > 0 ? `바퀴 ${cmH(caster)} 포함` : '바퀴 없음'
 
   if (under) {
     const margin = under.underClearance! - item.h
     checks.push({
       level: margin < UNDER_MARGIN_MIN ? 'warn' : 'ok',
       title: margin < UNDER_MARGIN_MIN ? `${under.name} 아래 여유가 ${cm(margin)}뿐이에요` : `${under.name} 아래에 쏙 들어가요`,
-      detail: `제품 높이 ${cm(item.h)}(${wheelNote}), ${under.name} 아래 높이 ${cm(under.underClearance!)}예요. 위로 ${cm(margin)} 남아요.`,
+      detail: `제품 높이 ${cmH(item.h)}(${wheelNote}), ${under.name} 아래 높이 ${cmH(under.underClearance!)}예요. 위로 ${cmH(margin)} 남아요.`,
     })
   }
 
@@ -146,8 +148,8 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     const without = under.underClearance! - (item.h - caster)
     checks.push({
       level: 'ok',
-      title: `바퀴 ${cm(caster)} 때문에 위 여유가 빠듯해요`,
-      detail: `바퀴를 빼면 제품 높이 ${cm(item.h - caster)}로 위 여유가 ${cm(without)}까지 늘어요.`,
+      title: `바퀴 ${cmH(caster)} 때문에 위 여유가 빠듯해요`,
+      detail: `바퀴를 빼면 제품 높이 ${cmH(item.h - caster)}로 위 여유가 ${cmH(without)}까지 늘어요.`,
     })
   }
 
@@ -155,7 +157,7 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     checks.push({
       level: 'ok',
       title: '바퀴 없이 바닥에 바로 놓여요',
-      detail: `바닥에서 ${cm(item.h)} 높이예요. 바퀴가 없어서 밀어 넣을 수 없고, 들어서 옮겨야 해요.`,
+      detail: `바닥에서 ${cmH(item.h)} 높이예요. 바퀴가 없어서 밀어 넣을 수 없고, 들어서 옮겨야 해요.`,
     })
   }
 

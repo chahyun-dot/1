@@ -13,9 +13,9 @@ export const PRODUCT = {
   rating: 4.5,
   reviews: 15236,
   scraps: 99631,
-  size: { w: 280, d: 410, h: 690 },
-  // 본체 높이(바퀴 제외)와 기본 바퀴 높이. 바퀴 포함 690mm = 640 + 50.
-  bodyH: 640,
+  size: { w: 280, d: 410, h: 685 },
+  // 본체 높이(바퀴 제외)와 기본 바퀴 높이. 바퀴 포함 685mm = 655 + 30.
+  bodyH: 655,
 }
 
 // 색상 옵션: 이름 · 가격은 오늘의집 상품 페이지 그대로. hex는 3D 모델용 근사색.
@@ -38,7 +38,7 @@ export const ADDONS = [{ id: 'finsert', label: 'FINSERT 수납함 KS1035DSW 라�
 
 export const ASSEMBLY_PRICE = 29000
 
-export const WHEEL_DEFAULT = 50
+export const WHEEL_DEFAULT = 30
 export const WHEEL_MIN = 20
 export const WHEEL_MAX = 100
 

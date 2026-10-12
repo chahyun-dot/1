@@ -21,9 +21,9 @@ type FitModalProps = {
 }
 
 const VERDICT: Record<Level, { label: string; icon: string; box: string; text: string }> = {
-  ok: { label: '여기 둘 수 있어요', icon: 'check_circle', box: 'bg-status-success-bg', text: 'text-status-success' },
+  ok: { label: '입력한 치수 기준으로 배치 가능해요', icon: 'check_circle', box: 'bg-status-success-bg', text: 'text-status-success' },
   warn: { label: '둘 수 있지만 확인이 필요해요', icon: 'error', box: 'bg-status-warn-bg', text: 'text-amber-600' },
-  bad: { label: '이대로는 둘 수 없어요', icon: 'cancel', box: 'bg-status-bad-bg', text: 'text-status-bad' },
+  bad: { label: '현재 배치에서는 사용 공간이 부족해요', icon: 'cancel', box: 'bg-status-bad-bg', text: 'text-status-bad' },
 }
 
 const CHECK_ICON: Record<Level, string> = {
@@ -258,8 +258,9 @@ export default function FitModal({ colorId, onColor, onClose, onDone }: FitModal
                 </span>
               </span>
             </div>
-            <p className="text-[13px] text-text-secondary">
-              {PRODUCT.shortName}를 우리 집 치수에 놓고 돌려 보세요.
+            <p className="flex flex-wrap items-center gap-x-3 text-[13px] text-text-secondary">
+              <span>{PRODUCT.shortName}를 우리 집 치수에 놓고 돌려 보세요.</span>
+              <span className="font-semibold text-text-primary">① 책상 치수 입력 → ② 서랍장 위치 조정 → ③ 설치 조건 확인</span>
             </p>
           </div>
           <div className="flex items-center gap-2">
