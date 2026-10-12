@@ -143,18 +143,19 @@ export const SUGGESTED_PRODUCTS: ProductCard[] = [
 ]
 
 export const DETAIL_NOTICES = [
-  { alt: '판매자 공지 1', src: `${PRS}commerce/uploads/admins/productions/notice/v1-355512656412736.png?w=1440` },
-  { alt: '판매자 공지 2', src: `${PRS}any/uploads/seller/notice_images/v1-488188987387968.jpg?w=1440` },
+  { alt: '판매자 공지 1', src: `${PRS}commerce/uploads/admins/productions/notice/v1-355512656412736.png?w=1440`, w: 692, h: 301 },
+  { alt: '판매자 공지 2', src: `${PRS}any/uploads/seller/notice_images/v1-488188987387968.jpg?w=1440`, w: 692, h: 304 },
 ]
 
+// 상세 이미지: 원본 페이지에서 표시되는 크기(가로 x 세로)를 미리 적어 두어, 불러오는 동안 레이아웃이 흔들리지 않게 한다.
 export const DETAIL_IMAGES = [
-  'https://marketb.kr/web/product/steel_top_img.jpg',
-  'https://marketb.kr/web/product/fiha_4_all.jpg',
-  'https://marketb.kr/web/product/fiha_4_all_02.jpg',
-  'https://marketb.kr/web/product/fiha_41_info.jpg',
-  'https://marketb.kr/web/product/fiha_tip.jpg',
-  'https://marketb.kr/web/product/fiha_dishome.jpg',
-  'https://marketb.openhost.cafe24.com/web/img/20121212_customer_foot_01.jpg',
+  { src: 'https://marketb.kr/web/product/steel_top_img.jpg', w: 692, h: 316 },
+  { src: 'https://marketb.kr/web/product/fiha_4_all.jpg', w: 692, h: 14801 },
+  { src: 'https://marketb.kr/web/product/fiha_4_all_02.jpg', w: 692, h: 11633 },
+  { src: 'https://marketb.kr/web/product/fiha_41_info.jpg', w: 650, h: 1644 },
+  { src: 'https://marketb.kr/web/product/fiha_tip.jpg', w: 692, h: 3697 },
+  { src: 'https://marketb.kr/web/product/fiha_dishome.jpg', w: 692, h: 1661 },
+  { src: 'https://marketb.openhost.cafe24.com/web/img/20121212_customer_foot_01.jpg', w: 692, h: 4353 },
 ]
 
 export const SPEC_ROWS: [string, string][] = [

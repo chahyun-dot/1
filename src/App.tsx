@@ -1,9 +1,11 @@
 import { Suspense, lazy, useState } from 'react'
 import AdCarousel from '@/components/page/AdCarousel'
+import DeliverySection from '@/components/page/DeliverySection'
+import DetailInfo from '@/components/page/DetailInfo'
 import ProductHero, { Breadcrumb } from '@/components/page/ProductHero'
 import PurchasePanel from '@/components/page/PurchasePanel'
 import SiteHeader, { useHeaderVisible } from '@/components/page/SiteHeader'
-import StickyTabs, { SECTIONS, TAB_HEIGHT, TAB_TOP_HIDDEN, TAB_TOP_WITH_HEADER, useActiveSection } from '@/components/page/StickyTabs'
+import StickyTabs, { TAB_HEIGHT, TAB_TOP_HIDDEN, TAB_TOP_WITH_HEADER, useActiveSection } from '@/components/page/StickyTabs'
 import StylingShots from '@/components/page/StylingShots'
 import TopBanner from '@/components/page/TopBanner'
 import TopButton from '@/components/page/TopButton'
@@ -19,6 +21,15 @@ function ModalLoading() {
         <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary-container border-t-transparent" />
         3D 공간을 준비하고 있어요
       </div>
+    </div>
+  )
+}
+
+// 아직 만들지 않은 영역의 임시 자리(탭 이동·강조 확인용).
+function Placeholder({ id, label }: { id: string; label: string }) {
+  return (
+    <div id={id} className="mb-[80px] h-[700px] rounded-lg border border-dashed border-oh-line text-center text-[14px] leading-[700px] text-oh-gray">
+      {label}
     </div>
   )
 }
@@ -49,12 +60,11 @@ export default function App() {
             <div className="w-[757px] shrink-0 pr-[65px] pt-[80px]">
               <StylingShots />
               <AdCarousel />
-              {/* 다음 단계에서 각 영역(상품정보, 리뷰 …)으로 채운다. */}
-              {SECTIONS.map((section) => (
-                <div key={section.id} id={section.id} className="mb-[80px] h-[700px] rounded-lg border border-dashed border-oh-line text-center text-[14px] leading-[700px] text-oh-gray">
-                  {section.label}
-                </div>
-              ))}
+              <DetailInfo />
+              <Placeholder id="goods-detail-section-reviews" label="리뷰" />
+              <Placeholder id="goods-detail-section-question" label="문의" />
+              <DeliverySection />
+              <Placeholder id="goods-detail-section-suggestion" label="추천" />
             </div>
             <div className="w-[379px] shrink-0">
               {/* 화면 높이에서 위쪽 고정 영역을 뺀 만큼만 차지해서, 헤더가 보이면 옵션 영역이 그만큼 줄어든다. */}
