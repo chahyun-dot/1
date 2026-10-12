@@ -7,7 +7,7 @@ import Reviews from '@/components/page/Reviews'
 import SiteFooter from '@/components/page/SiteFooter'
 import ProductHero, { Breadcrumb } from '@/components/page/ProductHero'
 import PurchasePanel from '@/components/page/PurchasePanel'
-import SiteHeader, { useHeaderVisible } from '@/components/page/SiteHeader'
+import SiteHeader, { useHeaderMode } from '@/components/page/SiteHeader'
 import StickyTabs, { TAB_HEIGHT, TAB_TOP_HIDDEN, TAB_TOP_WITH_HEADER, useActiveSection } from '@/components/page/StickyTabs'
 import StylingShots from '@/components/page/StylingShots'
 import Suggestions from '@/components/page/Suggestions'
@@ -33,16 +33,16 @@ export default function App() {
   const [colorId, setColorId] = useState<ColorId>('white')
   const [fitOpen, setFitOpen] = useState(false)
   const purchase = usePurchase(setColorId)
-  const headerVisible = useHeaderVisible()
-  const tabTop = headerVisible ? TAB_TOP_WITH_HEADER : TAB_TOP_HIDDEN
-  const active = useActiveSection(tabTop + TAB_HEIGHT + 20)
+  const headerMode = useHeaderMode()
+  const tabTop = headerMode === 'full' ? TAB_TOP_WITH_HEADER : TAB_TOP_HIDDEN
+  const active = useActiveSection(0.25)
   const openFit = () => setFitOpen(true)
 
   return (
     <>
       <div className="ohou bg-white">
         <TopBanner />
-        <SiteHeader fixedVisible={headerVisible} />
+        <SiteHeader mode={headerMode} />
         <main>
           <div className="mx-auto w-full max-w-[1256px] px-[60px]">
             <Breadcrumb />

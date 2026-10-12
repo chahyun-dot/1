@@ -10,18 +10,18 @@ export const SECTIONS = [
 ]
 
 export const TAB_HEIGHT = 54
-// 고정 헤더가 숨어 있을 때 탭 바가 붙는 위치와, 헤더(배너 제외 133px)가 나타났을 때의 위치.
+// 상단 줄만 고정됐을 때 탭 바가 붙는 위치와, 카테고리 줄까지 나타났을 때의 위치.
 export const TAB_TOP_HIDDEN = 80
-export const TAB_TOP_WITH_HEADER = 133
+export const TAB_TOP_WITH_HEADER = 132
 
-export function useActiveSection(offset: number) {
+export function useActiveSection(ratio: number) {
   const [active, setActive] = useState(SECTIONS[0].id)
   useEffect(() => {
     const onScroll = () => {
       let current = SECTIONS[0].id
       for (const section of SECTIONS) {
         const el = document.getElementById(section.id)
-        if (el && el.getBoundingClientRect().top <= offset) current = section.id
+        if (el && el.getBoundingClientRect().top <= window.innerHeight * ratio) current = section.id
       }
       setActive(current)
     }
@@ -32,7 +32,7 @@ export function useActiveSection(offset: number) {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
     }
-  }, [offset])
+  }, [ratio])
   return active
 }
 
@@ -40,7 +40,7 @@ export default function StickyTabs({ top, active }: { top: number; active: strin
   const go = (id: string) => {
     const el = document.getElementById(id)
     if (!el) return
-    const y = el.getBoundingClientRect().top + window.scrollY - top - TAB_HEIGHT
+    const y = el.getBoundingClientRect().top + window.scrollY - TAB_TOP_HIDDEN - TAB_HEIGHT - 20
     window.scrollTo({ top: y, behavior: 'smooth' })
   }
 

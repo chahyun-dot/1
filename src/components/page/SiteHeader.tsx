@@ -98,27 +98,28 @@ function CategoryNav() {
   )
 }
 
-// 스크롤을 내리면 숨고, 올리면 화면 맨 위에 다시 나타나는 고정 헤더. 변경 시 탭 바 위치도 맞춰야 해서 높이를 밖으로 알려 준다.
-export const FIXED_HEADER_HEIGHT = 133
+// 원본처럼 스크롤을 100px 넘게 내리면 상단 줄만 고정되고, 위로 올리면 카테고리 줄이 그 아래로 내려온다.
+export type HeaderMode = 'static' | 'top' | 'full'
 
-export function useHeaderVisible() {
-  const [visible, setVisible] = useState(false)
+export function useHeaderMode() {
+  const [mode, setMode] = useState<HeaderMode>('static')
   useEffect(() => {
     let last = window.scrollY
     const onScroll = () => {
       const y = window.scrollY
-      if (y < 200) setVisible(false)
-      else if (y < last - 4) setVisible(true)
-      else if (y > last + 4) setVisible(false)
+      if (y < 100) setMode('static')
+      else if (y < last - 4) setMode('full')
+      else if (y > last + 4) setMode('top')
       last = y
     }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
-  return visible
+  return mode
 }
 
-export default function SiteHeader({ fixedVisible }: { fixedVisible: boolean }) {
+export default function SiteHeader({ mode }: { mode: HeaderMode }) {
   return (
     <>
       <header className="bg-white">
@@ -128,14 +129,16 @@ export default function SiteHeader({ fixedVisible }: { fixedVisible: boolean }) 
         <CategoryNav />
       </header>
       <div
-        className="fixed inset-x-0 top-0 z-[1102] bg-white transition-transform duration-200"
-        style={{ transform: fixedVisible ? 'translateY(0)' : 'translateY(-100%)' }}
-        aria-hidden={!fixedVisible}
+        className="fixed inset-x-0 top-0 z-[1102] transition-transform duration-200"
+        style={{ transform: mode === 'static' ? 'translateY(-100%)' : 'translateY(0)' }}
+        aria-hidden={mode === 'static'}
       >
-        <div className="border-b border-oh-line2">
+        <div className="relative z-10 border-b border-oh-line2 bg-white">
           <HeaderRow />
         </div>
-        <CategoryNav />
+        <div className="transition-transform duration-200" style={{ transform: mode === 'full' ? 'translateY(0)' : 'translateY(-100%)' }}>
+          <CategoryNav />
+        </div>
       </div>
     </>
   )
