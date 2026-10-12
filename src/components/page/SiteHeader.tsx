@@ -5,6 +5,7 @@ import type { GnbLabel } from '@/data/ohou'
 
 const LINKS = ['로그인', '회원가입', '고객센터']
 
+// 본문이 1199px 아래로 줄지 않아서 헤더도 그 폭을 지키고, 글자는 줄바꿈하지 않는다.
 // 두 번째 줄에 올릴 GNB 메뉴와 마우스를 올린 항목을 두 줄이 함께 알아야 해서 헤더 한 벌마다 하나씩 둔다.
 function useHeaderState() {
   const [gnb, setGnb] = useState<GnbLabel>('쇼핑')
@@ -58,8 +59,8 @@ function WriteMenu() {
 
 function HeaderRow({ state }: { state: HeaderState }) {
   return (
-    <div className="mx-auto flex h-20 w-full max-w-[1256px] items-center justify-between px-[60px]">
-      <div className="flex items-center">
+    <div className="mx-auto flex h-20 w-full max-w-[1256px] items-center justify-between whitespace-nowrap px-[60px]">
+      <div className="flex shrink-0 items-center">
         <a href="#" className="-ml-1 flex items-center p-1">
           <img src={ICONS.logo} alt="오늘의집 로고" className="h-[30px] w-[106px]" />
         </a>
@@ -74,8 +75,8 @@ function HeaderRow({ state }: { state: HeaderState }) {
         </nav>
       </div>
 
-      <div className="flex items-center justify-end">
-        <label className="flex h-[38px] w-[305px] items-center gap-[6px] rounded-full border border-transparent bg-oh-bg px-[10px]">
+      <div className="flex min-w-0 items-center justify-end">
+        <label className="flex h-[38px] w-[305px] min-w-[120px] shrink items-center gap-[6px] rounded-full border border-transparent bg-oh-bg px-[10px]">
           <Osset name="search" size={16} color="#8c8c8c" />
           <input
             type="search"
@@ -83,10 +84,10 @@ function HeaderRow({ state }: { state: HeaderState }) {
             className="h-5 w-full bg-transparent text-[14px] text-oh-ink outline-none placeholder:text-oh-gray"
           />
         </label>
-        <a href="#" aria-label="장바구니" className="ml-[14px] flex h-9 w-9 items-center justify-center p-[6px] text-oh-ink">
+        <a href="#" aria-label="장바구니" className="ml-[14px] flex h-9 w-9 shrink-0 items-center justify-center p-[6px] text-oh-ink">
           <Osset name="cart" size={24} />
         </a>
-        <div className="ml-[9px] flex items-center">
+        <div className="ml-[9px] flex shrink-0 items-center">
           {LINKS.map((label, index) => (
             <a
               key={label}
@@ -121,7 +122,7 @@ function HotKeyword() {
   }, [])
   const item = HOT_KEYWORDS[index]
   return (
-    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+    <div className="relative shrink-0" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
       <div className="flex h-[30px] w-[192px] items-center justify-between">
         <a href="#" className="flex h-6 w-[156px] items-center gap-[6px] text-[14px]">
           <span className="w-4 text-center font-bold text-oh-ink">{item.rank}</span>
@@ -175,8 +176,8 @@ function CategoryNav({ state }: { state: HeaderState }) {
   const items = state.gnb === '쇼핑' ? CATEGORY_NAV.map((label) => ({ label, href: '#' })) : GNB_MENUS[state.gnb]
   return (
     <div className="relative border-b border-oh-line2 bg-white" onMouseLeave={() => setPanel(false)}>
-      <div className="mx-auto flex h-[51px] w-full max-w-[1256px] items-center justify-between px-[60px]">
-        <nav className="flex items-stretch gap-[10px] self-stretch">
+      <div className="mx-auto flex h-[51px] w-full max-w-[1256px] items-center justify-between whitespace-nowrap px-[60px]">
+        <nav className="flex min-w-0 items-stretch gap-[10px] self-stretch">
           {items.map(({ label, href }) => (
             <a
               key={label}
@@ -223,14 +224,14 @@ export default function SiteHeader({ mode }: { mode: HeaderMode }) {
   const fixedState = useHeaderState()
   return (
     <>
-      <header className="bg-white" onMouseLeave={staticState.reset}>
+      <header className="min-w-[1199px] bg-white" onMouseLeave={staticState.reset}>
         <div className="border-b border-oh-line2 bg-white">
           <HeaderRow state={staticState} />
         </div>
         <CategoryNav state={staticState} />
       </header>
       <div
-        className="fixed inset-x-0 top-0 z-[1102] transition-transform duration-200"
+        className="fixed inset-x-0 top-0 z-[1102] min-w-[1199px] transition-transform duration-200"
         style={{ transform: mode === 'static' ? 'translateY(-100%)' : 'translateY(0)' }}
         aria-hidden={mode === 'static'}
         onMouseLeave={fixedState.reset}
