@@ -42,15 +42,15 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
       </div>
       <div className="relative ml-[66px] h-[537px] w-[537px] overflow-hidden rounded-[10px] bg-oh-bg">
         <img src={galleryUrl(GALLERY[index], 1280)} alt={`상품 이미지 ${index + 1}`} className="h-full w-full object-cover" />
-        {/* 캐릭터는 장식이라 누를 수 없고, 가상배치는 옆 버튼으로만 연다. 버튼에 가까운 오른손(136px 기준 바닥에서 약 49px)이 버튼 글자와 같은 높이가 되도록 버튼을 30px 띄운다. */}
-        <div className="absolute bottom-4 right-4 flex items-end">
-          <div className="-mr-5">
+        {/* 캐릭터는 장식이라 누를 수 없고, 가상배치는 옆 버튼으로만 연다. 캐릭터는 버튼 위에 겹쳐 오른손이 버튼 앞에 오고, 발끝(이미지 아래 투명 여백 16px)이 사진 아래 선에 닿도록 -16px 내린다. 오른손(바닥에서 약 49px)이 버튼 글자와 같은 높이가 되도록 버튼은 캐릭터 바닥에서 30px 띄운다. */}
+        <div className="absolute -bottom-4 right-4 flex items-end">
+          <div className="relative z-10 -mr-8">
             <WavingCharacter size={136} />
           </div>
           <button
             type="button"
             onClick={onOpenFit}
-            className="mb-[30px] flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[24px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
+            className="mb-[30px] flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[40px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
           >
             <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
             <Osset name="chevronRight" size={14} />
