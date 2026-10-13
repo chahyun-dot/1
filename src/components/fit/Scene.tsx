@@ -33,6 +33,8 @@ type SceneProps = {
 
 const CLICK_SLOP = 5
 
+const yawOf = (item: Item) => (item.yaw !== undefined ? (item.yaw * Math.PI) / 180 : (item.rot * Math.PI) / 2)
+
 type ControlsLike = { target: THREE.Vector3; update: () => void }
 
 function CameraRig({ view, room, distance }: { view: View; room: Room; distance: number }) {
@@ -137,7 +139,7 @@ function DraggableItem({
 
   if (item.kind === 'rug') {
     return (
-      <group position={[x, 0, z]} rotation={[0, (item.rot * Math.PI) / 2, 0]}>
+      <group position={[x, 0, z]} rotation={[0, yawOf(item), 0]}>
         <ItemModel item={item} />
       </group>
     )
@@ -181,7 +183,7 @@ function DraggableItem({
   return (
     <group
       position={[x, (item.elevation ?? 0) / M, z]}
-      rotation={[0, (item.rot * Math.PI) / 2, 0]}
+      rotation={[0, yawOf(item), 0]}
       onPointerDown={handleDown}
       onPointerMove={handleMove}
       onPointerUp={handleUp}

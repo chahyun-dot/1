@@ -1,4 +1,4 @@
-import type { Rect, Room } from '@/lib/types'
+import type { Rect, Room, Side } from '@/lib/types'
 
 export const WALL_THICKNESS = 160
 export const DOOR_HEIGHT = 2100
@@ -11,6 +11,14 @@ export const doorSpan = (room: Room) => {
 }
 
 export const doorSwingRect = (room: Room): Rect => {
+  const door = room.openings?.door
+  if (door) {
+    const width = door.to - door.from
+    if (door.side === '-x') return { minX: 0, maxX: width, minZ: door.from, maxZ: door.to }
+    if (door.side === '+x') return { minX: room.w - width, maxX: room.w, minZ: door.from, maxZ: door.to }
+    if (door.side === '-z') return { minX: door.from, maxX: door.to, minZ: 0, maxZ: width }
+    return { minX: door.from, maxX: door.to, minZ: room.d - width, maxZ: room.d }
+  }
   const { zFrom, zTo } = doorSpan(room)
   return { minX: 0, maxX: room.doorWidth, minZ: zFrom, maxZ: zTo }
 }
@@ -32,6 +40,17 @@ export const curtainRect = (room: Room): Rect => {
   const { zFrom, zTo } = windowSpan(room)
   return { minX: room.w - CURTAIN_GAP, maxX: room.w, minZ: zFrom, maxZ: zTo }
 }
+
+const curtainOf = (room: Room, side: Side, from: number, to: number): Rect => {
+  if (side === '-x') return { minX: 0, maxX: CURTAIN_GAP, minZ: from, maxZ: to }
+  if (side === '+x') return { minX: room.w - CURTAIN_GAP, maxX: room.w, minZ: from, maxZ: to }
+  if (side === '-z') return { minX: from, maxX: to, minZ: 0, maxZ: CURTAIN_GAP }
+  return { minX: from, maxX: to, minZ: room.d - CURTAIN_GAP, maxZ: room.d }
+}
+
+// 창마다 커튼 라인이 있다. 기본 방은 오른쪽 벽 창 하나.
+export const curtainRects = (room: Room): Rect[] =>
+  room.openings ? room.openings.windows.map((win) => curtainOf(room, win.side, win.from, win.to)) : [curtainRect(room)]
 
 export const toWorld = (room: Room, x: number, z: number): [number, number] => [
   (x - room.w / 2) / 1000,

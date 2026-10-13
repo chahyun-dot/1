@@ -1,5 +1,5 @@
 import { measureAgainstDesk } from '@/lib/desk'
-import { CURTAIN_GAP, curtainRect, doorSwingRect } from '@/lib/room'
+import { CURTAIN_GAP, curtainRects, doorSwingRect } from '@/lib/room'
 import type { Check, Dir, FitResult, Gap, Item, Level, Rect, Room, Rot } from '@/lib/types'
 
 export const DRAWER_PULL = 350
@@ -189,7 +189,7 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     checks.push({ level: 'warn', title: `옆 ${tightSide.target}와 ${cm(tightSide.distance)}만 떨어져 있어요`, detail: caster > 0 ? '바퀴로 넣고 뺄 때 긁힐 수 있어요. 2cm 이상 띄워 주세요.' : '바퀴가 없어 끌면 바닥과 옆면이 긁힐 수 있어요. 들어서 옮기고 2cm 이상 띄워 주세요.' })
   }
 
-  if (overlaps(rect, curtainRect(room))) {
+  if (curtainRects(room).some((curtain) => overlaps(rect, curtain))) {
     checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
   }
 
@@ -202,7 +202,19 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
 const FLAT_MAX = 30
 
 // 벽에 높이 걸린 가구(거울, 블라인드)는 그 아래에 놓인 가구와 높이가 겹칠 때만 서로 막는다.
-const levelOverlap = (a: Item, b: Item) => (a.elevation ?? 0) < (b.elevation ?? 0) + b.h && (b.elevation ?? 0) < (a.elevation ?? 0) + a.h
+const levelOverlap = (a: Item, b: Item) =>
+  (a.elevation ?? 0) < (b.elevation ?? 0) + b.h && (b.elevation ?? 0) < (a.elevation ?? 0) + a.h && !rests(a, b) && !rests(b, a)
+
+// 다른 가구 위에 대부분 얹힌 물건(침대 위 이불, 소파 위 쿠션)은 그 가구를 막는 것으로 보지 않는다.
+const rests = (top: Item, base: Item) => {
+  if ((top.elevation ?? 0) <= (base.elevation ?? 0) + 50) return false
+  const a = footprint(top)
+  const b = footprint(base)
+  const overlapW = Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX)
+  const overlapD = Math.min(a.maxZ, b.maxZ) - Math.max(a.minZ, b.minZ)
+  if (overlapW <= 0 || overlapD <= 0) return false
+  return (overlapW * overlapD) / ((a.maxX - a.minX) * (a.maxZ - a.minZ)) >= 0.6
+}
 
 // 데모용: 서랍 전용 규칙 없이, 고른 가구 하나의 위치 문제와 앞뒤좌우 여유만 본다.
 export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResult => {
@@ -224,7 +236,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   blocking.forEach((other) => checks.push({ level: 'bad', title: `${other.name}와 겹쳐요`, detail: '같은 자리에 둘 수 없어요. 끌어서 옮겨 주세요.' }))
   if (under) checks.push({ level: 'ok', title: `${under.name} 아래에 들어가요`, detail: `${under.name} 아래 높이 ${cm(under.underClearance!)}, 가구 높이 ${cm(item.h)}예요.` })
   if (overlaps(rect, doorSwingRect(room))) checks.push({ level: 'bad', title: '문 여닫는 공간을 막아요', detail: `문 폭 ${cm(room.doorWidth)}만큼 문이 열리는 자리예요.` })
-  if (overlaps(rect, curtainRect(room))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
+  if (curtainRects(room).some((curtain) => overlaps(rect, curtain))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
 
   const front = frontDir(item.rot)
   const gaps: Gap[] = (['+x', '-x', '+z', '-z'] as Dir[]).map((dir) => {
@@ -252,7 +264,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
 // 가구를 놓을 빈 자리를 방 가운데에서 가까운 순으로 찾는다. 없으면 null.
 export const findFreeSpot = (item: Item, room: Room, items: Item[]): { x: number; z: number } | null => {
   const others = items.filter((other) => other.kind !== 'rug' && other.h > FLAT_MAX && levelOverlap(item, other)).map((other) => footprint(other))
-  const blocked = [...others, doorSwingRect(room), curtainRect(room)]
+  const blocked = [...others, doorSwingRect(room), ...curtainRects(room)]
   const candidates: { x: number; z: number; distance: number }[] = []
   for (let x = 0; x <= room.w; x += 100) {
     for (let z = 0; z <= room.d; z += 100) {

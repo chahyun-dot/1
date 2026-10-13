@@ -26,13 +26,22 @@ export type Item = {
   image?: string
   // 바닥에서 띄워 건 높이(mm). 벽에 거는 거울·액자·블라인드용이며, 없으면 바닥에 놓인다.
   elevation?: number
+  // 90° 단위가 아닌 각도(도). 있으면 그림은 이 각도로 돌리고, 판정은 가장 가까운 rot 로 한다.
+  yaw?: number
 }
+
+export type Side = '-x' | '+x' | '-z' | '+z'
+
+// 벽에 난 구멍. from~to 는 그 벽을 따라 잰 위치(mm), bottom~top 은 바닥에서의 높이(mm).
+export type Opening = { side: Side; from: number; to: number; bottom: number; top: number }
 
 export type Room = {
   w: number
   d: number
   h: number
   doorWidth: number
+  // 있으면 기본 문·창 대신 이 구멍들로 방을 만든다(플래너 배치 같은 실제 방용).
+  openings?: { door: Opening; windows: Opening[] }
 }
 
 export type Rect = { minX: number; maxX: number; minZ: number; maxZ: number }

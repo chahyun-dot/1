@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
-import { DEFAULT_ROOM, createFurniture, createProduct } from '@/data/catalog'
+import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
 import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
@@ -9,8 +9,8 @@ import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
 // 데모: 현재 "내 공간에 맞는지 확인하기"와 별개로, 3D 영역에 가구를 더하고 크기·여유를 보는 개정판.
 // 오른쪽 탭 = 배치된 가구 / 전체 가구 / 직접 입력.
 
-const room = DEFAULT_ROOM
-const PRODUCT_COLOR = '#f1f1ee'
+// 플래너 프로젝트(Archisketch)와 같은 방·배치로 시작한다.
+const room = PLANNER_ROOM
 
 type Tab = 'placed' | 'catalog' | 'custom'
 
@@ -33,9 +33,9 @@ const LEVEL_STYLE: Record<Level, { icon: string; text: string; box: string; labe
   bad: { icon: 'cancel', text: 'text-status-bad', box: 'bg-status-bad-bg', label: '이대로는 어려워요' },
 }
 
-const DIR_NAME: Record<Gap['dir'], string> = { '-x': '문 쪽', '+x': '창 쪽', '-z': '뒷벽 쪽', '+z': '앞벽 쪽' }
+const DIR_NAME: Record<Gap['dir'], string> = { '-x': '왼쪽 벽 쪽', '+x': '오른쪽 벽 쪽', '-z': '뒷벽 쪽', '+z': '앞벽 쪽' }
 
-const initialItems = (): Item[] => [createProduct(room, PRODUCT_COLOR), ...createFurniture(room)]
+const initialItems = (): Item[] => plannerItems()
 
 const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
 const won = (value: number) => `${value.toLocaleString()}원`
@@ -82,7 +82,7 @@ function CheckList({ checks }: { checks: Check[] }) {
 
 export default function FitDemo() {
   const [items, setItems] = useState<Item[]>(initialItems)
-  const [selectedId, setSelectedId] = useState<string | null>('product')
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<View>('persp')
   const [tab, setTab] = useState<Tab>('placed')
   const [toast, setToast] = useState<string | null>(null)
@@ -160,7 +160,7 @@ export default function FitDemo() {
         <div className="flex items-center gap-2">
           <span className="rounded-full border border-brand-sky-border bg-brand-sky-light px-2.5 py-0.5 text-[12px] font-bold text-primary-container">DEMO</span>
           <h1 className="text-[17px] font-bold">내 공간에 가구 배치해 보기</h1>
-          <span className="text-[12px] text-text-muted">넓은 침실 (6×6m) · 실측 치수 1:1</span>
+          <span className="text-[12px] text-text-muted">플래너 배치 (4.2×4.2m, 천장 2.3m) · 실측 치수 1:1</span>
         </div>
         <a href="#/" className="text-[14px] font-medium text-primary-container">상품 페이지로 돌아가기</a>
       </header>
@@ -195,7 +195,7 @@ export default function FitDemo() {
               { icon: 'rotate_right', label: '90° 회전', onClick: rotate, disabled: !selected },
               { icon: 'vertical_align_top', label: '벽에 붙이기', onClick: () => selected && updateItem(selected.id, (item) => backToWall(item, room)), disabled: !selected },
               { icon: view === 'top' ? 'view_in_ar' : 'grid_view', label: view === 'top' ? '비스듬히 보기' : '위에서 보기', onClick: () => setView(view === 'top' ? 'persp' : 'top'), disabled: false },
-              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setSelectedId('product'); say('처음 배치로 되돌렸어요') }, disabled: false },
+              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setSelectedId(null); say('처음 배치로 되돌렸어요') }, disabled: false },
             ].map((button) => (
               <button
                 key={button.label}

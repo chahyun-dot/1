@@ -32,7 +32,7 @@ const CHECK_ICON: Record<Level, string> = {
   bad: 'text-status-bad',
 }
 
-const ROOM_FIELDS: { key: keyof Room; label: string }[] = [
+const ROOM_FIELDS: { key: Exclude<keyof Room, 'openings'>; label: string }[] = [
   { key: 'w', label: '가로 (문 ↔ 창)' },
   { key: 'd', label: '세로 (책상 벽 ↔ 맞은편)' },
   { key: 'h', label: '천장 높이' },

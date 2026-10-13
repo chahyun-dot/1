@@ -3,8 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { Grid, Html } from '@react-three/drei'
 import * as THREE from 'three'
 import { CURTAIN_GAP, DOOR_HEIGHT, WALL_THICKNESS, doorSpan, isWideRoom, toWorld, windowSpan } from '@/lib/room'
-import { OpenBox } from '@/components/fit/Models'
-import type { Room } from '@/lib/types'
+import ItemModel, { OpenBox } from '@/components/fit/Models'
+import type { Item, Opening, Room, Side } from '@/lib/types'
 
 const M = 1000
 const WINDOW_BOTTOM = 900
@@ -217,12 +217,110 @@ function Tag({ position, tone, children }: { position: [number, number, number];
   )
 }
 
+
+// 벽을 따라 잰 구멍들(문·창)을 빼고 남는 벽 조각을 만든다.
+const wallPieces = (room: Room, length: number, cuts: Opening[]): Piece[] => {
+  const sorted = [...cuts].sort((a, b) => a.from - b.from)
+  const list: Piece[] = []
+  let cursor = 0
+  sorted.forEach((cut) => {
+    list.push({ from: cursor, to: cut.from, bottom: 0, top: room.h })
+    list.push({ from: cut.from, to: cut.to, bottom: 0, top: cut.bottom })
+    list.push({ from: cut.from, to: cut.to, bottom: cut.top, top: room.h })
+    cursor = cut.to
+  })
+  list.push({ from: cursor, to: length, bottom: 0, top: room.h })
+  return list.filter((piece) => piece.to > piece.from && piece.top > piece.bottom)
+}
+
+// 구멍이 난 벽 안쪽을 보는 방향(앞)이 가구 모델의 +z 가 되도록 돌린다.
+const FACING: Record<Side, number> = { '-x': Math.PI / 2, '+x': -Math.PI / 2, '-z': 0, '+z': Math.PI }
+
+function OpeningModel({ room, opening, kind }: { room: Room; opening: Opening; kind: 'door' | 'window' }) {
+  const view = useMemo(windowTexture, [])
+  const t = WALL_THICKNESS / M
+  const length = (opening.to - opening.from) / M
+  const height = (opening.top - opening.bottom) / M
+  const mid = (opening.from + opening.to) / 2
+  const alongX = opening.side === '-z' || opening.side === '+z'
+  const [wx, wz] = alongX ? toWorld(room, mid, 0) : toWorld(room, 0, mid)
+  const halfW = room.w / 2 / M
+  const halfD = room.d / 2 / M
+  const position: [number, number, number] = alongX
+    ? [wx, opening.bottom / M, opening.side === '-z' ? -halfD - t / 2 : halfD + t / 2]
+    : [opening.side === '-x' ? -halfW - t / 2 : halfW + t / 2, opening.bottom / M, wz]
+  const item: Item = {
+    id: `opening-${opening.side}-${opening.from}`,
+    name: kind === 'door' ? '문' : '창문',
+    kind: 'furniture',
+    model: kind === 'door' ? 'frontdoor' : 'window',
+    w: opening.to - opening.from,
+    d: kind === 'door' ? WALL_THICKNESS : 100,
+    h: opening.top - opening.bottom,
+    x: 0,
+    z: 0,
+    rot: 0,
+    color: '#d9d5cc',
+  }
+  return (
+    <group position={position} rotation={[0, FACING[opening.side], 0]}>
+      <ItemModel item={item} />
+      {kind === 'window' && (
+        <mesh position={[0, height / 2, -t / 2 - 0.02]}>
+          <planeGeometry args={[length, height]} />
+          <meshBasicMaterial map={view} />
+        </mesh>
+      )}
+    </group>
+  )
+}
+
+// 문이 열리는 부채꼴. 경첩은 벽 끝(-쪽 벽은 from, +쪽 벽은 to)에 있다고 본다.
+function DoorSwing({ room, door }: { room: Room; door: Opening }) {
+  const width = (door.to - door.from) / M
+  const plus = door.side === '+x' || door.side === '+z'
+  const along = plus ? door.to : door.from
+  const [hx, hz] = door.side === '-x' || door.side === '+x' ? toWorld(room, door.side === '-x' ? 0 : room.w, along) : toWorld(room, along, door.side === '-z' ? 0 : room.d)
+  return (
+    <mesh position={[hx, 0.004, hz]} rotation={[-Math.PI / 2, 0, 0]}>
+      <circleGeometry args={[width, 32, plus ? Math.PI / 2 : -Math.PI / 2, Math.PI / 2]} />
+      <meshBasicMaterial color="#f59e0b" transparent opacity={0.18} side={THREE.DoubleSide} />
+    </mesh>
+  )
+}
+
+function CustomShell({ room, floorMaterials }: { room: Room; floorMaterials: THREE.Material[] }) {
+  const { door, windows } = room.openings!
+  const cuts = [door, ...windows]
+  const on = (side: Side) => cuts.filter((cut) => cut.side === side)
+  return (
+    <group>
+      <mesh position={[0, -0.1, 0]} material={floorMaterials} receiveShadow>
+        <boxGeometry args={[room.w / M, 0.2, room.d / M]} />
+      </mesh>
+      <Grid position={[0, -0.201, 0]} args={[40, 40]} cellSize={0.5} sectionSize={2} cellColor="#323336" sectionColor="#3a3b3f" cellThickness={0.5} sectionThickness={0.8} fadeDistance={40} infiniteGrid />
+
+      <Wall room={room} side="-z" pieces={wallPieces(room, room.w, on('-z'))} />
+      <Wall room={room} side="+z" pieces={wallPieces(room, room.w, on('+z'))} />
+      <Wall room={room} side="-x" pieces={wallPieces(room, room.d, on('-x'))} />
+      <Wall room={room} side="+x" pieces={wallPieces(room, room.d, on('+x'))} />
+
+      <OpeningModel room={room} opening={door} kind="door" />
+      {windows.map((win, index) => (
+        <OpeningModel key={index} room={room} opening={win} kind="window" />
+      ))}
+      <DoorSwing room={room} door={door} />
+    </group>
+  )
+}
+
 export default function RoomShell({ room }: { room: Room }) {
   const floorMaterials = useMemo(() => {
     const side = new THREE.MeshStandardMaterial({ color: '#202124', roughness: 0.9 })
     const top = new THREE.MeshStandardMaterial({ map: plankTexture(room), roughness: 0.85, emissive: '#2a2b2e' })
     return [side, side, top, side, side, side]
   }, [room])
+  if (room.openings) return <CustomShell room={room} floorMaterials={floorMaterials} />
   const wide = isWideRoom(room)
   const door = doorSpan(room)
   const win = windowSpan(room)

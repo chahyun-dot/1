@@ -91,6 +91,7 @@ src/
 │   ├── ohou.ts              페이지 문구, 이미지 주소, 하위 메뉴, 리뷰 1쪽, 문의 1쪽 (원본 그대로)
 │   ├── reviewPages.ts, qnaPages.ts   리뷰·문의 2~9쪽(원본 API 에서 옮김)
 │   ├── catalog.ts           상품, 색상 10종, 방/가구 기본값, createProduct
+│   ├── plannerLayout.ts     플래너 프로젝트 배치(방·가구 69개), #/demo 의 처음 상태
 │   ├── furniture.ts         Archisketch 가구 67개 타입 변환, 분류, MODEL_BY_FURNITURE(3D 모델 등록)
 │   ├── archisketch-furniture.json   가구 원본 데이터(docs 의 md 코드 블록에서 뽑음)
 │   └── badges.ts            상품 카드 인라인 PNG 뱃지
@@ -153,11 +154,12 @@ design/ohhouse.html          초기 디자인 초안(참고용)
 
 기존 팝업은 그대로 두고 같은 3D(`Scene`)를 재사용해 따로 만든 개정판이다.
 
+- **처음 배치**: Archisketch 플래너 프로젝트(링크 `planner.archisketch.com/?projectId=aYeMimdkSTmATo50VgeGRw`, 로그인 필요)의 3D 장면에서 읽은 좌표 그대로다. 방 안쪽 4200×4200mm, 천장 2300mm, 문은 오른쪽 벽, 창은 왼쪽 벽 2개와 앞(+z) 벽 2개. 가구 69개(러그 2개 포함)가 `data/plannerLayout.ts` 의 `PLANNER_ROOM`·`plannerItems()` 에 있고, 데이터 좌표는 방 안쪽 왼쪽 위 모서리가 (0,0)이다. 좌표를 읽은 방법: 플래너 탭에서 `canvas` 의 React fiber 를 따라 three.js `scene` 을 찾고, `floorplan` 그룹의 메쉬(`userData.url` 에 상품 id, `position` 이 가운데 mm, `rotation.y` 가 각도)를 읽었다. 플래너 좌표에서 x-1100, z-100 이 이 방 좌표다.
 - 오른쪽 탭: **배치된 가구**(3D에 있는 가구 목록·선택·빼기) / **전체 가구**(67개를 이미지로 고르면 3D에 놓임, 검색·가구/소품/벽·천장 필터, 3D 모델이 있는 것은 "3D 모델" 배지) / **직접 입력**(이름과 가로·세로·높이 mm, 범위 50mm~방 크기. 치수가 없는 가구를 고르면 이 탭으로 넘어옴).
 - 가구를 고르면(목록이나 3D에서) 위쪽 카드에 크기, 바닥 면적, **앞·뒤·옆 여유 사이즈**(벽·가구까지 거리), 공간 적합도 진단이 나온다. 서랍장은 기존 `evaluate`, 그 밖의 가구는 `measureFurniture`(방 밖·천장·겹침·문·커튼·앞 여유 600mm).
 - 새 가구는 `findFreeSpot` 으로 방 가운데에서 가까운 빈 자리에 놓인다. 90° 회전, 벽에 붙이기, 위에서 보기, 초기화 도구가 있다.
 - 벽에 거는 가구는 `elevation`(걸리는 높이 mm)을 가지며, 아래에 놓인 가구와는 높이가 겹칠 때만 서로 막는다(`lib/fit.ts` 의 `levelOverlap`). 새로 놓으면 방 가운데에 걸리므로 "벽에 붙이기"로 벽에 맞춘다.
-- 공용 코드에 더한 것(기존 동작은 그대로): `Scene` 의 `showFrontZone`·`distance` 옵션, `Item.image`·`Item.elevation`, `lib/fit.ts` 의 `measureFurniture`·`findFreeSpot`.
+- 공용 코드에 더한 것(기존 동작은 그대로): `Room.openings`(문·창을 원하는 벽에 내는 설정, 없으면 기존 방), `Item.yaw`(90° 아닌 각도), `lib/room.ts` 의 `curtainRects`, `RoomShell` 의 `CustomShell`, `lib/fit.ts` 의 `rests`(다른 가구 위에 대부분 얹힌 물건은 서로 막지 않음), `Scene` 의 `showFrontZone`·`distance` 옵션, `Item.image`·`Item.elevation`, `lib/fit.ts` 의 `measureFurniture`·`findFreeSpot`.
 
 ### 7-4. 코드로 만든 3D 가구 모델 (`#/models`, `ArchiModels.tsx`, `Models.tsx`)
 
