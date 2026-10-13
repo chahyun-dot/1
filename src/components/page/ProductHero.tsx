@@ -52,7 +52,7 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
             onClick={onOpenFit}
             className="mb-[30px] flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[40px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
           >
-            <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
+            <span className="text-[13px] font-semibold">내 공간에 맞는지 확인하기</span>
             <Osset name="chevronRight" size={14} />
           </button>
         </div>
