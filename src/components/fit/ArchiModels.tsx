@@ -549,8 +549,8 @@ export function AraliaPlant({ item }: Props) {
       const lean = 0.03 + (index % 3) * 0.045
       const top = h * (0.62 + ((index * 37) % 10) / 28)
       const to: [number, number, number] = [Math.cos(angle) * lean * top * 1.5, top, Math.sin(angle) * lean * top * 1.5]
-      const tufts = Array.from({ length: 8 }, (_, n): [number, number, number] => {
-        const t = 0.3 + n * 0.09
+      const tufts = Array.from({ length: 9 }, (_, n): [number, number, number] => {
+        const t = 0.3 + n * 0.08
         return [to[0] * t + Math.cos(angle + n) * 0.06, potH + (to[1] - potH) * t, to[2] * t + Math.sin(angle + n) * 0.06]
       })
       list.push({ to, tufts })
@@ -570,39 +570,42 @@ export function AraliaPlant({ item }: Props) {
       {stems.map((stem, index) => (
         <group key={index}>
           <Rod from={[0, potH, 0]} to={stem.to} r={0.005} color="#3a3d38" />
-          {stem.tufts.map((tuft, n) => (
-            <mesh key={n} position={tuft} rotation={[0, n * 1.3, 0]} scale={[1, 0.22, 1]} castShadow>
-              <sphereGeometry args={[0.075 - n * 0.003, 8, 6]} />
-              <meshStandardMaterial color="#2f3a31" roughness={0.9} />
-            </mesh>
-          ))}
+          {stem.tufts.map((tuft, n) =>
+            Array.from({ length: 5 }, (_, k) => {
+              const angle = n * 1.1 + (k / 5) * Math.PI * 2
+              const reach = 0.13 - n * 0.006
+              return <Rod key={`${n}${k}`} from={tuft} to={[tuft[0] + Math.cos(angle) * reach, tuft[1] - 0.045, tuft[2] + Math.sin(angle) * reach]} r={0.0028} color="#26302a" />
+            }),
+          )}
         </group>
       ))}
     </group>
   )
 }
 
-// Tolomeo Mega Floor Lamp: 둥근 알루미늄 받침에서 기둥이 올라가고, 한쪽(앞)으로 뻗은 팔 끝에 흰 원뿔 갓이 매달린 조명.
+// Tolomeo Mega Floor Lamp: 둥근 알루미늄 받침에서 곧은 기둥이 올라가 흰 원뿔 갓 바로 아래까지 닿고, 갓은 맨 위의 가는 팔 끝에 걸려 기둥 위에 매달린 조명.
 export function TolomeoLamp({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
   const baseZ = -d / 2 + 0.17
-  const poleTop = h * 0.74
-  const shadeZ = d / 2 - w / 2
-  const shadeH = h * 0.2
+  const shadeH = h * 0.22
+  const shadeBottom = h * 0.66
+  const shadeTop = shadeBottom + shadeH
+  const shadeZ = baseZ + 0.1
   return (
     <group>
       <mesh position={[0, 0.01, baseZ]} castShadow receiveShadow>
         <cylinderGeometry args={[0.17, 0.17, 0.02, 32]} />
         <meshStandardMaterial color={CHROME} metalness={0.6} roughness={0.3} />
       </mesh>
-      <Rod from={[0, 0.02, baseZ]} to={[0, poleTop, baseZ]} r={0.012} color={CHROME} metal />
-      <Rod from={[0, poleTop, baseZ]} to={[0, h - 0.05, shadeZ]} r={0.007} color={CHROME} metal />
-      <Rod from={[0, h - 0.05, shadeZ]} to={[0, h - 0.4, shadeZ]} r={0.004} color="#8d8d90" metal />
-      <mesh position={[0, h - 0.4 - shadeH / 2, shadeZ]}>
-        <cylinderGeometry args={[0.03, w / 2, shadeH, 28, 1, true]} />
-        <meshStandardMaterial color="#f7f4d9" emissive="#fff3b0" emissiveIntensity={0.35} roughness={0.8} side={THREE.DoubleSide} />
+      <Rod from={[0, 0.02, baseZ]} to={[0, shadeBottom, baseZ]} r={0.012} color={CHROME} metal />
+      <Rod from={[0, shadeBottom, baseZ]} to={[0, shadeBottom + 0.04, shadeZ]} r={0.006} color={CHROME} metal />
+      <Rod from={[0, shadeTop + 0.02, shadeZ]} to={[0, h, shadeZ]} r={0.005} color={CHROME} metal />
+      <Rod from={[0, h - 0.03, shadeZ]} to={[0, h - 0.17, baseZ - 0.02]} r={0.004} color="#8d8d90" metal />
+      <mesh position={[0, shadeBottom + shadeH / 2 + 0.02, shadeZ]}>
+        <cylinderGeometry args={[0.03, Math.min(w / 2, 0.21), shadeH, 32, 1, true]} />
+        <meshStandardMaterial color="#f7f4d9" emissive="#fff3b0" emissiveIntensity={0.4} roughness={0.8} side={THREE.DoubleSide} />
       </mesh>
     </group>
   )
