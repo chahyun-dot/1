@@ -338,6 +338,64 @@ function Box({ item }: ModelProps) {
   )
 }
 
+// 두 점 사이를 잇는 가는 막대(다리, 파이프용).
+function Tube({ from, to, radius, color }: { from: [number, number, number]; to: [number, number, number]; radius: number; color: string }) {
+  const a = new THREE.Vector3(...from)
+  const b = new THREE.Vector3(...to)
+  const dir = b.clone().sub(a)
+  const quaternion = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize())
+  return (
+    <mesh position={a.clone().add(b).multiplyScalar(0.5).toArray()} quaternion={quaternion} castShadow>
+      <cylinderGeometry args={[radius, radius, dir.length(), 12]} />
+      <meshStandardMaterial color={color} metalness={0.5} roughness={0.35} />
+    </mesh>
+  )
+}
+
+// Archisketch "W1000 원형테이블": 얇은 둥근 상판, 가운데 기둥, 바깥으로 벌어졌다가 끝이 아래로 꺾이는 가는 다리 3개.
+function RoundTable({ item }: ModelProps) {
+  const r = item.w / 2 / M
+  const h = item.h / M
+  const topThickness = 0.025
+  const underside = h - topThickness
+  const joint = h * 0.8
+  const reach = r * 0.9
+  const foot = 0.05
+  const metal = '#1b1b1d'
+  return (
+    <group>
+      <mesh position={[0, h - topThickness / 2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[r, r, topThickness, 64]} />
+        <meshStandardMaterial color="#3e3e40" roughness={0.55} />
+      </mesh>
+      <mesh position={[0, (underside + joint) / 2, 0]} castShadow>
+        <cylinderGeometry args={[0.018, 0.018, underside - joint, 16]} />
+        <meshStandardMaterial color={metal} metalness={0.5} roughness={0.35} />
+      </mesh>
+      <mesh position={[0, joint, 0]} castShadow>
+        <cylinderGeometry args={[0.026, 0.02, 0.05, 16]} />
+        <meshStandardMaterial color={metal} metalness={0.5} roughness={0.35} />
+      </mesh>
+      {[0, 1, 2].map((index) => {
+        const angle = Math.PI / 2 + (index * Math.PI * 2) / 3
+        const cx = Math.cos(angle)
+        const cz = Math.sin(angle)
+        const kneeY = foot
+        return (
+          <group key={index}>
+            <Tube from={[cx * 0.02, joint, cz * 0.02]} to={[cx * reach, kneeY, cz * reach]} radius={0.0105} color={metal} />
+            <Tube from={[cx * reach, kneeY, cz * reach]} to={[cx * reach, 0.004, cz * reach]} radius={0.0105} color={metal} />
+            <mesh position={[cx * reach, kneeY, cz * reach]} castShadow>
+              <sphereGeometry args={[0.0105, 12, 12]} />
+              <meshStandardMaterial color={metal} metalness={0.5} roughness={0.35} />
+            </mesh>
+          </group>
+        )
+      })}
+    </group>
+  )
+}
+
 function Plant({ item }: ModelProps) {
   const r = item.w / 2 / M
   const leaves = Array.from({ length: 9 }, (_, index) => index)
@@ -383,5 +441,7 @@ export default function ItemModel(props: ModelProps) {
       return <Plant {...props} />
     case 'box':
       return <Box {...props} />
+    case 'roundtable':
+      return <RoundTable {...props} />
   }
 }

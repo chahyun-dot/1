@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
 import { DEFAULT_ROOM, createFurniture, createProduct } from '@/data/catalog'
-import { FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
 import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
 
@@ -106,8 +106,8 @@ export default function FitDemo() {
 
   const updateItem = (id: string, patch: (item: Item) => Item) => setItems((prev) => prev.map((item) => (item.id === id ? patch(item) : item)))
 
-  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string) => {
-    const item: Item = { id, name, kind: 'furniture', model: 'box', rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
+  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box') => {
+    const item: Item = { id, name, kind: 'furniture', model, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
     const spot = findFreeSpot(item, room, items)
     const placed: Item = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
     setItems((prev) => [...prev, placed])
@@ -117,7 +117,7 @@ export default function FitDemo() {
 
   const addFromCatalog = (furniture: Furniture) => {
     const n = items.filter((item) => item.id.startsWith(`${furniture.id}#`)).length + 1
-    addBox(`${furniture.id}#${n}`, furniture.name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image)
+    addBox(`${furniture.id}#${n}`, furniture.name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, MODEL_BY_FURNITURE[furniture.id])
   }
 
   const addCustom = () => {
@@ -358,6 +358,7 @@ export default function FitDemo() {
                         >
                           <span className="relative block aspect-square bg-surface-subtle">
                             <img src={furniture.image} alt="" loading="lazy" className="h-full w-full object-contain" />
+                            {MODEL_BY_FURNITURE[furniture.id] && <span className="absolute left-1.5 top-1.5 rounded-full bg-inverse-surface px-1.5 py-0.5 text-[10px] font-bold text-white">3D 모델</span>}
                             {placedCount > 0 && <span className="absolute right-1.5 top-1.5 rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-bold text-white">{placedCount}개 배치됨</span>}
                           </span>
                           <span className="flex flex-1 flex-col gap-0.5 p-2">

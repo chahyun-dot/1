@@ -1,4 +1,5 @@
 import raw from '@/data/archisketch-furniture.json'
+import type { ItemModel } from '@/lib/types'
 
 // Archisketch 에서 내보낸 가구 목록(docs/archisketch-furniture-items.md 와 같은 내용).
 // 이미지는 componentId 로 짝지어 public/archisketch/{componentId}.png 에 받아 두었다.
@@ -48,4 +49,9 @@ export const categoryOf = (f: Furniture): FurnitureCategory => {
   if (WALL_OR_CEILING.has(f.id)) return '벽·천장'
   if (CLOTHES.has(f.id) || Math.max(f.size.w, f.size.d, f.size.h) < 600) return '소품'
   return '가구'
+}
+
+// 이미지를 보고 코드로 모양을 만든 가구. 여기에 없는 가구는 치수 그대로의 상자(box)로 보인다.
+export const MODEL_BY_FURNITURE: Record<string, ItemModel> = {
+  YSEBSV826EADFB11D0F4FDD: 'roundtable', // W1000 원형테이블
 }
