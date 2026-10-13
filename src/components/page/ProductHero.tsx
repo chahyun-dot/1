@@ -42,15 +42,26 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
       </div>
       <div className="relative ml-[66px] h-[537px] w-[537px] overflow-hidden rounded-[10px] bg-oh-bg">
         <img src={galleryUrl(GALLERY[index], 1280)} alt={`상품 이미지 ${index + 1}`} className="h-full w-full object-cover" />
-        <button
-          type="button"
-          onClick={onOpenFit}
-          className="absolute bottom-4 right-4 flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 px-[14px] py-2 text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
-        >
-          <img src={character} alt="" width={52} height={52} className="-my-[14px] -ml-1 h-[52px] w-[52px] shrink-0 object-contain" />
-          <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
-          <Osset name="chevronRight" size={14} />
-        </button>
+        {/* 캐릭터는 버튼 밖(왼쪽)에 따로 두고, 눌러도 같은 팝업이 열리게 한다. */}
+        <div className="absolute bottom-4 right-4 flex items-end">
+          <button
+            type="button"
+            tabIndex={-1}
+            aria-hidden="true"
+            onClick={onOpenFit}
+            className="-mr-4 shrink-0 cursor-pointer transition-transform hover:-translate-y-1"
+          >
+            <img src={character} alt="" width={104} height={104} className="h-[104px] w-[104px] object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.3)]" />
+          </button>
+          <button
+            type="button"
+            onClick={onOpenFit}
+            className="flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[22px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
+          >
+            <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
+            <Osset name="chevronRight" size={14} />
+          </button>
+        </div>
       </div>
     </div>
   )
