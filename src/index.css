@@ -74,3 +74,21 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3.2 3.2L15 6.8' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-size: 100% 100%;
 }
+
+/* 캐릭터가 NEW 팻말을 든 손을 계속 흔든다. 움직임을 줄이도록 설정한 사용자에게는 멈춘다. */
+@keyframes oh-wave {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-13deg); }
+  45% { transform: rotate(7deg); }
+  70% { transform: rotate(-9deg); }
+}
+
+.oh-wave {
+  animation: oh-wave 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oh-wave {
+    animation: none;
+  }
+}

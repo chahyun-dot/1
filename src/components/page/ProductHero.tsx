@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import Osset, { Stars } from '@/components/page/Osset'
-import character from '@/assets/oh-character-new.webp'
+import WavingCharacter from '@/components/page/WavingCharacter'
 import PurchasePanel from '@/components/page/PurchasePanel'
 import type { Purchase } from '@/components/page/usePurchase'
 import { PRODUCT } from '@/data/catalog'
@@ -42,21 +42,15 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
       </div>
       <div className="relative ml-[66px] h-[537px] w-[537px] overflow-hidden rounded-[10px] bg-oh-bg">
         <img src={galleryUrl(GALLERY[index], 1280)} alt={`상품 이미지 ${index + 1}`} className="h-full w-full object-cover" />
-        {/* 캐릭터는 버튼 밖(왼쪽)에 따로 두고, 눌러도 같은 팝업이 열리게 한다. */}
+        {/* 캐릭터는 장식이라 누를 수 없고, 가상배치는 옆 버튼으로만 연다. */}
         <div className="absolute bottom-4 right-4 flex items-end">
-          <button
-            type="button"
-            tabIndex={-1}
-            aria-hidden="true"
-            onClick={onOpenFit}
-            className="-mr-4 shrink-0 cursor-pointer transition-transform hover:-translate-y-1"
-          >
-            <img src={character} alt="" width={104} height={104} className="h-[104px] w-[104px] object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.3)]" />
-          </button>
+          <div className="-mr-5">
+            <WavingCharacter size={136} />
+          </div>
           <button
             type="button"
             onClick={onOpenFit}
-            className="flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[22px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
+            className="flex cursor-pointer items-center gap-2 rounded-full border border-oh-line2 bg-white/95 py-2 pl-[24px] pr-[14px] text-oh-ink shadow-md backdrop-blur-md transition-colors hover:text-oh-blue"
           >
             <span className="text-[13px] font-semibold">내 방에 맞을까? 가상배치</span>
             <Osset name="chevronRight" size={14} />
