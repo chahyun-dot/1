@@ -1,4 +1,4 @@
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import AdCarousel from '@/components/page/AdCarousel'
 import DeliverySection from '@/components/page/DeliverySection'
 import DetailInfo from '@/components/page/DetailInfo'
@@ -17,6 +17,20 @@ import { usePurchase } from '@/components/page/usePurchase'
 import type { ColorId } from '@/data/catalog'
 
 const FitModal = lazy(() => import('@/components/fit/FitModal'))
+const FurnitureCatalog = lazy(() => import('@/components/page/FurnitureCatalog'))
+
+const FURNITURE_HASH = '#/furniture'
+
+// 주소 끝이 #/furniture 이면 상품 페이지 대신 가구 목록을 보여 준다.
+function useFurnitureView() {
+  const [on, setOn] = useState(() => window.location.hash === FURNITURE_HASH)
+  useEffect(() => {
+    const onHash = () => setOn(window.location.hash === FURNITURE_HASH)
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+  return on
+}
 
 function ModalLoading() {
   return (
@@ -36,7 +50,16 @@ export default function App() {
   const { mode: headerMode, pin: pinHeader } = useHeaderMode()
   const tabTop = headerMode === 'full' ? TAB_TOP_WITH_HEADER : TAB_TOP_HIDDEN
   const active = useActiveSection(0.25)
+  const furnitureView = useFurnitureView()
   const openFit = () => setFitOpen(true)
+
+  if (furnitureView) {
+    return (
+      <Suspense fallback={null}>
+        <FurnitureCatalog />
+      </Suspense>
+    )
+  }
 
   return (
     <>

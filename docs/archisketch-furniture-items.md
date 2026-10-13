@@ -1,0 +1,616 @@
+# Archisketch 가구 목록 (프로젝트 "Untitled")
+
+사용자가 Archisketch에서 내보낸 JSON을 그대로 옮겼다. 가구 67개 항목(`furnitureItems`)과 마감재 0개(`finishItems`)가 있다.
+읽기 쉽도록 항목마다 필드를 묶어 줄을 줄였을 뿐 값은 원본과 같다. 화면용 데이터는 이 코드 블록에서 뽑아 `src/data/archisketch-furniture.json` 으로 만든다.
+
+```json
+{
+  "projectName": "Untitled",
+  "furnitureItems": [
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xs_Qb6C3D61BBB72B9B4159", "previewImage": "https://resources.archisketch.com/product/Xs_Qb6C3D61BBB72B9B4159/26-08-2021_01-48-48/preview/Xs_Qb6C3D61BBB72B9B4159_1.png",
+      "name": "D2178B. 뷰티레스트 스위트. 슈퍼싱글 침대 (블랙)", "color": null, "brand": "시몬스",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 2160000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 44, "height": 41, "depth": 82, "unit": "in"}, "dimensionMm": {"width": 1125, "height": 1058, "depth": 2098, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YSEBSV826EADFB11D0F4FDD", "previewImage": "https://resources.archisketch.com/product/YSEBSV826EADFB11D0F4FDD/18-11-2022_19-35-21/preview/YSEBSV826EADFB11D0F4FDD_1.png",
+      "name": "W1000 원형테이블", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 282000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 39, "height": 29, "depth": 39, "unit": "in"}, "dimensionMm": {"width": 1000, "height": 740, "depth": 1000, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YV_XVxTA1102E846ACA437E", "previewImage": "https://resources.archisketch.com/product/YV_XVxTA1102E846ACA437E/08-02-2023_02-22-45/preview/YV_XVxTA1102E846ACA437E_1.png",
+      "name": "Aralia Large", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 23, "height": 65, "depth": 23, "unit": "in"}, "dimensionMm": {"width": 599, "height": 1651, "depth": 607, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZHCng6-9DA238A1CE5340E1", "previewImage": "https://resources.archisketch.com/product/ZHCng6-9DA238A1CE5340E1/24-09-2024_08-03-46/preview/ZHCng6-9DA238A1CE5340E1_1.png",
+      "name": "H1740 5단 철제선반장(2단 도어)", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 487000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 31, "height": 68, "depth": 14, "unit": "in"}, "dimensionMm": {"width": 800, "height": 1738, "depth": 380, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XnPfj-S5D34B27A4E7B4B99", "previewImage": "https://resources.archisketch.com/product/XnPfj-S5D34B27A4E7B4B99/04-06-2021_09-49-45/preview/XnPfj-S5D34B27A4E7B4B99_1.png",
+      "name": "스트링 포켓 (월넛/블랙)", "color": null, "brand": "String(스트링)",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 243000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 23, "height": 19, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 600, "height": 500, "depth": 150, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Ydpb3l75AC40FF808E14852", "previewImage": "https://resources.archisketch.com/product/Ydpb3l75AC40FF808E14852/13-04-2023_00-22-30/preview/Ydpb3l75AC40FF808E14852_1.png",
+      "name": "Villette Blue Bedding Set SS", "color": null, "brand": "메종드룸룸",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 188100.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 57, "height": 32, "depth": 82, "unit": "in"}, "dimensionMm": {"width": 1450, "height": 835, "depth": 2100, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "X8kL5fT81A10556FC5447E5", "previewImage": "https://resources.archisketch.com/product/X8kL5fT81A10556FC5447E5/24-04-2023_06-07-12/preview/X8kL5fT81A10556FC5447E5_1.png",
+      "name": "Illusion 01 IE - Writer Choi Yun-jeong (No. 10 Pisa Ash Gray)", "color": null, "brand": "엘디프",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 250000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 19, "height": 15, "depth": 0, "unit": "in"}, "dimensionMm": {"width": 500, "height": 400, "depth": 20, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Yq8D3hC589DB8DF6B7D4EC5", "previewImage": "https://resources.archisketch.com/product/Yq8D3hC589DB8DF6B7D4EC5/25-09-2023_01-45-48/preview/Yq8D3hC589DB8DF6B7D4EC5_1.png",
+      "name": "Tolomeo Mega Floor Lamp", "color": null, "brand": "아르떼미데",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 16, "height": 93, "depth": 44, "unit": "in"}, "dimensionMm": {"width": 420, "height": 2380, "depth": 1130, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Yew1htX9938663D6F624933", "previewImage": "https://resources.archisketch.com/product/Yew1htX9938663D6F624933/25-04-2023_07-44-55/preview/Yew1htX9938663D6F624933_1.png",
+      "name": "UFO KID LAMP", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 10, "height": 10, "depth": 7, "unit": "in"}, "dimensionMm": {"width": 270, "height": 270, "depth": 183, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YqRULWb0F39B81582104692", "previewImage": "https://resources.archisketch.com/modelings/440738a36f22445283f47fbe027f0f45/IMAGE/1747975823946/440738a36f22445283f47fbe027f0f45_1.png",
+      "name": "[Sample] Pro 13-inch", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 12, "height": 8, "depth": 8, "unit": "in"}, "dimensionMm": {"width": 312, "height": 222, "depth": 226, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XRxqWHD79D04BB434D74AF9", "previewImage": "https://resources.archisketch.com/product/XRxqWHD79D04BB434D74AF9/24-06-2021_12-26-01/preview/XRxqWHD79D04BB434D74AF9_1.png",
+      "name": "[샘플] Geneva Model L (Black)", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 11, "height": 33, "depth": 11, "unit": "in"}, "dimensionMm": {"width": 300, "height": 840, "depth": 286, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XwSAxFf68C8240186EB4765", "previewImage": "https://resources.archisketch.com/product/XwSAxFf68C8240186EB4765/28-09-2021_03-15-32/preview/XwSAxFf68C8240186EB4765_1.png",
+      "name": "Chronotime table clock", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 127300.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 2, "height": 3, "depth": 3, "unit": "in"}, "dimensionMm": {"width": 72, "height": 86, "depth": 82, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YneAfk7A250635ACE594C54", "previewImage": "https://resources.archisketch.com/product/YneAfk7A250635ACE594C54/16-08-2023_06-58-43/preview/YneAfk7A250635ACE594C54_1.png",
+      "name": "perforated board", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 44, "height": 22, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 1140, "height": 560, "depth": 106, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YV_XVxZ6AA659D9487F417E", "previewImage": "https://resources.archisketch.com/product/YV_XVxZ6AA659D9487F417E/09-01-2023_10-09-12/preview/YV_XVxZ6AA659D9487F417E_1.png",
+      "name": "chardonnay wine", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 3, "height": 13, "depth": 3, "unit": "in"}, "dimensionMm": {"width": 85, "height": 334, "depth": 85, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YV_XVxa64C03905B0F34865", "previewImage": "https://resources.archisketch.com/product/YV_XVxa64C03905B0F34865/13-01-2023_07-11-43/preview/YV_XVxa64C03905B0F34865_1.png",
+      "name": "2 wine glasses", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 6, "height": 8, "depth": 7, "unit": "in"}, "dimensionMm": {"width": 155, "height": 205, "depth": 191, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xs_QLXX29615894078C4CDF", "previewImage": "https://resources.archisketch.com/product/Xs_QLXX29615894078C4CDF/02-09-2021_03-08-08/preview/Xs_QLXX29615894078C4CDF_1.png",
+      "name": "가방형 LP턴테이블 (블랙)", "color": null, "brand": "사운드룩",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 99000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 13, "height": 11, "depth": 16, "unit": "in"}, "dimensionMm": {"width": 345, "height": 303, "depth": 419, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YN8fSMr84BEC99AE48C4A26", "previewImage": "https://resources.archisketch.com/modelings/9e2a93f9adcf4d96b2c8930576a2a2b2/IMAGE/1789635389947/9e2a93f9adcf4d96b2c8930576a2a2b2_1.png",
+      "name": "LP_3", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 8, "height": 12, "depth": 11, "unit": "in"}, "dimensionMm": {"width": 218, "height": 311, "depth": 301, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YeNvIsREA05481C46254539", "previewImage": "https://resources.archisketch.com/product/YeNvIsREA05481C46254539/19-04-2023_09-00-56/preview/YeNvIsREA05481C46254539_1.png",
+      "name": "Checkerboard tissue case", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 9, "height": 8, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 238, "height": 212, "depth": 128, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XtdxyE493CC22D0979C4F07", "previewImage": "https://resources.archisketch.com/product/XtdxyE493CC22D0979C4F07/26-08-2021_08-15-26/preview/XtdxyE493CC22D0979C4F07_1.png",
+      "name": "DSTL Diffuser + Sticks", "color": null, "brand": "무브먼트랩",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 58000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 3, "height": 7, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 82, "height": 178, "depth": 113, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xhjjsyp24F553380D414A9A", "previewImage": "https://resources.archisketch.com/product/Xhjjsyp24F553380D414A9A/20-01-2022_02-57-44/preview/Xhjjsyp24F553380D414A9A_1.png",
+      "name": "Books 10 Set", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 16, "height": 10, "depth": 6, "unit": "in"}, "dimensionMm": {"width": 416, "height": 271, "depth": 175, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YVMPHUe388DE520FF74407B", "previewImage": "https://resources.archisketch.com/product/YVMPHUe388DE520FF74407B/03-01-2023_09-41-46/preview/YVMPHUe388DE520FF74407B_1.png",
+      "name": "Book 2 set", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 24, "height": 10, "depth": 6, "unit": "in"}, "dimensionMm": {"width": 620, "height": 270, "depth": 170, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YgjU_Ah72C5B21C5B7F4F47", "previewImage": "https://resources.archisketch.com/product/YgjU_Ah72C5B21C5B7F4F47/19-05-2023_01-48-49/preview/YgjU_Ah72C5B21C5B7F4F47_1.png",
+      "name": "Oval round tray silver beads transparent accessory shelf", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 11, "height": 5, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 300, "height": 142, "depth": 120, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XV5vpP7A568816FF2C2432F", "previewImage": "https://resources.archisketch.com/product/XV5vpP7A568816FF2C2432F/07-02-2022_07-08-57/preview/XV5vpP7A568816FF2C2432F_1.png",
+      "name": "Eames House Bird (Black)", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 8, "height": 10, "depth": 2, "unit": "in"}, "dimensionMm": {"width": 212, "height": 254, "depth": 76, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XW_VtxtA8DF6CDA88104092", "previewImage": "https://resources.archisketch.com/product/XW_VtxtA8DF6CDA88104092/16-06-2021_02-10-39/preview/XW_VtxtA8DF6CDA88104092_1.png",
+      "name": "Ideal living(Black Aluminum)", "color": null, "brand": "자리스튜디오",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 339000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 35, "height": 50, "depth": 0, "unit": "in"}, "dimensionMm": {"width": 905, "height": 1280, "depth": 10, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YBp1W4_021584BC9C234BDF", "previewImage": "https://resources.archisketch.com/product/YBp1W4_021584BC9C234BDF/04-05-2022_02-59-44/preview/YBp1W4_021584BC9C234BDF_1.png",
+      "name": "FK6720 Sofa 2-seater (Black)", "color": null, "brand": "랑게프로덕션",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 1.6055E7, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 57, "height": 31, "depth": 31, "unit": "in"}, "dimensionMm": {"width": 1450, "height": 800, "depth": 810, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YSBhD9T1E65915F80104295", "previewImage": "https://resources.archisketch.com/product/YSBhD9T1E65915F80104295/18-11-2022_16-07-58/preview/YSBhD9T1E65915F80104295_1.png",
+      "name": "(벽고정)W800 철제행거", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 301000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 31, "height": 68, "depth": 12, "unit": "in"}, "dimensionMm": {"width": 800, "height": 1738, "depth": 320, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YV8EVEF2D36EE1DB1D44CAB", "previewImage": "https://resources.archisketch.com/product/YV8EVEF2D36EE1DB1D44CAB/04-01-2023_09-27-18/preview/YV8EVEF2D36EE1DB1D44CAB_1.png",
+      "name": "Dress Shirt", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 3, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 5, "height": 37, "depth": 17, "unit": "in"}, "dimensionMm": {"width": 134, "height": 964, "depth": 451, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XX-zmmq45F1867DE7EE462B", "previewImage": "https://resources.archisketch.com/product/XX-zmmq45F1867DE7EE462B/21-06-2021_23-05-17/preview/XX-zmmq45F1867DE7EE462B_1.png",
+      "name": "Clothes 2", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 13, "height": 15, "depth": 18, "unit": "in"}, "dimensionMm": {"width": 339, "height": 383, "depth": 464, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZFFQHal586565A1F38B473C", "previewImage": "https://resources.archisketch.com/product/ZFFQHal586565A1F38B473C/21-12-2023_07-35-15/preview/ZFFQHal586565A1F38B473C_1.png",
+      "name": "shoes 01", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 6, "height": 2, "depth": 8, "unit": "in"}, "dimensionMm": {"width": 169, "height": 71, "depth": 228, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Ylybxgt16DA8B0918B94B21", "previewImage": "https://resources.archisketch.com/product/Ylybxgt16DA8B0918B94B21/26-07-2023_02-02-11/preview/Ylybxgt16DA8B0918B94B21_1.png",
+      "name": "PARENTESI", "color": null, "brand": "FLOS",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 8, "height": 94, "depth": 11, "unit": "in"}, "dimensionMm": {"width": 205, "height": 2410, "depth": 285, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZLDAeRK53BFEDFD0CF2475A", "previewImage": "https://resources.archisketch.com/modelings/17905d0a22d54c6b892af093604440cb/IMAGE/1729848737117/17905d0a22d54c6b892af093604440cb_1.png",
+      "name": "아르덴 미러_거울 (S)블랙", "color": null, "brand": "플랫포인트",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 360000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 15, "height": 23, "depth": 1, "unit": "in"}, "dimensionMm": {"width": 395, "height": 590, "depth": 30, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "X5S4t1X5DE143AD22764FF9", "previewImage": "https://resources.archisketch.com/product/X5S4t1X5DE143AD22764FF9/17-01-2022_10-21-21/preview/X5S4t1X5DE143AD22764FF9_1.png",
+      "name": "LOOM+ Tweed Rug (round 1000mm, border type)", "color": null, "brand": "무브먼트랩",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 39, "height": 0, "depth": 39, "unit": "in"}, "dimensionMm": {"width": 1000, "height": 5, "depth": 1000, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "X-bB_LP883ADBC85E374EBB", "previewImage": "https://resources.archisketch.com/product/X-bB_LP883ADBC85E374EBB/21-03-2022_02-02-16/preview/X-bB_LP883ADBC85E374EBB_1.png",
+      "name": "CABINET WITH SLIDING DOORS W78 D30 BLACK STAINED ASH", "color": null, "brand": "스트링",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 5.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 30, "height": 16, "depth": 11, "unit": "in"}, "dimensionMm": {"width": 780, "height": 420, "depth": 300, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YgDgtY8090165E920A148CE", "previewImage": "https://resources.archisketch.com/product/YgDgtY8090165E920A148CE/12-05-2023_07-53-44/preview/YgDgtY8090165E920A148CE_1.png",
+      "name": "Audiorama 4000(Black)", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 9, "height": 31, "depth": 9, "unit": "in"}, "dimensionMm": {"width": 250, "height": 799, "depth": 250, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZCREWuP85D472F7745C4005", "previewImage": "https://resources.archisketch.com/product/ZCREWuP85D472F7745C4005/10-07-2024_15-36-55/preview/ZCREWuP85D472F7745C4005_1.png",
+      "name": "SIMPLIE 수납장 BC264 (블랙)", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 185000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 30, "height": 32, "depth": 15, "unit": "in"}, "dimensionMm": {"width": 770, "height": 820, "depth": 400, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "E1632324621148B0", "previewImage": "https://resources.archisketch.com/product/E1632324621148B0/15-06-2021_07-40-36/preview/E1632324621148B0_1.png",
+      "name": "PREMIUM 맞춤 우드 블라인드 에스프레소", "color": null, "brand": "한샘윈도우",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 1900.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 4, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 56, "height": 89, "depth": 3, "unit": "in"}, "dimensionMm": {"width": 1440, "height": 2281, "depth": 90, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZZHrOv2AC2EF05FF43243FB", "previewImage": "https://resources.archisketch.com/product/ZZHrOv2AC2EF05FF43243FB/28-04-2025_01-34-04/preview/ZZHrOv2AC2EF05FF43243FB_1.png",
+      "name": "Beat Table Light (Black)", "color": null, "brand": "Tom Dixon",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 7, "height": 20, "depth": 11, "unit": "in"}, "dimensionMm": {"width": 185, "height": 531, "depth": 300, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YneAfk909E36FF912414229", "previewImage": "https://resources.archisketch.com/product/YneAfk909E36FF912414229/16-08-2023_01-19-59/preview/YneAfk909E36FF912414229_1.png",
+      "name": "keyboard", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 17, "height": 1, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 445, "height": 39, "depth": 137, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YneAfk-85AC7705BADE4E4A", "previewImage": "https://resources.archisketch.com/product/YneAfk-85AC7705BADE4E4A/14-08-2023_00-10-05/preview/YneAfk-85AC7705BADE4E4A_1.png",
+      "name": "mouse", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 2, "height": 1, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 67, "height": 30, "depth": 112, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Ymz-AKZAAF5DF9BAB3E47A8", "previewImage": "https://resources.archisketch.com/product/Ymz-AKZAAF5DF9BAB3E47A8/09-08-2023_05-25-03/preview/Ymz-AKZAAF5DF9BAB3E47A8_1.png",
+      "name": "NIMM File Holder", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 3, "height": 11, "depth": 9, "unit": "in"}, "dimensionMm": {"width": 100, "height": 300, "depth": 250, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xo35PnA02CC15F5E5C44324", "previewImage": "https://resources.archisketch.com/product/Xo35PnA02CC15F5E5C44324/20-01-2022_04-21-16/preview/Xo35PnA02CC15F5E5C44324_1.png",
+      "name": "Open book (not for sale)", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 10, "height": 3, "depth": 7, "unit": "in"}, "dimensionMm": {"width": 270, "height": 80, "depth": 180, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YVMPHUZ0DEE6D5660DB48B2", "previewImage": "https://resources.archisketch.com/product/YVMPHUZ0DEE6D5660DB48B2/04-01-2023_09-25-15/preview/YVMPHUZ0DEE6D5660DB48B2_1.png",
+      "name": "espresso cup set", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 4, "height": 2, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 125, "height": 65, "depth": 145, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YVMPHUe2B4ECE07C08E426B", "previewImage": "https://resources.archisketch.com/product/YVMPHUe2B4ECE07C08E426B/03-01-2023_09-16-25/preview/YVMPHUe2B4ECE07C08E426B_1.png",
+      "name": "Book 12set", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 20, "height": 10, "depth": 6, "unit": "in"}, "dimensionMm": {"width": 520, "height": 270, "depth": 170, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "X-w77FkE525CF8C677A46B0", "previewImage": "https://resources.archisketch.com/modelings/37bcfe3181cd4419abfe3e92b665621d/IMAGE/1789633667076/37bcfe3181cd4419abfe3e92b665621d_1.png",
+      "name": "Union #12-copied", "color": null, "brand": "유니온",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 15000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 9, "height": 10, "depth": 7, "unit": "in"}, "dimensionMm": {"width": 230, "height": 277, "depth": 184, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Y3Jvd_BD5EF2B210F564BF1", "previewImage": "https://resources.archisketch.com/product/Y3Jvd_BD5EF2B210F564BF1/21-02-2024_08-24-54/preview/Y3Jvd_BD5EF2B210F564BF1_1.png",
+      "name": "book deco", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 12, "height": 11, "depth": 9, "unit": "in"}, "dimensionMm": {"width": 320, "height": 290, "depth": 250, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Ymz-AKVBAE7A1C5651944C3", "previewImage": "https://resources.archisketch.com/product/Ymz-AKVBAE7A1C5651944C3/07-08-2023_09-53-57/preview/Ymz-AKVBAE7A1C5651944C3_1.png",
+      "name": "steel storage box", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 10, "height": 9, "depth": 12, "unit": "in"}, "dimensionMm": {"width": 277, "height": 232, "depth": 320, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Ym4zsLYED3C0331F08148F5", "previewImage": "https://resources.archisketch.com/product/Ym4zsLYED3C0331F08148F5/03-08-2023_00-45-23/preview/Ym4zsLYED3C0331F08148F5_1.png",
+      "name": "office supplies desk supplies", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 19, "height": 6, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 487, "height": 173, "depth": 104, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "7564995DC96E40A3", "previewImage": "https://resources.archisketch.com/product/7564995DC96E40A3/10-04-2023_05-22-05/preview/7564995DC96E40A3_1.png",
+      "name": "Black vase", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 4, "height": 8, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 105, "height": 207, "depth": 105, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YdE3dZD86B1AD39B3C1443A", "previewImage": "https://resources.archisketch.com/modelings/6cf1d5662d5f48afb84922ae0bf1cab1/IMAGE/1789634500365/6cf1d5662d5f48afb84922ae0bf1cab1_1.png",
+      "name": "26 CM_blue", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 10, "height": 10, "depth": 10, "unit": "in"}, "dimensionMm": {"width": 270, "height": 260, "depth": 270, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xr78id08D1C38D7AD0D4D47", "previewImage": "https://resources.archisketch.com/product/Xr78id08D1C38D7AD0D4D47/05-08-2021_14-22-31/preview/Xr78id08D1C38D7AD0D4D47_1.png",
+      "name": "LED 뉴플랜 면조명 방등 50W (주광색)", "color": null, "brand": "비츠",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 105000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 6, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 25, "height": 0, "depth": 25, "unit": "in"}, "dimensionMm": {"width": 640, "height": 20, "depth": 640, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xw0ZynH039E7EE04F954257", "previewImage": "https://resources.archisketch.com/product/Xw0ZynH039E7EE04F954257/30-09-2021_10-34-15/preview/Xw0ZynH039E7EE04F954257_1.png",
+      "name": "CALDERA incense holder", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 4, "height": 5, "depth": 4, "unit": "in"}, "dimensionMm": {"width": 110, "height": 145, "depth": 110, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XtdxyE4131F59D7EE0040B4", "previewImage": "https://resources.archisketch.com/product/XtdxyE4131F59D7EE0040B4/23-08-2021_05-24-22/preview/XtdxyE4131F59D7EE0040B4_1.png",
+      "name": "4 Scents X Mini Room Spray", "color": null, "brand": "무브먼트랩",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 60000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 6, "height": 1, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 173, "height": 46, "depth": 135, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YV_XVxW9536C02931594E10", "previewImage": "https://resources.archisketch.com/product/YV_XVxW9536C02931594E10/28-02-2023_14-28-13/preview/YV_XVxW9536C02931594E10_1.png",
+      "name": "Diptyque", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 2, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 3, "height": 5, "depth": 1, "unit": "in"}, "dimensionMm": {"width": 100, "height": 150, "depth": 50, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YSCLdDz3A9D4CDED05E451C", "previewImage": "https://resources.archisketch.com/product/YSCLdDz3A9D4CDED05E451C/18-11-2022_17-59-29/preview/YSCLdDz3A9D4CDED05E451C_1.png",
+      "name": "W400 3단 서랍 상단 수납형(잠금장치)", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 191000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 15, "height": 23, "depth": 19, "unit": "in"}, "dimensionMm": {"width": 399, "height": 594, "depth": 493, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "Xr1ry-I72F798A8F6CB4CAD", "previewImage": "https://resources.archisketch.com/product/Xr1ry-I72F798A8F6CB4CAD/13-08-2021_02-23-06/preview/Xr1ry-I72F798A8F6CB4CAD_1.png",
+      "name": "ODDRUN (dark golden brown)", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 20, "height": 11, "depth": 24, "unit": "in"}, "dimensionMm": {"width": 509, "height": 295, "depth": 613, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XjOO_Xy13478D0D91CD493D", "previewImage": "https://resources.archisketch.com/product/XjOO_Xy13478D0D91CD493D/18-06-2021_14-27-42/preview/XjOO_Xy13478D0D91CD493D_1.png",
+      "name": "프리미엄 리넨 쿠션 30cm x 50cm (카멜)", "color": null, "brand": "메종드룸룸",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 25000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 19, "height": 10, "depth": 8, "unit": "in"}, "dimensionMm": {"width": 500, "height": 256, "depth": 207, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YSZphlN2272C00BB9264030", "previewImage": "https://resources.archisketch.com/modelings/bd3839c81cd046f0a05583fe4c611ae8/IMAGE/1784034636828/bd3839c81cd046f0a05583fe4c611ae8_1.png",
+      "name": "W1600*D800 모션데스크 프리미엄", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 945000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 62, "height": 28, "depth": 31, "unit": "in"}, "dimensionMm": {"width": 1600, "height": 720, "depth": 800, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YSJfCSW3C8249DE736F456A", "previewImage": "https://resources.archisketch.com/product/YSJfCSW3C8249DE736F456A/25-01-2024_01-18-17/preview/YSJfCSW3C8249DE736F456A_1.png",
+      "name": "PC 홀더", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 50000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 6, "height": 14, "depth": 5, "unit": "in"}, "dimensionMm": {"width": 166, "height": 359, "depth": 148, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YneAflHA33DBE2534ED4DC7", "previewImage": "https://resources.archisketch.com/product/YneAflHA33DBE2534ED4DC7/15-08-2023_09-09-58/preview/YneAflHA33DBE2534ED4DC7_1.png",
+      "name": "desktop computer", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 8, "height": 13, "depth": 15, "unit": "in"}, "dimensionMm": {"width": 204, "height": 337, "depth": 401, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YjCJHDA8B714D95FB9D45DD", "previewImage": "https://resources.archisketch.com/modelings/ed5d6b4e9887411aab1f6ab57c64c344/IMAGE/1754355510858/ed5d6b4e9887411aab1f6ab57c64c344_1.png",
+      "name": "싱글 모니터암", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 75000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 0, "height": 0, "depth": 0, "unit": "in"}, "dimensionMm": {"width": 0, "height": 0, "depth": 0, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "ZGXmJUk293C2AE613ED4B4B", "previewImage": "https://resources.archisketch.com/modelings/2881c245ba964e0e8a0fc73a9134ff3c/IMAGE/1790061576633/2881c245ba964e0e8a0fc73a9134ff3c_1.png",
+      "name": "[샘플] 삼성 QLED QNDX1 (KQ55QNDX1-W16) 풀 모션 슬림핏 벽걸이형", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 48, "height": 28, "depth": 1, "unit": "in"}, "dimensionMm": {"width": 1227, "height": 713, "depth": 46, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YHx4J5H2C427AA8FBFD482A", "previewImage": "https://resources.archisketch.com/product/YHx4J5H2C427AA8FBFD482A/14-07-2022_10-05-11/preview/YHx4J5H2C427AA8FBFD482A_1.png",
+      "name": "코어렉(CORE RACK) (Black)", "color": null, "brand": "피콕서울",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 377000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 39, "height": 29, "depth": 13, "unit": "in"}, "dimensionMm": {"width": 1000, "height": 750, "depth": 345, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YvLiCvk04866276686B40C7", "previewImage": "https://resources.archisketch.com/product/YvLiCvk04866276686B40C7/21-11-2023_01-36-05/preview/YvLiCvk04866276686B40C7_1.png",
+      "name": "Erba Dhurrie Rug", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 68, "height": 1, "depth": 95, "unit": "in"}, "dimensionMm": {"width": 1740, "height": 29, "depth": 2429, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "XNpyDGd4339E9DBCEE941AC", "previewImage": "https://resources.archisketch.com/modelings/336573e18db749868a495e033352c9ad/IMAGE/1789633615522/336573e18db749868a495e033352c9ad_1.png",
+      "name": "Archisketch Dining Chair6", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 17, "height": 33, "depth": 16, "unit": "in"}, "dimensionMm": {"width": 444, "height": 850, "depth": 424, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "83470177e6504b21bad9d2d15b6d5fba", "previewImage": "https://resources.archisketch.com/modelings/3247eb5f1f044237a4535bc4641aaf18/IMAGE/1784019266981/3247eb5f1f044237a4535bc4641aaf18_1.png",
+      "name": "데스커 GX_HDA(블랙프레임/4C6 메쉬/836 좌판)", "color": null, "brand": null,
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 454000.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 28, "height": 45, "depth": 24, "unit": "in"}, "dimensionMm": {"width": 715, "height": 1145, "depth": 622, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "YPGPhJp77841A682B5A4CD2", "previewImage": "https://resources.archisketch.com/product/YPGPhJp77841A682B5A4CD2/24-06-2022_04-44-09/preview/YPGPhJp77841A682B5A4CD2_1.png",
+      "name": "Front door (1000)", "color": null, "brand": "Archisketch",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 1, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 39, "height": 90, "depth": 7, "unit": "in"}, "dimensionMm": {"width": 1000, "height": 2300, "depth": 200, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    },
+    {
+      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "", "roomType": "furniture", "group": null, "ancestorGroupId": null,
+      "componentId": "E976B33E1388415C", "previewImage": "https://resources.archisketch.com/modelings/7cb5b6af89af4aa78c00c6dde02a4c0e/IMAGE/1790061998914/7cb5b6af89af4aa78c00c6dde02a4c0e_1.png",
+      "name": "JELD WEN Windows", "color": null, "brand": "젤드웬",
+      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
+      "quantity": 4, "seriesName": "", "optionValue": "",
+      "dimensionInch": {"width": 35, "height": 47, "depth": 3, "unit": "in"}, "dimensionMm": {"width": 908, "height": 1215, "depth": 91, "unit": "mm"},
+      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
+    }
+  ],
+  "finishItems": []
+}
+```

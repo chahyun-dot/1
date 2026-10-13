@@ -65,6 +65,13 @@ src/
 
 페이지 폭 기준: 컨테이너 `max-w-[1256px] px-[60px]`(내용 1136px). 히어로 왼쪽 603px + 간격 60 + 오른쪽 473px. 본문 왼쪽 757px(내용 692) + 오른쪽 고정 카드 379px.
 
+### 가구 목록 페이지 (오늘의집 페이지와 별개)
+
+Archisketch 에서 내보낸 가구 JSON 67개를 이미지와 짝지어 보여 주는 페이지다. 주소 끝에 `#/furniture` 를 붙이면 열린다(예: `https://roomjirak.vercel.app/#/furniture`).
+- 원본 JSON: `docs/archisketch-furniture-items.md` (코드 블록) → 화면용 `src/data/archisketch-furniture.json` → 타입 변환 `src/data/furniture.ts` → 화면 `components/page/FurnitureCatalog.tsx`.
+- 이미지: `public/archisketch/{componentId}.png` 67장(500×500, 약 13MB). `resources.archisketch.com` 의 `previewImage` 주소에서 받은 것이며, componentId 로 데이터와 짝짓는다.
+- 데이터 점검 결과: 항목 67개·총 수량 92개·소비자가 합계 24,944,010원. 가격 0원 41개, 방 밖(roomId 없음) 11개, 치수 0인 항목 1개(싱글 모니터암). 가격이 의심스러운 항목은 소파 16,055,000원, 슬라이딩 도어 캐비닛 5원, 블라인드 1,900원.
+
 ## 4. 원본과 비교하는 방법 (검증 규칙)
 
 - 원본 탭과 우리 탭 모두 **뷰포트 1280×900**으로 맞춘다 (`resize_window`). **탭을 바꾸면 에뮬레이션이 풀리므로** 매번 다시 맞춘다.
