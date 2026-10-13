@@ -33,12 +33,12 @@ function Slab({ size, position, color, rotation, radius = 0, roughness = 0.6, me
 }
 
 // 회전체(병, 꽃병, 잔). profile 은 [반지름, 높이] 점들을 아래에서 위로.
-function Lathe({ profile, color, roughness = 0.4, metalness = 0, opacity = 1, position }: { profile: [number, number][]; color: string; roughness?: number; metalness?: number; opacity?: number; position?: Vec3 }) {
+function Lathe({ profile, color, roughness = 0.4, metalness = 0, opacity = 1, emissive, position }: { profile: [number, number][]; color: string; roughness?: number; metalness?: number; opacity?: number; emissive?: string; position?: Vec3 }) {
   const key = JSON.stringify(profile)
   const geometry = useMemo(() => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 36), [key])
   return (
     <mesh geometry={geometry} position={position} castShadow receiveShadow>
-      <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} transparent={opacity < 1} opacity={opacity} side={THREE.DoubleSide} />
+      <meshStandardMaterial color={color} roughness={roughness} metalness={metalness} transparent={opacity < 1} opacity={opacity} emissive={emissive} emissiveIntensity={emissive ? 0.35 : 0} side={THREE.DoubleSide} />
     </mesh>
   )
 }
@@ -186,24 +186,29 @@ function Poster({ item }: Props) {
   )
 }
 
-// UFO KID LAMP: 벽에 붙는 검은 원판에 소켓과 투명 전구가 앞으로 튀어나온 벽등.
+// UFO KID LAMP: 벽에 붙는 검은 돔(UFO 모양)과 가운데에서 앞으로 나온 소켓, 투명 전구.
 function KidLamp({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
+  const dome = Math.min(0.07, d * 0.4)
   return (
     <group position={[0, h / 2, 0]}>
-      <mesh position={[0, 0, -d / 2 + 0.02]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[w / 2, w / 2, 0.04, 32]} />
-        {std('#222224', 0.35, 0.3)}
+      <mesh position={[0, 0, -d / 2]} rotation={[Math.PI / 2, 0, 0]} scale={[1, dome / (w / 2), 1]} castShadow>
+        <sphereGeometry args={[w / 2, 36, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        {std('#1d1d20', 0.3, 0.4)}
       </mesh>
-      <mesh position={[0, 0, -d / 2 + 0.07]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.045, 0.06, 0.06, 20]} />
-        {std('#17171a', 0.4, 0.3)}
+      <mesh position={[0, 0, -d / 2 + dome + 0.02]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.028, 0.034, 0.05, 20]} />
+        {std('#2a2a2d', 0.35, 0.6)}
       </mesh>
-      <mesh position={[0, 0, -d / 2 + 0.12]}>
-        <sphereGeometry args={[0.055, 20, 16]} />
-        {glass('#e8eef2', 0.55)}
+      <mesh position={[0, 0, -d / 2 + dome + 0.085]}>
+        <sphereGeometry args={[0.048, 24, 18]} />
+        {glass('#e8eef2', 0.5)}
+      </mesh>
+      <mesh position={[0, 0, -d / 2 + dome + 0.085]}>
+        <sphereGeometry args={[0.012, 12, 10]} />
+        <meshStandardMaterial color="#fff2c4" emissive="#fff2c4" emissiveIntensity={0.8} />
       </mesh>
     </group>
   )
@@ -1237,6 +1242,64 @@ function WindowFrame({ item }: Props) {
   )
 }
 
+// Tolomeo Mega Floor Lamp: 둥근 알루미늄 받침에서 곧은 기둥이 올라가 종 모양 흰 갓 바로 아래까지 닿고, 맨 위에 작은 도르래와 뒤로 젖힌 가는 팔이 있다.
+export function TolomeoLamp({ item }: Props) {
+  const d = item.d / M
+  const h = item.h / M
+  const baseZ = -d / 2 + 0.17
+  const shadeH = h * 0.22
+  const shadeBottom = h * 0.66
+  const shade: [number, number][] = [[0.21, 0], [0.17, shadeH * 0.4], [0.1, shadeH * 0.8], [0.03, shadeH]]
+  return (
+    <group>
+      <mesh position={[0, 0.01, baseZ]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.17, 0.17, 0.02, 32]} />
+        {std(CHROME, 0.3, 0.6)}
+      </mesh>
+      <Rod from={[0, 0.02, baseZ]} to={[0, shadeBottom, baseZ]} r={0.011} color={CHROME} metal />
+      <Lathe profile={shade} color="#f4f0d2" roughness={0.8} emissive="#fff3b0" position={[0, shadeBottom, baseZ]} />
+      <Rod from={[0, shadeBottom + shadeH, baseZ]} to={[0, h - 0.04, baseZ]} r={0.003} color="#8d8d90" metal />
+      <mesh position={[0, h - 0.03, baseZ]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.025, 0.025, 0.012, 18]} />
+        {std(CHROME, 0.3, 0.7)}
+      </mesh>
+      <Rod from={[0, h - 0.03, baseZ]} to={[0, h - 0.1, baseZ - 0.12]} r={0.004} color="#8d8d90" metal />
+    </group>
+  )
+}
+
+// 싱글 모니터암: 책상 모서리에 물리는 흰 클램프, 짧은 기둥, 위로 비스듬히 뻗은 팔, 끝의 VESA 판(모니터 고정판). 뒤(-z)가 클램프다.
+function MonitorArm({ item }: Props) {
+  const w = item.w / M
+  const d = item.d / M
+  const h = item.h / M
+  const white = '#f1f1ef'
+  const baseZ = -d / 2 + 0.05
+  const headZ = d / 2 - 0.03
+  const postTop = h * 0.5
+  return (
+    <group>
+      <Slab size={[w * 0.6, 0.05, 0.1]} position={[0, 0.025, baseZ]} color={white} radius={0.006} roughness={0.5} />
+      <Rod from={[0, 0.05, baseZ]} to={[0, postTop, baseZ]} r={0.019} color={white} />
+      <mesh position={[0, postTop, baseZ]} castShadow>
+        <sphereGeometry args={[0.024, 18, 14]} />
+        {std(white, 0.5)}
+      </mesh>
+      <Rod from={[0, postTop, baseZ]} to={[0, h * 0.82, d * 0.1]} r={0.016} color={white} />
+      <Rod from={[0, h * 0.82, d * 0.1]} to={[0, h - 0.07, headZ]} r={0.014} color={white} />
+      <Slab size={[0.1, 0.1, 0.012]} position={[0, h - 0.06, headZ + 0.01]} color={white} radius={0.008} roughness={0.5} rotation={[-0.15, 0, 0]} />
+      {[-1, 1].flatMap((sx) =>
+        [-1, 1].map((sy) => (
+          <mesh key={`${sx}${sy}`} position={[sx * 0.037, h - 0.06 + sy * 0.037, headZ + 0.0175]} rotation={[-0.15, 0, 0]}>
+            <circleGeometry args={[0.006, 12]} />
+            {std('#8d8d90', 0.5)}
+          </mesh>
+        )),
+      )}
+    </group>
+  )
+}
+
 export const PROP_MODELS: Record<PropModel, ComponentType<Props>> = {
   stringpocket: StringPocket,
   bedding: BeddingSet,
@@ -1286,5 +1349,6 @@ export const PROP_MODELS: Record<PropModel, ComponentType<Props>> = {
   dhurrie: Dhurrie,
   frontdoor: FrontDoor,
   window: WindowFrame,
+  monitorarm: MonitorArm,
 }
 

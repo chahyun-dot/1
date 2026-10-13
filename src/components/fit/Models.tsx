@@ -4,8 +4,8 @@ import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { DESK_TOP, FOOT_W, LEG_W, legCenter, undersideOf } from '@/lib/desk'
 import { DRAWER_PULL } from '@/lib/fit'
-import { PROP_MODELS } from '@/components/fit/ArchiProps'
-import { AraliaPlant, ArdenMirror, BlackBed, ChromeCabinet, CoreRack, DrawerUnit, FkSofa, MeshOfficeChair, MotionDesk, PegBoard, SteelShelf, TolomeoLamp, WallTv, WalnutDiningChair, WoodBlind } from '@/components/fit/ArchiModels'
+import { PROP_MODELS, TolomeoLamp } from '@/components/fit/ArchiProps'
+import { AraliaPlant, ArdenMirror, BlackBed, ChromeCabinet, CoreRack, DrawerUnit, FkSofa, MeshOfficeChair, MotionDesk, PegBoard, SteelShelf, WallTv, WalnutDiningChair, WoodBlind } from '@/components/fit/ArchiModels'
 import type { Item } from '@/lib/types'
 
 const M = 1000

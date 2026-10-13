@@ -583,34 +583,6 @@ export function AraliaPlant({ item }: Props) {
   )
 }
 
-// Tolomeo Mega Floor Lamp: 둥근 알루미늄 받침에서 곧은 기둥이 올라가 흰 원뿔 갓 바로 아래까지 닿고, 갓은 맨 위의 가는 팔 끝에 걸려 기둥 위에 매달린 조명.
-export function TolomeoLamp({ item }: Props) {
-  const w = item.w / M
-  const d = item.d / M
-  const h = item.h / M
-  const baseZ = -d / 2 + 0.17
-  const shadeH = h * 0.22
-  const shadeBottom = h * 0.66
-  const shadeTop = shadeBottom + shadeH
-  const shadeZ = baseZ + 0.1
-  return (
-    <group>
-      <mesh position={[0, 0.01, baseZ]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.17, 0.17, 0.02, 32]} />
-        <meshStandardMaterial color={CHROME} metalness={0.6} roughness={0.3} />
-      </mesh>
-      <Rod from={[0, 0.02, baseZ]} to={[0, shadeBottom, baseZ]} r={0.012} color={CHROME} metal />
-      <Rod from={[0, shadeBottom, baseZ]} to={[0, shadeBottom + 0.04, shadeZ]} r={0.006} color={CHROME} metal />
-      <Rod from={[0, shadeTop + 0.02, shadeZ]} to={[0, h, shadeZ]} r={0.005} color={CHROME} metal />
-      <Rod from={[0, h - 0.03, shadeZ]} to={[0, h - 0.17, baseZ - 0.02]} r={0.004} color="#8d8d90" metal />
-      <mesh position={[0, shadeBottom + shadeH / 2 + 0.02, shadeZ]}>
-        <cylinderGeometry args={[0.03, Math.min(w / 2, 0.21), shadeH, 32, 1, true]} />
-        <meshStandardMaterial color="#f7f4d9" emissive="#fff3b0" emissiveIntensity={0.4} roughness={0.8} side={THREE.DoubleSide} />
-      </mesh>
-    </group>
-  )
-}
-
 // W400 3단 서랍(바퀴 달림): 어두운 본체 앞에 서랍 3개(윗칸이 가장 높고 열쇠 구멍 있음), 합판 색 단면, 아래 바퀴 4개.
 export function DrawerUnit({ item }: Props) {
   const w = item.w / M

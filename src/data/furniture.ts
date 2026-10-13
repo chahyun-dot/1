@@ -14,13 +14,18 @@ export type Furniture = {
   image: string
 }
 
+// 원본 데이터에 치수가 없는(전부 0) 가구는 모양으로 추정한 치수를 쓴다. 단위 mm.
+const ESTIMATED_SIZE: Record<string, { w: number; d: number; h: number }> = {
+  YjCJHDA8B714D95FB9D45DD: { w: 120, d: 480, h: 400 }, // 싱글 모니터암(클램프 폭, 팔 뻗은 길이, 기둥+팔 높이)
+}
+
 export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
   id: item.componentId,
   name: item.name,
   brand: item.brand,
   quantity: item.quantity,
   price: item.retailPrice.value,
-  size: { w: item.dimensionMm.width, d: item.dimensionMm.depth, h: item.dimensionMm.height },
+  size: item.dimensionMm.width > 0 ? { w: item.dimensionMm.width, d: item.dimensionMm.depth, h: item.dimensionMm.height } : (ESTIMATED_SIZE[item.componentId] ?? { w: 0, d: 0, h: 0 }),
   placed: item.roomId !== '',
   image: `/archisketch/${item.componentId}.png`,
 }))
@@ -120,4 +125,5 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   YvLiCvk04866276686B40C7: { model: 'dhurrie' }, // Erba Dhurrie Rug
   YPGPhJp77841A682B5A4CD2: { model: 'frontdoor' }, // Front door (1000)
   E976B33E1388415C: { model: 'window', elevation: 900 }, // JELD WEN Windows
+  YjCJHDA8B714D95FB9D45DD: { model: 'monitorarm', elevation: 720 }, // 싱글 모니터암(책상 위 높이 720mm 에 얹음, 치수는 추정)
 }
