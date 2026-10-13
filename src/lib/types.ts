@@ -2,7 +2,7 @@ export type Rot = 0 | 1 | 2 | 3
 
 export type ItemKind = 'product' | 'furniture' | 'rug'
 
-export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable' | 'bedframe' | 'steelshelf' | 'pegboard' | 'mirror' | 'blind'
+export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable' | 'bedframe' | 'steelshelf' | 'pegboard' | 'mirror' | 'blind' | 'fksofa' | 'meshchair' | 'diningchair' | 'motiondesk' | 'chromecabinet' | 'corerack' | 'aralia' | 'tolomeo' | 'drawerunit' | 'walltv'
 
 export type Item = {
   id: string

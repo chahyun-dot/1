@@ -60,4 +60,14 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   YneAfk7A250635ACE594C54: { model: 'pegboard', elevation: 1100 }, // perforated board
   ZLDAeRK53BFEDFD0CF2475A: { model: 'mirror', elevation: 900 }, // 아르덴 미러
   E1632324621148B0: { model: 'blind', elevation: 240 }, // PREMIUM 우드 블라인드(2281mm, 천장 쪽에 맞춤)
+  YBp1W4_021584BC9C234BDF: { model: 'fksofa' }, // FK6720 2인 소파(블랙)
+  '83470177e6504b21bad9d2d15b6d5fba': { model: 'meshchair' }, // 데스커 GX_HDA 의자
+  XNpyDGd4339E9DBCEE941AC: { model: 'diningchair' }, // Archisketch Dining Chair6
+  YSZphlN2272C00BB9264030: { model: 'motiondesk' }, // W1600*D800 모션데스크
+  ZCREWuP85D472F7745C4005: { model: 'chromecabinet' }, // SIMPLIE 수납장 BC264
+  YHx4J5H2C427AA8FBFD482A: { model: 'corerack' }, // 코어렉(CORE RACK)
+  YV_XVxTA1102E846ACA437E: { model: 'aralia' }, // Aralia Large
+  Yq8D3hC589DB8DF6B7D4EC5: { model: 'tolomeo' }, // Tolomeo Mega Floor Lamp
+  YSCLdDz3A9D4CDED05E451C: { model: 'drawerunit' }, // W400 3단 서랍
+  ZGXmJUk293C2AE613ED4B4B: { model: 'walltv', elevation: 900 }, // 삼성 QLED 벽걸이 TV
 }
