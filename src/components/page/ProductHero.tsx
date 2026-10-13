@@ -44,7 +44,7 @@ function Gallery({ onOpenFit }: { onOpenFit: () => void }) {
         <img src={galleryUrl(GALLERY[index], 1280)} alt={`상품 이미지 ${index + 1}`} className="h-full w-full object-cover" />
         {/* 캐릭터는 장식이라 누를 수 없고, 가상배치는 옆 버튼으로만 연다. 캐릭터는 버튼 위에 겹쳐 오른손이 버튼 앞에 오고, 발끝(이미지 아래 투명 여백 16px)이 사진 아래 선에 닿도록 -16px 내린다. 오른손(바닥에서 약 49px)이 버튼 글자와 같은 높이가 되도록 버튼은 캐릭터 바닥에서 30px 띄운다. */}
         <div className="absolute -bottom-4 right-4 flex items-end">
-          <div className="relative z-10 -mr-8">
+          <div className="pointer-events-none relative z-10 -mr-8">
             <WavingCharacter size={136} />
           </div>
           <button
