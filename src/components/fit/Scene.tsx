@@ -180,7 +180,7 @@ function DraggableItem({
 
   return (
     <group
-      position={[x, 0, z]}
+      position={[x, (item.elevation ?? 0) / M, z]}
       rotation={[0, (item.rot * Math.PI) / 2, 0]}
       onPointerDown={handleDown}
       onPointerMove={handleMove}

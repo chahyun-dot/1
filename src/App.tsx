@@ -19,11 +19,14 @@ import type { ColorId } from '@/data/catalog'
 const FitModal = lazy(() => import('@/components/fit/FitModal'))
 const FurnitureCatalog = lazy(() => import('@/components/page/FurnitureCatalog'))
 const FitDemo = lazy(() => import('@/components/demo/FitDemo'))
+const ModelPreview = lazy(() => import('@/components/demo/ModelPreview'))
 
-// 주소 끝이 #/furniture 이면 가구 목록, #/demo 이면 데모 페이지를 상품 페이지 대신 보여 준다.
-type Route = 'home' | 'furniture' | 'demo'
+// 주소 끝이 #/furniture 이면 가구 목록, #/demo 이면 데모 페이지, #/models 이면 3D 모델 미리보기를 상품 페이지 대신 보여 준다.
+type Route = 'home' | 'furniture' | 'demo' | 'models'
 
-const routeOf = (): Route => (window.location.hash === '#/furniture' ? 'furniture' : window.location.hash === '#/demo' ? 'demo' : 'home')
+const ROUTES: Record<string, Route> = { '#/furniture': 'furniture', '#/demo': 'demo', '#/models': 'models' }
+
+const routeOf = (): Route => ROUTES[window.location.hash] ?? 'home'
 
 function useRoute() {
   const [route, setRoute] = useState<Route>(routeOf)
@@ -59,7 +62,7 @@ export default function App() {
   if (route !== 'home') {
     return (
       <Suspense fallback={<ModalLoading />}>
-        {route === 'furniture' ? <FurnitureCatalog /> : <FitDemo />}
+        {route === 'furniture' ? <FurnitureCatalog /> : route === 'models' ? <ModelPreview /> : <FitDemo />}
       </Suspense>
     )
   }

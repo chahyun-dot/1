@@ -2,7 +2,7 @@ export type Rot = 0 | 1 | 2 | 3
 
 export type ItemKind = 'product' | 'furniture' | 'rug'
 
-export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable'
+export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable' | 'bedframe' | 'steelshelf' | 'pegboard' | 'mirror' | 'blind'
 
 export type Item = {
   id: string
@@ -22,6 +22,8 @@ export type Item = {
   caster?: number
   // 데모 페이지에서 고른 가구의 미리보기 이미지 주소.
   image?: string
+  // 바닥에서 띄워 건 높이(mm). 벽에 거는 거울·액자·블라인드용이며, 없으면 바닥에 놓인다.
+  elevation?: number
 }
 
 export type Room = {

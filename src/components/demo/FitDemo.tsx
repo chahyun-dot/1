@@ -106,8 +106,8 @@ export default function FitDemo() {
 
   const updateItem = (id: string, patch: (item: Item) => Item) => setItems((prev) => prev.map((item) => (item.id === id ? patch(item) : item)))
 
-  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box') => {
-    const item: Item = { id, name, kind: 'furniture', model, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
+  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box', elevation?: number) => {
+    const item: Item = { id, name, kind: 'furniture', model, elevation, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
     const spot = findFreeSpot(item, room, items)
     const placed: Item = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
     setItems((prev) => [...prev, placed])
@@ -117,7 +117,7 @@ export default function FitDemo() {
 
   const addFromCatalog = (furniture: Furniture) => {
     const n = items.filter((item) => item.id.startsWith(`${furniture.id}#`)).length + 1
-    addBox(`${furniture.id}#${n}`, furniture.name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, MODEL_BY_FURNITURE[furniture.id])
+    addBox(`${furniture.id}#${n}`, furniture.name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, MODEL_BY_FURNITURE[furniture.id]?.model, MODEL_BY_FURNITURE[furniture.id]?.elevation)
   }
 
   const addCustom = () => {
@@ -340,7 +340,7 @@ export default function FitDemo() {
                   </button>
                 ))}
               </div>
-              {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이라 데모에서는 바닥에 세워 크기만 확인해요.</p>}
+              {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이에요. 3D 모델이 있는 것은 걸리는 높이에 걸리고, 나머지는 바닥에 세워 크기만 확인해요.</p>}
 
               {visibleCatalog.length === 0 ? (
                 <p className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</p>

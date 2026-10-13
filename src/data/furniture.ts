@@ -52,6 +52,12 @@ export const categoryOf = (f: Furniture): FurnitureCategory => {
 }
 
 // 이미지를 보고 코드로 모양을 만든 가구. 여기에 없는 가구는 치수 그대로의 상자(box)로 보인다.
-export const MODEL_BY_FURNITURE: Record<string, ItemModel> = {
-  YSEBSV826EADFB11D0F4FDD: 'roundtable', // W1000 원형테이블
+// elevation 은 벽에 거는 높이(mm). 없으면 바닥에 놓인다.
+export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: number }> = {
+  YSEBSV826EADFB11D0F4FDD: { model: 'roundtable' }, // W1000 원형테이블
+  Xs_Qb6C3D61BBB72B9B4159: { model: 'bedframe' }, // D2178B 슈퍼싱글 침대(블랙)
+  'ZHCng6-9DA238A1CE5340E1': { model: 'steelshelf' }, // H1740 5단 철제선반장
+  YneAfk7A250635ACE594C54: { model: 'pegboard', elevation: 1100 }, // perforated board
+  ZLDAeRK53BFEDFD0CF2475A: { model: 'mirror', elevation: 900 }, // 아르덴 미러
+  E1632324621148B0: { model: 'blind', elevation: 240 }, // PREMIUM 우드 블라인드(2281mm, 천장 쪽에 맞춤)
 }

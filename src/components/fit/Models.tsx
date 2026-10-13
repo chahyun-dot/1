@@ -4,6 +4,7 @@ import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { DESK_TOP, FOOT_W, LEG_W, legCenter, undersideOf } from '@/lib/desk'
 import { DRAWER_PULL } from '@/lib/fit'
+import { ArdenMirror, BlackBed, PegBoard, SteelShelf, WoodBlind } from '@/components/fit/ArchiModels'
 import type { Item } from '@/lib/types'
 
 const M = 1000
@@ -443,5 +444,15 @@ export default function ItemModel(props: ModelProps) {
       return <Box {...props} />
     case 'roundtable':
       return <RoundTable {...props} />
+    case 'bedframe':
+      return <BlackBed {...props} />
+    case 'steelshelf':
+      return <SteelShelf {...props} />
+    case 'pegboard':
+      return <PegBoard {...props} />
+    case 'mirror':
+      return <ArdenMirror {...props} />
+    case 'blind':
+      return <WoodBlind {...props} />
   }
 }

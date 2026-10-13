@@ -77,7 +77,8 @@ Archisketch 에서 내보낸 가구 JSON 67개를 이미지와 짝지어 보여 
 주소 끝에 `#/demo` 를 붙이면 열린다(예: `https://roomjirak.vercel.app/#/demo`). 기존 "내 공간에 맞는지 확인하기" 팝업은 그대로 두고, 같은 3D(`Scene`)를 재사용해 따로 만든 페이지다. 코드는 `components/demo/FitDemo.tsx`.
 - 오른쪽 탭: **배치된 가구**(3D에 있는 가구 목록·선택·빼기) / **전체 가구**(등록 가구 67개를 이미지로 고르면 3D에 놓임. 검색, 가구·소품·벽·천장 필터) / **직접 입력**(이름과 가로·세로·높이 mm 입력 → 3D에 놓임. 치수가 없는 가구를 고르면 이 탭으로 넘어온다).
 - 가구를 고르면(목록이나 3D에서) 위쪽 카드에 크기(cm·mm), 바닥 면적, **앞·뒤·옆 여유 사이즈**(벽·가구까지 거리), 공간 적합도 진단이 나온다. 서랍장은 기존 서랍 진단(`evaluate`), 그 밖의 가구는 `measureFurniture`(방 밖·천장·겹침·문·커튼·앞 여유 600mm).
-- 3D 표현: 기본은 치수 그대로의 상자(`model: 'box'`). 이미지를 보고 코드로 모양을 만든 가구는 `data/furniture.ts` 의 `MODEL_BY_FURNITURE` 에 등록하며(지금은 W1000 원형테이블 → `roundtable`, `Models.tsx` 의 `RoundTable`·`Tube`), 전체 가구 카드에 "3D 모델" 배지가 붙는다. 선택하면 미리보기 이미지가 라벨에 뜬다. 새 가구는 `findFreeSpot` 으로 방 가운데에서 가까운 빈 자리에 놓인다.
+- 3D 표현: 기본은 치수 그대로의 상자(`model: 'box'`). 이미지를 보고 코드로 모양을 만든 가구 6개는 `data/furniture.ts` 의 `MODEL_BY_FURNITURE` 에 등록하며(원형테이블 `roundtable`은 `Models.tsx`, 나머지 침대 `bedframe`·철제선반장 `steelshelf`·펀칭보드 `pegboard`·아르덴 미러 `mirror`·우드 블라인드 `blind` 는 `components/fit/ArchiModels.tsx`), 전체 가구 카드에 "3D 모델" 배지가 붙는다. 벽에 거는 가구는 `elevation`(걸리는 높이 mm: 펀칭보드 1100, 거울 900, 블라인드 240)을 두며, 아래에 놓인 가구와는 높이가 겹칠 때만 서로 막는다(`lib/fit.ts` 의 `levelOverlap`). 선택하면 미리보기 이미지가 라벨에 뜬다.
+- 모델 미리보기: `#/models` 에서 코드로 만든 3D 모델을 하나씩 돌려 보며 원본 이미지와 비교할 수 있다(`components/demo/ModelPreview.tsx`). 새 모델을 만들면 여기서 먼저 확인한다.
 - "전체 가구"는 오늘의집 상품이 아니라 Archisketch 샘플 67개다. 분류(가구/소품/벽·천장)는 `data/furniture.ts` 에서 직접 나눴다. 벽·천장용(액자, 문, 창문 등)은 데모에서 바닥에 세워 크기만 본다.
 - 한계: 추가한 가구는 새로고침하면 사라진다(저장 안 함). 상세 360° 뷰는 책상용 그대로이고, 다른 가구용은 만들지 않았다.
 - 공용 코드에 더한 것(기존 동작은 그대로): `Scene` 의 `showFrontZone`·`distance` 옵션, `Models.tsx` 의 `box`, `lib/fit.ts` 의 `measureFurniture`·`findFreeSpot`, `Item.image`.

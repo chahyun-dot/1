@@ -90,7 +90,7 @@ const frontLevel = (distance: number): Level =>
 
 export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
   const rect = footprint(item)
-  const others = items.filter((other) => other.id !== item.id && other.kind !== 'rug')
+  const others = items.filter((other) => other.id !== item.id && other.kind !== 'rug' && levelOverlap(item, other))
   const covering = others.filter((other) => overlaps(rect, footprint(other)))
   const under = covering.find((other) => other.underClearance !== undefined && item.h <= other.underClearance) ?? null
   const blocking = covering.filter((other) => other !== under)
@@ -201,11 +201,14 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
 // 바닥에 깔리는 얇은 것(러그 등)은 다른 가구를 막지 않는다.
 const FLAT_MAX = 30
 
+// 벽에 높이 걸린 가구(거울, 블라인드)는 그 아래에 놓인 가구와 높이가 겹칠 때만 서로 막는다.
+const levelOverlap = (a: Item, b: Item) => (a.elevation ?? 0) < (b.elevation ?? 0) + b.h && (b.elevation ?? 0) < (a.elevation ?? 0) + a.h
+
 // 데모용: 서랍 전용 규칙 없이, 고른 가구 하나의 위치 문제와 앞뒤좌우 여유만 본다.
 export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResult => {
   const rect = footprint(item)
   const flat = item.h <= FLAT_MAX
-  const others = items.filter((other) => other.id !== item.id && other.kind !== 'rug' && other.h > FLAT_MAX)
+  const others = items.filter((other) => other.id !== item.id && other.kind !== 'rug' && other.h > FLAT_MAX && levelOverlap(item, other))
   const covering = flat ? [] : others.filter((other) => overlaps(rect, footprint(other)))
   const under = covering.find((other) => other.underClearance !== undefined && item.h <= other.underClearance) ?? null
   const blocking = covering.filter((other) => other !== under)
@@ -217,7 +220,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
 
   const outside = Math.max(-rect.minX, -rect.minZ, rect.maxX - room.w, rect.maxZ - room.d)
   if (outside > 0) checks.push({ level: 'bad', title: '방 밖으로 나가요', detail: `벽 밖으로 ${cm(outside)} 나가 있어요.` })
-  if (item.h > room.h) checks.push({ level: 'bad', title: '천장보다 높아요', detail: `가구 높이 ${cm(item.h)}, 천장 높이 ${cm(room.h)}예요.` })
+  if ((item.elevation ?? 0) + item.h > room.h) checks.push({ level: 'bad', title: '천장보다 높아요', detail: `가구 높이 ${cm((item.elevation ?? 0) + item.h)}, 천장 높이 ${cm(room.h)}예요.` })
   blocking.forEach((other) => checks.push({ level: 'bad', title: `${other.name}와 겹쳐요`, detail: '같은 자리에 둘 수 없어요. 끌어서 옮겨 주세요.' }))
   if (under) checks.push({ level: 'ok', title: `${under.name} 아래에 들어가요`, detail: `${under.name} 아래 높이 ${cm(under.underClearance!)}, 가구 높이 ${cm(item.h)}예요.` })
   if (overlaps(rect, doorSwingRect(room))) checks.push({ level: 'bad', title: '문 여닫는 공간을 막아요', detail: `문 폭 ${cm(room.doorWidth)}만큼 문이 열리는 자리예요.` })
@@ -248,7 +251,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
 
 // 가구를 놓을 빈 자리를 방 가운데에서 가까운 순으로 찾는다. 없으면 null.
 export const findFreeSpot = (item: Item, room: Room, items: Item[]): { x: number; z: number } | null => {
-  const others = items.filter((other) => other.kind !== 'rug' && other.h > FLAT_MAX).map((other) => footprint(other))
+  const others = items.filter((other) => other.kind !== 'rug' && other.h > FLAT_MAX && levelOverlap(item, other)).map((other) => footprint(other))
   const blocked = [...others, doorSwingRect(room), curtainRect(room)]
   const candidates: { x: number; z: number; distance: number }[] = []
   for (let x = 0; x <= room.w; x += 100) {
