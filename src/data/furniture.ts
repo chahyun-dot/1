@@ -25,3 +25,27 @@ export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
 }))
 
 export const FURNITURE_PROJECT = raw.projectName
+
+export type FurnitureCategory = '가구' | '소품' | '벽·천장'
+
+// 데이터에 분류가 없어서 직접 나눴다. 벽에 걸거나 천장·창문·문에 붙는 것은 벽·천장, 옷과 작은 물건은 소품이다.
+const WALL_OR_CEILING = new Set([
+  'X8kL5fT81A10556FC5447E5', // Illusion 01 (액자)
+  'XW_VtxtA8DF6CDA88104092', // Ideal living (액자)
+  'ZLDAeRK53BFEDFD0CF2475A', // 아르덴 미러
+  'YneAfk7A250635ACE594C54', // perforated board
+  'ZGXmJUk293C2AE613ED4B4B', // 삼성 QLED 벽걸이
+  'YPGPhJp77841A682B5A4CD2', // Front door
+  'E976B33E1388415C', // JELD WEN Windows
+  'E1632324621148B0', // 우드 블라인드
+  'Xr78id08D1C38D7AD0D4D47', // LED 면조명
+])
+const CLOTHES = new Set(['YV8EVEF2D36EE1DB1D44CAB', 'XX-zmmq45F1867DE7EE462B', 'ZFFQHal586565A1F38B473C'])
+
+export const hasSize = (f: Furniture) => f.size.w > 0 && f.size.d > 0 && f.size.h > 0
+
+export const categoryOf = (f: Furniture): FurnitureCategory => {
+  if (WALL_OR_CEILING.has(f.id)) return '벽·천장'
+  if (CLOTHES.has(f.id) || Math.max(f.size.w, f.size.d, f.size.h) < 600) return '소품'
+  return '가구'
+}

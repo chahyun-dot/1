@@ -198,6 +198,73 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
   return { verdict, checks, gaps, under: under?.name ?? null }
 }
 
+// 바닥에 깔리는 얇은 것(러그 등)은 다른 가구를 막지 않는다.
+const FLAT_MAX = 30
+
+// 데모용: 서랍 전용 규칙 없이, 고른 가구 하나의 위치 문제와 앞뒤좌우 여유만 본다.
+export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResult => {
+  const rect = footprint(item)
+  const flat = item.h <= FLAT_MAX
+  const others = items.filter((other) => other.id !== item.id && other.kind !== 'rug' && other.h > FLAT_MAX)
+  const covering = flat ? [] : others.filter((other) => overlaps(rect, footprint(other)))
+  const under = covering.find((other) => other.underClearance !== undefined && item.h <= other.underClearance) ?? null
+  const blocking = covering.filter((other) => other !== under)
+  const obstacles: Obstacle[] = [
+    ...others.filter((other) => other !== under).map((other) => ({ name: other.name, rect: footprint(other) })),
+    { name: '문 여닫는 공간', rect: doorSwingRect(room) },
+  ]
+  const checks: Check[] = []
+
+  const outside = Math.max(-rect.minX, -rect.minZ, rect.maxX - room.w, rect.maxZ - room.d)
+  if (outside > 0) checks.push({ level: 'bad', title: '방 밖으로 나가요', detail: `벽 밖으로 ${cm(outside)} 나가 있어요.` })
+  if (item.h > room.h) checks.push({ level: 'bad', title: '천장보다 높아요', detail: `가구 높이 ${cm(item.h)}, 천장 높이 ${cm(room.h)}예요.` })
+  blocking.forEach((other) => checks.push({ level: 'bad', title: `${other.name}와 겹쳐요`, detail: '같은 자리에 둘 수 없어요. 끌어서 옮겨 주세요.' }))
+  if (under) checks.push({ level: 'ok', title: `${under.name} 아래에 들어가요`, detail: `${under.name} 아래 높이 ${cm(under.underClearance!)}, 가구 높이 ${cm(item.h)}예요.` })
+  if (overlaps(rect, doorSwingRect(room))) checks.push({ level: 'bad', title: '문 여닫는 공간을 막아요', detail: `문 폭 ${cm(room.doorWidth)}만큼 문이 열리는 자리예요.` })
+  if (overlaps(rect, curtainRect(room))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
+
+  const front = frontDir(item.rot)
+  const gaps: Gap[] = (['+x', '-x', '+z', '-z'] as Dir[]).map((dir) => {
+    const gap = gapInDir(rect, dir, room, obstacles)
+    const side = dir === front ? '앞' : dir === OPPOSITE[front] ? '뒤' : '옆'
+    const level: Level = side === '앞' && gap.distance < STAND_ROOM ? 'warn' : 'ok'
+    return { dir, side, level, distance: gap.distance, target: gap.target, from: [...gap.from], to: [...gap.to] }
+  })
+
+  const frontGap = gaps.find((gap) => gap.side === '앞')!
+  if (!flat && frontGap.level === 'warn') {
+    checks.push({ level: 'warn', title: '앞쪽 여유가 좁아요', detail: `앞쪽 ${frontGap.target}까지 ${cm(frontGap.distance)}예요. 사람이 서거나 지나가려면 ${cm(STAND_ROOM)} 정도가 편해요.` })
+  } else if (!flat) {
+    checks.push({ level: 'ok', title: `앞쪽 여유 ${cm(frontGap.distance)}`, detail: `앞쪽 ${frontGap.target}까지 ${cm(frontGap.distance)}라 사람이 서거나 지나가기에 충분해요.` })
+  }
+  if (checks.every((check) => check.level === 'ok')) {
+    checks.unshift({ level: 'ok', title: '이 자리에 둘 수 있어요', detail: '방 안에 들어가고 다른 가구와 겹치지 않아요.' })
+  }
+
+  const verdict = checks.reduce<Level>((worst, check) => (LEVEL_RANK[check.level] > LEVEL_RANK[worst] ? check.level : worst), 'ok')
+  checks.sort((a, b) => LEVEL_RANK[b.level] - LEVEL_RANK[a.level])
+  return { verdict, checks, gaps, under: under?.name ?? null }
+}
+
+// 가구를 놓을 빈 자리를 방 가운데에서 가까운 순으로 찾는다. 없으면 null.
+export const findFreeSpot = (item: Item, room: Room, items: Item[]): { x: number; z: number } | null => {
+  const others = items.filter((other) => other.kind !== 'rug' && other.h > FLAT_MAX).map((other) => footprint(other))
+  const blocked = [...others, doorSwingRect(room), curtainRect(room)]
+  const candidates: { x: number; z: number; distance: number }[] = []
+  for (let x = 0; x <= room.w; x += 100) {
+    for (let z = 0; z <= room.d; z += 100) {
+      const spot = clampToRoom(item, x, z, room)
+      if (spot.x !== x && spot.z !== z) continue
+      const rect = footprint({ ...item, ...spot })
+      if (rect.minX < 0 || rect.minZ < 0 || rect.maxX > room.w || rect.maxZ > room.d) continue
+      if (blocked.some((other) => overlaps(rect, other))) continue
+      candidates.push({ ...spot, distance: Math.hypot(spot.x - room.w / 2, spot.z - room.d / 2) })
+    }
+  }
+  candidates.sort((a, b) => a.distance - b.distance)
+  return candidates[0] ? { x: candidates[0].x, z: candidates[0].z } : null
+}
+
 // 제품 뒷면을 가장 가까운 벽에 붙이고, 그 벽을 등지도록 돌린다.
 export const backToWall = (item: Item, room: Room): Item => {
   const rect = footprint(item)

@@ -22,6 +22,10 @@ type SceneProps = {
   fit: FitResult | null
   view: View
   drawersOpen: boolean
+  // 서랍 앞 공간 표시는 서랍장 전용이라 데모처럼 다른 가구를 볼 때는 끈다.
+  showFrontZone?: boolean
+  // 카메라를 기본보다 멀리(1보다 크게) 두면 좁은 화면에서도 방이 덜 잘린다.
+  distance?: number
   onSelect: (id: string | null) => void
   onMove: (id: string, x: number, z: number) => void
   onOpenDetail: (id: string) => void
@@ -31,18 +35,18 @@ const CLICK_SLOP = 5
 
 type ControlsLike = { target: THREE.Vector3; update: () => void }
 
-function CameraRig({ view, room }: { view: View; room: Room }) {
+function CameraRig({ view, room, distance }: { view: View; room: Room; distance: number }) {
   const camera = useThree((state) => state.camera)
   const controls = useThree((state) => state.controls) as unknown as ControlsLike | null
 
   useEffect(() => {
-    const span = Math.max(room.w, room.d) / M
+    const span = (Math.max(room.w, room.d) / M) * distance
     // 이미지처럼 모서리를 비스듬히 내려다보는 아이소메트릭 시점 (좁은 화각으로 원근을 줄인다)
     if (view === 'top') camera.position.set(0, span * 3.4, 0.001)
     else camera.position.set(-span * 1.8, span * 1.33, span * 1.8)
     controls?.target.set(0, 0.7, 0)
     controls?.update()
-  }, [view, room.w, room.d, camera, controls])
+  }, [view, room.w, room.d, distance, camera, controls])
 
   return null
 }
@@ -194,6 +198,7 @@ function DraggableItem({
         <Html position={[0, item.h / M + 0.18, 0]} center style={{ pointerEvents: 'none' }}>
           <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">
             {onClick ? <span className="text-primary-container">상품 자세히 보기</span> : item.name}
+            {item.image && <img src={item.image} alt="" className="mx-auto mt-1 h-14 w-14 rounded bg-white object-contain" />}
           </span>
         </Html>
       )}
@@ -201,7 +206,7 @@ function DraggableItem({
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, onSelect, onMove, onOpenDetail }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail }: SceneProps) {
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => () => {
@@ -253,7 +258,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
       {focus && fit && (
         <>
           <Outline room={room} item={focus} color={LEVEL_COLOR[fit.verdict]} />
-          <DrawerZone room={room} item={focus} fit={fit} />
+          {showFrontZone && <DrawerZone room={room} item={focus} fit={fit} />}
           <GapLines room={room} fit={fit} />
         </>
       )}
@@ -266,7 +271,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
         maxDistance={40}
         maxPolarAngle={Math.PI / 2 - 0.05}
       />
-      <CameraRig view={view} room={room} />
+      <CameraRig view={view} room={room} distance={distance} />
     </Canvas>
   )
 }

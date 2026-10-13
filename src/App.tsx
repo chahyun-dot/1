@@ -18,18 +18,21 @@ import type { ColorId } from '@/data/catalog'
 
 const FitModal = lazy(() => import('@/components/fit/FitModal'))
 const FurnitureCatalog = lazy(() => import('@/components/page/FurnitureCatalog'))
+const FitDemo = lazy(() => import('@/components/demo/FitDemo'))
 
-const FURNITURE_HASH = '#/furniture'
+// 주소 끝이 #/furniture 이면 가구 목록, #/demo 이면 데모 페이지를 상품 페이지 대신 보여 준다.
+type Route = 'home' | 'furniture' | 'demo'
 
-// 주소 끝이 #/furniture 이면 상품 페이지 대신 가구 목록을 보여 준다.
-function useFurnitureView() {
-  const [on, setOn] = useState(() => window.location.hash === FURNITURE_HASH)
+const routeOf = (): Route => (window.location.hash === '#/furniture' ? 'furniture' : window.location.hash === '#/demo' ? 'demo' : 'home')
+
+function useRoute() {
+  const [route, setRoute] = useState<Route>(routeOf)
   useEffect(() => {
-    const onHash = () => setOn(window.location.hash === FURNITURE_HASH)
+    const onHash = () => setRoute(routeOf())
     window.addEventListener('hashchange', onHash)
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
-  return on
+  return route
 }
 
 function ModalLoading() {
@@ -50,13 +53,13 @@ export default function App() {
   const { mode: headerMode, pin: pinHeader } = useHeaderMode()
   const tabTop = headerMode === 'full' ? TAB_TOP_WITH_HEADER : TAB_TOP_HIDDEN
   const active = useActiveSection(0.25)
-  const furnitureView = useFurnitureView()
+  const route = useRoute()
   const openFit = () => setFitOpen(true)
 
-  if (furnitureView) {
+  if (route !== 'home') {
     return (
-      <Suspense fallback={null}>
-        <FurnitureCatalog />
+      <Suspense fallback={<ModalLoading />}>
+        {route === 'furniture' ? <FurnitureCatalog /> : <FitDemo />}
       </Suspense>
     )
   }

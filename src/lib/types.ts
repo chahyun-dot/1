@@ -2,7 +2,7 @@ export type Rot = 0 | 1 | 2 | 3
 
 export type ItemKind = 'product' | 'furniture' | 'rug'
 
-export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant'
+export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box'
 
 export type Item = {
   id: string
@@ -20,6 +20,8 @@ export type Item = {
   legGap?: number
   // 서랍장 바퀴 높이(mm). 0이면 바퀴 없이 바닥에 놓인다.
   caster?: number
+  // 데모 페이지에서 고른 가구의 미리보기 이미지 주소.
+  image?: string
 }
 
 export type Room = {

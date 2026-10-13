@@ -319,6 +319,25 @@ function Table({ item }: ModelProps) {
   )
 }
 
+// 데모 페이지에서 고른 가구: 3D 모델이 없어서 치수 그대로의 상자로 보여 준다. 앞면(+z) 위쪽에 흰 줄을 둬 방향을 알 수 있게 한다.
+function Box({ item }: ModelProps) {
+  const w = item.w / M
+  const d = item.d / M
+  const h = Math.max(item.h / M, 0.01)
+  const radius = Math.min(0.02, w / 4, h / 4, d / 4)
+  return (
+    <group>
+      <RoundedBox args={[w, h, d]} radius={radius} smoothness={3} position={[0, h / 2, 0]} castShadow receiveShadow>
+        <meshStandardMaterial color={item.color} roughness={0.55} />
+      </RoundedBox>
+      <mesh position={[0, h * 0.85, d / 2 + 0.002]}>
+        <planeGeometry args={[w * 0.7, Math.min(0.03, h * 0.1)]} />
+        <meshBasicMaterial color="#ffffff" transparent opacity={0.85} />
+      </mesh>
+    </group>
+  )
+}
+
 function Plant({ item }: ModelProps) {
   const r = item.w / 2 / M
   const leaves = Array.from({ length: 9 }, (_, index) => index)
@@ -362,5 +381,7 @@ export default function ItemModel(props: ModelProps) {
       return <Table {...props} />
     case 'plant':
       return <Plant {...props} />
+    case 'box':
+      return <Box {...props} />
   }
 }
