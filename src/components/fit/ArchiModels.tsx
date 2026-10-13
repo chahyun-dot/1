@@ -28,7 +28,7 @@ const rounded = (w: number, h: number, r: number) => {
 }
 
 // 둥근 모서리의 얇은 판(거울 면 등). 앞면이 +z 를 본다.
-function RoundedPane({ w, h, r, depth, position, children }: { w: number; h: number; r: number; depth: number; position: [number, number, number]; children: React.ReactNode }) {
+export function RoundedPane({ w, h, r, depth, position, children }: { w: number; h: number; r: number; depth: number; position: [number, number, number]; children: React.ReactNode }) {
   const geometry = useMemo(() => new THREE.ExtrudeGeometry(rounded(w, h, r), { depth, bevelEnabled: false, curveSegments: 10 }), [w, h, r, depth])
   return (
     <mesh geometry={geometry} position={position}>
@@ -268,7 +268,7 @@ export function WoodBlind({ item }: Props) {
 }
 
 // 두 점을 잇는 가는 막대(철제 다리, 줄기 등).
-function Rod({ from, to, r, color, metal = false }: { from: [number, number, number]; to: [number, number, number]; r: number; color: string; metal?: boolean }) {
+export function Rod({ from, to, r, color, metal = false }: { from: [number, number, number]; to: [number, number, number]; r: number; color: string; metal?: boolean }) {
   const { position, quaternion, length } = useMemo(() => {
     const a = new THREE.Vector3(...from)
     const b = new THREE.Vector3(...to)
@@ -287,7 +287,7 @@ function Rod({ from, to, r, color, metal = false }: { from: [number, number, num
   )
 }
 
-const CHROME = '#c3c5c9'
+export const CHROME = '#c3c5c9'
 
 // FK6720 2인 소파(블랙): 크롬 프레임 위에 검은 가죽 좌판 2개와 등받이 2개, 양쪽 끝에 우드 팔걸이.
 export function FkSofa({ item }: Props) {

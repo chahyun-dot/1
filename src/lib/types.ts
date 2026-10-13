@@ -2,7 +2,9 @@ export type Rot = 0 | 1 | 2 | 3
 
 export type ItemKind = 'product' | 'furniture' | 'rug'
 
-export type ItemModel = 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable' | 'bedframe' | 'steelshelf' | 'pegboard' | 'mirror' | 'blind' | 'fksofa' | 'meshchair' | 'diningchair' | 'motiondesk' | 'chromecabinet' | 'corerack' | 'aralia' | 'tolomeo' | 'drawerunit' | 'walltv'
+export type PropModel = 'stringpocket' | 'bedding' | 'picframe' | 'poster' | 'kidlamp' | 'laptop' | 'geneva' | 'clock' | 'winebottle' | 'wineglasses' | 'turntable' | 'recordstack' | 'tissuecase' | 'diffuser' | 'bookrow' | 'ovaltray' | 'bird' | 'wallhanger' | 'shirt' | 'folded' | 'shoes' | 'parentesi' | 'tweedrug' | 'slidingcab' | 'audiorama' | 'beatlight' | 'keyboard' | 'mouse' | 'fileholder' | 'openbook' | 'espresso' | 'unionbook' | 'bookdeco' | 'steelbox' | 'supplies' | 'blackvase' | 'bluevase' | 'ledpanel' | 'incense' | 'dstl' | 'diptyque' | 'oddrun' | 'cushion' | 'pcholder' | 'desktoppc' | 'dhurrie' | 'frontdoor' | 'window'
+
+export type ItemModel = PropModel | 'cabinet' | 'desk' | 'chair' | 'bed' | 'rug' | 'roundrug' | 'shelf' | 'sofa' | 'table' | 'plant' | 'box' | 'roundtable' | 'bedframe' | 'steelshelf' | 'pegboard' | 'mirror' | 'blind' | 'fksofa' | 'meshchair' | 'diningchair' | 'motiondesk' | 'chromecabinet' | 'corerack' | 'aralia' | 'tolomeo' | 'drawerunit' | 'walltv'
 
 export type Item = {
   id: string
