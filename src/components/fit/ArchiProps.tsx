@@ -426,7 +426,7 @@ function TissueCase({ item }: Props) {
         <meshStandardMaterial map={check} roughness={0.8} />
       </RoundedBox>
       {[-1, 1].map((side) => (
-        <Slab key={side} size={[w * 0.35, h - boxH + 0.02, 0.004]} position={[side * w * 0.12, boxH + (h - boxH) / 2 - 0.01, 0]} color="#fbfbfa" rotation={[0, 0, -side * 0.25]} roughness={0.95} />
+        <Slab key={side} size={[w * 0.32, h - boxH + 0.02, 0.004]} position={[side * w * 0.1, boxH + (h - boxH) / 2 - 0.005, side * 0.01]} color="#fbfbfa" rotation={[side * 0.15, side * 0.2, -side * 0.12]} roughness={0.95} />
       ))}
     </group>
   )
@@ -519,31 +519,31 @@ function OvalTray({ item }: Props) {
   )
 }
 
-// Eames House Bird: 짙은 회색의 새. 비스듬히 선 몸통, 둥근 머리와 작은 부리, 뒤로 길게 빠진 꼬리, 가는 막대 다리 두 개.
+// Eames House Bird: 짙은 회색의 새. 머리가 왼쪽(-x), 기울어진 몸통, 작은 부리, 오른쪽 아래로 뻗는 납작한 꼬리, 가는 막대 다리 두 개.
 function EamesBird({ item }: Props) {
-  const w = item.w / M
   const h = item.h / M
   const dark = '#3a3a3d'
+  const bodyY = h * 0.45
   return (
     <group>
-      <mesh position={[0, h * 0.5, 0]} rotation={[0, 0, 0.55]} scale={[0.05, 0.088, 0.03]} castShadow>
+      <mesh position={[0, bodyY, 0]} rotation={[0, 0, 0.5]} scale={[0.052, 0.095, 0.032]} castShadow>
         <sphereGeometry args={[1, 24, 16]} />
         {std(dark, 0.85)}
       </mesh>
-      <mesh position={[-w * 0.22, h * 0.76, 0]} castShadow>
-        <sphereGeometry args={[0.028, 20, 16]} />
+      <mesh position={[-0.052, bodyY + 0.09, 0]} castShadow>
+        <sphereGeometry args={[0.027, 20, 16]} />
         {std(dark, 0.85)}
       </mesh>
-      <mesh position={[-w * 0.33, h * 0.74, 0]} rotation={[0, 0, Math.PI / 2 + 0.25]}>
-        <coneGeometry args={[0.009, 0.04, 12]} />
+      <mesh position={[-0.084, bodyY + 0.086, 0]} rotation={[0, 0, Math.PI / 2 + 0.2]}>
+        <coneGeometry args={[0.008, 0.032, 12]} />
         {std(dark, 0.85)}
       </mesh>
-      <mesh position={[w * 0.27, h * 0.4, 0]} rotation={[0, 0, -1.25]} scale={[1, 1, 0.55]} castShadow>
-        <coneGeometry args={[0.024, w * 0.55, 14]} />
+      <mesh position={[0.09, bodyY - 0.09, 0]} rotation={[0, 0, -1.9]} scale={[1, 1, 0.45]} castShadow>
+        <coneGeometry args={[0.03, 0.12, 14]} />
         {std(dark, 0.85)}
       </mesh>
       {[0, 1].map((index) => (
-        <Rod key={index} from={[-0.006 + index * 0.018, h * 0.34, (index - 0.5) * 0.026]} to={[-0.022 + index * 0.05, 0, (index - 0.5) * 0.026]} r={0.003} color="#222" />
+        <Rod key={index} from={[-0.006 + index * 0.02, bodyY - 0.05, (index - 0.5) * 0.026]} to={[-0.02 + index * 0.05, 0, (index - 0.5) * 0.026]} r={0.003} color="#222" />
       ))}
     </group>
   )
@@ -570,23 +570,39 @@ function WallHanger({ item }: Props) {
   )
 }
 
-// Dress Shirt: 옷걸이에 걸린 회색 셔츠. 가로(어깨 방향)는 깊이 쪽으로 잡았다.
+// Dress Shirt: 옷걸이에 걸린 회색 셔츠. 어깨가 깊이(z) 방향으로 놓인 납작한 실루엣에 흰 칼라를 붙였다.
 function Shirt({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
   const hanger = 0.1
-  const bodyH = h - hanger
+  const H = h - hanger
+  const profile = useMemo<[number, number][]>(
+    () => [
+      [-0.1 * d, H * 0.95],
+      [-0.5 * d, H * 0.88],
+      [-0.52 * d, H * 0.5],
+      [-0.4 * d, H * 0.48],
+      [-0.28 * d, H * 0.68],
+      [-0.28 * d, 0],
+      [0.28 * d, 0],
+      [0.28 * d, H * 0.68],
+      [0.4 * d, H * 0.48],
+      [0.52 * d, H * 0.5],
+      [0.5 * d, H * 0.88],
+      [0.1 * d, H * 0.95],
+      [0, H * 0.89],
+    ],
+    [d, H],
+  )
+  const thickness = Math.min(0.04, w * 0.4)
   return (
     <group>
-      <Slab size={[w * 0.5, bodyH * 0.78, d * 0.5]} position={[0, bodyH * 0.39, 0]} color="#8d9096" radius={0.01} roughness={0.9} />
-      {[-1, 1].map((side) => (
-        <Slab key={side} size={[w * 0.4, bodyH * 0.34, d * 0.1]} position={[0, bodyH * 0.6, side * d * 0.33]} color="#8d9096" radius={0.01} roughness={0.9} rotation={[side * 0.35, 0, 0]} />
-      ))}
-      <Slab size={[w * 0.5, 0.04, d * 0.16]} position={[0, bodyH * 0.8, 0]} color="#f1f1ef" radius={0.01} roughness={0.9} />
-      <Rod from={[0, bodyH * 0.8, -d * 0.3]} to={[0, bodyH + 0.04, 0]} r={0.003} color={CHROME} metal />
-      <Rod from={[0, bodyH * 0.8, d * 0.3]} to={[0, bodyH + 0.04, 0]} r={0.003} color={CHROME} metal />
-      <Rod from={[0, bodyH + 0.04, 0]} to={[0, h, 0]} r={0.003} color={CHROME} metal />
+      <SidePlate profile={profile} thickness={thickness} x={-thickness / 2} color="#8d9096" />
+      <Slab size={[thickness * 1.1, 0.035, d * 0.2]} position={[0, H * 0.93, 0]} color="#f1f1ef" radius={0.006} roughness={0.9} />
+      <Rod from={[0, H * 0.93, -d * 0.12]} to={[0, H + 0.05, 0]} r={0.003} color={CHROME} metal />
+      <Rod from={[0, H * 0.93, d * 0.12]} to={[0, H + 0.05, 0]} r={0.003} color={CHROME} metal />
+      <Rod from={[0, H + 0.05, 0]} to={[0, h, 0]} r={0.003} color={CHROME} metal />
     </group>
   )
 }
@@ -608,20 +624,24 @@ function FoldedClothes({ item }: Props) {
   )
 }
 
-// shoes 01: 회색 슬립온 한 켤레, 흰 밑창.
+// shoes 01: 회색 슬립온 한 켤레. 흰 밑창 위에 둥근 돔 모양 갑피와 뒤쪽 발 넣는 입구.
 function Shoes({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
   const each = w / 2 - 0.006
+  const soleH = 0.02
   return (
     <group>
       {[-1, 1].map((side) => (
         <group key={side} position={[side * (each / 2 + 0.003), 0, 0]}>
-          <Slab size={[each, 0.02, d]} position={[0, 0.01, 0]} color="#e6e6e4" radius={0.01} />
-          <Slab size={[each * 0.96, h - 0.02, d * 0.96]} position={[0, 0.02 + (h - 0.02) / 2, 0]} color="#5e6065" radius={0.02} roughness={0.85} />
-          <mesh position={[0, h - 0.001, -d * 0.12]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[each * 0.6, d * 0.4]} />
+          <Slab size={[each, soleH, d]} position={[0, soleH / 2, 0]} color="#e6e6e4" radius={0.009} />
+          <mesh position={[0, soleH, 0]} scale={[each / 2, h - soleH, d / 2 * 0.96]} castShadow>
+            <sphereGeometry args={[1, 28, 14, 0, Math.PI * 2, 0, Math.PI / 2]} />
+            {std('#5e6065', 0.85)}
+          </mesh>
+          <mesh position={[0, h - 0.004, -d * 0.2]} rotation={[-Math.PI / 2, 0, 0]} scale={[1, 1.6, 1]}>
+            <circleGeometry args={[each * 0.28, 20]} />
             {std('#17171a', 0.9)}
           </mesh>
         </group>
@@ -942,24 +962,30 @@ function BlackVase({ item }: Props) {
   return <Lathe profile={profile} color="#222224" roughness={0.55} />
 }
 
-// 26 CM_blue: 푸른 유리 화병을 초록 등나무 줄로 감싼 화병.
+// 26 CM_blue: 위가 넓은 푸른 도자 화병을 초록 등나무 줄로 감싼 화병.
 function BlueVase({ item }: Props) {
   const r = item.w / M / 2 - 0.02
   const h = item.h / M
   const green = '#1f4a2c'
+  const profile: [number, number][] = [[0, 0.01], [r * 0.75, 0.01], [r * 0.88, h * 0.4], [r, h * 0.85], [r * 1.02, h - 0.01], [r * 0.9, h - 0.012]]
   return (
     <group>
-      <mesh position={[0, h / 2 + 0.01, 0]} castShadow>
-        <cylinderGeometry args={[r, r * 0.9, h - 0.02, 32]} />
-        <meshStandardMaterial color="#27415e" roughness={0.15} metalness={0.3} />
-      </mesh>
-      {Array.from({ length: 8 }, (_, index) => {
-        const angle = (index / 8) * Math.PI * 2
-        return <Rod key={index} from={[Math.cos(angle) * (r * 0.98), 0.02, Math.sin(angle) * (r * 0.98)]} to={[Math.cos(angle) * (r + 0.015), h - 0.02, Math.sin(angle) * (r + 0.015)]} r={0.006} color={green} />
+      <Lathe profile={profile} color="#27415e" roughness={0.2} metalness={0.3} />
+      {Array.from({ length: 10 }, (_, index) => {
+        const angle = (index / 10) * Math.PI * 2
+        const bottom = r * 0.78
+        const mid = r * 1.08
+        const top = r * 1.06
+        return (
+          <group key={index}>
+            <Rod from={[Math.cos(angle) * bottom, 0.02, Math.sin(angle) * bottom]} to={[Math.cos(angle) * mid, h * 0.45, Math.sin(angle) * mid]} r={0.0055} color={green} />
+            <Rod from={[Math.cos(angle) * mid, h * 0.45, Math.sin(angle) * mid]} to={[Math.cos(angle) * top, h - 0.015, Math.sin(angle) * top]} r={0.0055} color={green} />
+          </group>
+        )
       })}
-      {[0.03, h - 0.025].map((y) => (
+      {[[0.03, 0.8], [h * 0.5, 1.09], [h - 0.02, 1.06]].map(([y, scale]) => (
         <mesh key={y} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[r + 0.005, 0.008, 8, 36]} />
+          <torusGeometry args={[r * scale, 0.007, 8, 40]} />
           {std(green, 0.6)}
         </mesh>
       ))}
@@ -1076,16 +1102,20 @@ function Oddrun({ item }: Props) {
   )
 }
 
-// 프리미엄 리넨 쿠션: 낙타색 직사각 쿠션.
+// 프리미엄 리넨 쿠션: 낙타색 직사각 쿠션. 모서리가 각지고 가운데가 통통하다.
 function Cushion({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
   return (
     <group>
-      <RoundedBox args={[w, h, d]} radius={Math.min(d * 0.45, 0.09)} smoothness={5} position={[0, h / 2, 0]} castShadow receiveShadow>
+      <RoundedBox args={[w, h, d]} radius={Math.min(d * 0.3, 0.05)} smoothness={6} position={[0, h / 2, 0]} castShadow receiveShadow>
         {std('#c79c62', 0.98)}
       </RoundedBox>
+      <mesh position={[0, h / 2, 0]} scale={[w / 2 * 0.98, h / 2 * 0.98, d / 2 * 1.04]}>
+        <sphereGeometry args={[1, 28, 18]} />
+        {std('#cba26a', 0.98)}
+      </mesh>
     </group>
   )
 }
