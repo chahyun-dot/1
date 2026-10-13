@@ -75,20 +75,43 @@ body {
   background-size: 100% 100%;
 }
 
-/* 캐릭터가 NEW 팻말을 든 손을 계속 흔든다. 움직임을 줄이도록 설정한 사용자에게는 멈춘다. */
-@keyframes oh-wave {
-  0%, 100% { transform: rotate(0deg); }
-  20% { transform: rotate(-13deg); }
-  45% { transform: rotate(7deg); }
-  70% { transform: rotate(-9deg); }
+/* 캐릭터가 두 팔을 흔들면서 계속 뛴다. 움직임을 줄이도록 설정한 사용자에게는 멈춘다. */
+@keyframes oh-hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  10% { transform: translateY(0) scale(1.05, 0.92); }
+  40% { transform: translateY(-20px) scale(0.97, 1.04); }
+  70% { transform: translateY(0) scale(1, 1); }
+  80% { transform: translateY(0) scale(1.05, 0.92); }
+  90% { transform: translateY(0) scale(1, 1); }
 }
 
-.oh-wave {
-  animation: oh-wave 1.6s ease-in-out infinite;
+@keyframes oh-wave-left {
+  0%, 100% { transform: rotate(-14deg); }
+  50% { transform: rotate(10deg); }
+}
+
+@keyframes oh-wave-right {
+  0%, 100% { transform: rotate(14deg); }
+  50% { transform: rotate(-10deg); }
+}
+
+.oh-hop {
+  transform-origin: 50% 100%;
+  animation: oh-hop 1.4s ease-in-out infinite;
+}
+
+.oh-wave-left {
+  animation: oh-wave-left 0.7s ease-in-out infinite;
+}
+
+.oh-wave-right {
+  animation: oh-wave-right 0.7s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .oh-wave {
+  .oh-hop,
+  .oh-wave-left,
+  .oh-wave-right {
     animation: none;
   }
 }
