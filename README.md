@@ -2,7 +2,7 @@
 
 오늘의집 상품 페이지(마켓비 피하 서랍장 4.1단)를 재현하고, 대표 이미지의 "내 방에 맞을까? 가상배치" 버튼으로 3D "내 공간에 맞는지 확인하기" 팝업을 여는 프로토타입입니다.
 
-- 배포: https://chy1-dev.vercel.app (`main` 푸시 시 Vercel 자동 배포)
+- 배포: https://roomjirak.vercel.app (`main` 푸시 시 Vercel 자동 배포)
 - **이어서 작업하려면 먼저 [docs/HANDOFF.md](docs/HANDOFF.md)를 읽으세요.** 현재 상태, 남은 문제, 검증 방법, 규칙이 정리돼 있습니다.
 
 ## 실행

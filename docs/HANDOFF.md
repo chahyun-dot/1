@@ -20,7 +20,7 @@
 | --- | --- |
 | 작업 폴더 (저장소 루트) | `/Users/t2025-m0017/Desktop/prj1/1` |
 | GitHub | `https://github.com/chahyun-dot/1.git` (`main`) |
-| 배포 | https://chy1-dev.vercel.app (`main` 푸시 시 Vercel 자동 배포. 프로젝트 `1`, `1-ha22` 두 개 연결) |
+| 배포 | https://roomjirak.vercel.app (`main` 푸시 시 Vercel 자동 배포. 이전 주소 `chy1-dev.vercel.app`은 연결이 끊겨 404라 쓰지 않는다. 배포마다 생기는 해시 주소는 로그인 보호가 걸려 있어 직접 확인할 수 없다) |
 | 이전 hello-world 앱 | git 기록 `48d603a` 와 `~/Desktop/prj1/1-old-hello-world-backup` |
 | 옛 `2` 폴더 잔여물 | `~/Desktop/prj1/2-project-backup` (자체 `.git` 포함), 커밋 기록은 로컬 브랜치 `project2-history` |
 | 원본 압축 파일 | `~/Desktop/prj1/2.zip` |
