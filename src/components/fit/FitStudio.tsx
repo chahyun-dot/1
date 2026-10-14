@@ -940,7 +940,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!inDetail && tab === 'all' && (
                 <section className="px-5 py-4">
                   <div className="mb-3 flex rounded-lg bg-surface-subtle p-0.5">
-                    {([['placed', `배치된 가구 ${listedCount}`], ['catalog', `전체 가구 목록 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
+                    {([['placed', `배치된 가구 목록 ${listedCount}`], ['catalog', `전체 가구 목록 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
                       <button key={id} type="button" aria-pressed={sub === id} onClick={() => setSub(id)} className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] ${sub === id ? 'bg-surface-base font-semibold text-on-primary-container shadow-xs' : 'text-text-secondary'}`}>
                         {label}
                       </button>
