@@ -115,32 +115,31 @@ function BeddingSet({ item }: Props) {
 }
 
 // 벽에 거는 그림. 액자(검은 틀 + 흰 매트 + 흑백 사진)와 포스터를 같은 방식으로 만든다.
-// 액자 속 그림은 public/wassily-chair-poster.png(708×911). 틀 안쪽 흰 여백에 비율을 지켜 맞춘다.
-const POSTER_ASPECT = 708 / 911
-
 function PictureFrame({ item }: Props) {
   const w = item.w / M
   const h = item.h / M
   const d = item.d / M
-  const poster = useMemo(() => {
-    const texture = new THREE.TextureLoader().load('/wassily-chair-poster.png')
-    texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 8
-    return texture
-  }, [])
-  const innerW = w - 0.05
-  const innerH = h - 0.05
-  const artH = Math.min(innerH, innerW / POSTER_ASPECT)
+  const photo = useDrawn(256, 160, (ctx, cw, ch) => {
+    const gradient = ctx.createLinearGradient(0, 0, 0, ch)
+    gradient.addColorStop(0, '#9b9b9b')
+    gradient.addColorStop(1, '#5d5d5d')
+    ctx.fillStyle = gradient
+    ctx.fillRect(0, 0, cw, ch)
+    ctx.fillStyle = '#d0d0d0'
+    ctx.fillRect(30, 60, 120, 40)
+    ctx.fillStyle = '#3a3a3a'
+    ctx.fillRect(160, 40, 60, 70)
+  })
   return (
     <group>
       <Slab size={[w, h, d]} position={[0, h / 2, 0]} color="#2c2c2e" radius={0.004} />
       <mesh position={[0, h / 2, d / 2 + 0.0004]}>
-        <planeGeometry args={[innerW, innerH]} />
+        <planeGeometry args={[w - 0.05, h - 0.05]} />
         {std('#f3f3f1', 0.9)}
       </mesh>
       <mesh position={[0, h / 2, d / 2 + 0.0009]}>
-        <planeGeometry args={[artH * POSTER_ASPECT, artH]} />
-        <meshStandardMaterial map={poster} roughness={0.8} />
+        <planeGeometry args={[(w - 0.05) * 0.58, (h - 0.05) * 0.4]} />
+        <meshStandardMaterial map={photo} roughness={0.8} />
       </mesh>
     </group>
   )
@@ -150,32 +149,16 @@ function Poster({ item }: Props) {
   const w = item.w / M
   const h = item.h / M
   const d = item.d / M
-  const art = useDrawn(256, 360, (ctx, cw, ch) => {
-    ctx.fillStyle = '#ebebea'
-    ctx.fillRect(0, 0, cw, ch)
-    ctx.fillStyle = '#222'
-    ctx.font = 'bold 14px sans-serif'
-    ctx.fillText('Museum', 18, 28)
-    ctx.fillText('für Gestaltung', 18, 46)
-    ctx.fillText('Zürich', 18, 64)
-    ctx.beginPath()
-    ctx.ellipse(130, 120, 100, 28, -0.08, 0, Math.PI * 2)
-    ctx.fill()
-    ctx.strokeStyle = '#d8a860'
-    ctx.lineWidth = 4
-    for (const x of [70, 130, 190]) {
-      ctx.beginPath()
-      ctx.moveTo(x, 140)
-      ctx.lineTo(x - 14, 230)
-      ctx.stroke()
-    }
-    ctx.fillStyle = '#111'
-    ctx.font = 'bold 34px sans-serif'
-    ctx.fillText('Ideales', 18, 262)
-    ctx.fillText('Wohnen', 18, 298)
-    ctx.font = '12px sans-serif'
-    ctx.fillText('Jetzt an der Ausstellungsstrasse', 18, 340)
-  })
+  const art = useMemo(() => {
+    // public/wassily-chair-poster.png(708×911)를 비율을 지켜 꽉 채운다. 남는 좌우는 잘라낸다.
+    const texture = new THREE.TextureLoader().load('/wassily-chair-poster.png')
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.anisotropy = 8
+    const crop = (w - 0.014) / (h - 0.014) / (708 / 911)
+    texture.repeat.set(Math.min(1, crop), Math.min(1, 1 / crop))
+    texture.offset.set((1 - texture.repeat.x) / 2, (1 - texture.repeat.y) / 2)
+    return texture
+  }, [w, h])
   return (
     <group>
       <Slab size={[w, h, d]} position={[0, h / 2, 0]} color="#1f1f21" />
