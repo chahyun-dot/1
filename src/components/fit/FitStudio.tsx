@@ -854,7 +854,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                         return (
                           <li key={member.id} className="rounded-xl border border-border-default px-3 py-3">
                             <div className="flex items-center gap-2">
-                              <button type="button" onClick={() => setSelectedId(member.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
+                              <div className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
                                 <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
                                   {member.image ? <img src={member.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: member.color }} />}
                                 </span>
@@ -862,7 +862,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                                   <span className="block truncate text-[13px] font-semibold">{member.name}</span>
                                   <span className="block text-[11px] text-text-muted">{sizeText(member)}</span>
                                 </span>
-                              </button>
+                              </div>
                               {resizable && <ResetButton label={member.name} disabled={!sizeChanged(member)} onClick={() => resetSize(member.id)} />}
                               {member.model === 'motiondesk' && <ResetButton label={member.name} disabled={!deskSizeChanged(member)} onClick={() => { const first = initialOf(member.id); if (first) updateDesk({ w: first.w, d: first.d, h: first.h, underClearance: first.underClearance, legGap: first.legGap }) }} />}
                             </div>
