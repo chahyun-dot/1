@@ -115,7 +115,12 @@ function Wall({ room, side, pieces }: WallProps) {
         const position: [number, number, number] = alongX
           ? [along - halfW, y, side === '-z' ? -halfD - t / 2 : halfD + t / 2]
           : [side === '-x' ? -halfW - t / 2 : halfW + t / 2, y, along - halfD]
-        const size: [number, number, number] = alongX ? [length + t * 2, height, t] : [t, height, length]
+        // 앞·뒤 벽은 방 모서리에 닿는 끝만 벽 두께만큼 늘려 모서리를 덮는다. 창 구멍 옆 끝까지 늘리면 구멍이 좁아져 창이 잘려 보인다.
+        const wallLength = room.w
+        const startExtra = alongX && piece.from <= 0 ? t : 0
+        const endExtra = alongX && piece.to >= wallLength ? t : 0
+        if (alongX) position[0] += (endExtra - startExtra) / 2
+        const size: [number, number, number] = alongX ? [length + startExtra + endExtra, height, t] : [t, height, length]
         return (
           <mesh key={index} position={position} material={built[index].materials} receiveShadow castShadow>
             <boxGeometry args={size} />
