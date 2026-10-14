@@ -237,10 +237,7 @@ const wallPieces = (room: Room, length: number, cuts: Opening[]): Piece[] => {
 const FACING: Record<Side, number> = { '-x': Math.PI / 2, '+x': -Math.PI / 2, '-z': 0, '+z': Math.PI }
 
 function OpeningModel({ room, opening, kind }: { room: Room; opening: Opening; kind: 'door' | 'window' }) {
-  const view = useMemo(windowTexture, [])
   const t = WALL_THICKNESS / M
-  const length = (opening.to - opening.from) / M
-  const height = (opening.top - opening.bottom) / M
   const mid = (opening.from + opening.to) / 2
   const alongX = opening.side === '-z' || opening.side === '+z'
   const [wx, wz] = alongX ? toWorld(room, mid, 0) : toWorld(room, 0, mid)
@@ -265,12 +262,6 @@ function OpeningModel({ room, opening, kind }: { room: Room; opening: Opening; k
   return (
     <group position={position} rotation={[0, FACING[opening.side], 0]}>
       <ItemModel item={item} />
-      {kind === 'window' && (
-        <mesh position={[0, height / 2, -t / 2 - 0.02]}>
-          <planeGeometry args={[length, height]} />
-          <meshBasicMaterial map={view} />
-        </mesh>
-      )}
     </group>
   )
 }

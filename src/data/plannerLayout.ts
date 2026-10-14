@@ -37,12 +37,9 @@ const ROWS: Row[] = [
   ['XRxqWHD79D04BB434D74AF9', 989, 309, 0, 300, 286, 840, 0],  // [샘플] Geneva Model L (Black)
   ['XwSAxFf68C8240186EB4765', 64, 730, 90, 90, 103, 107, 1162],  // Chronotime table clock
   ['YneAfk7A250635ACE594C54', 625, 47, 0, 1000, 93, 491, 1056],  // perforated board
-  ['YV_XVxZ6AA659D9487F417E', 2679, 1571, -90, 85, 85, 334, 739],  // chardonnay wine
-  ['YV_XVxa64C03905B0F34865', 2722, 1672, -90, 155, 191, 205, 740],  // 2 wine glasses
   ['Xs_QLXX29615894078C4CDF', 3665, 220, 0, 345, 419, 303, 698],  // 가방형 LP턴테이블 (블랙)
   ['YN8fSMr84BEC99AE48C4A26', 3988, 239, 0, 218, 302, 312, 700],  // LP_3
   ['YeNvIsREA05481C46254539', 3117, 239, 0, 238, 128, 212, 700],  // Checkerboard tissue case
-  ['XtdxyE493CC22D0979C4F07', 3310, 232, 90, 82, 113, 178, 700],  // DSTL Diffuser + Sticks
   ['Xhjjsyp24F553380D414A9A', 3236, 232, 0, 385, 162, 250, 405],  // Books 10 Set
   ['YVMPHUe388DE520FF74407B', 3790, 230, 0, 574, 157, 250, 131],  // Book 2 set
   ['YgjU_Ah72C5B21C5B7F4F47', 3886, 223, 0, 300, 120, 142, 405],  // Oval round tray silver beads
@@ -50,12 +47,10 @@ const ROWS: Row[] = [
   ['XV5vpP7A568816FF2C2432F', 3142, 232, 180, 168, 59, 200, 130],  // Eames House Bird (Black)
   ['XW_VtxtA8DF6CDA88104092', 3224, 3, 0, 495, 10, 700, 999],  // Ideal living(Black Aluminum)
   ['YBp1W4_021584BC9C234BDF', 3678, 1402, -90, 1450, 810, 800, 0],  // FK6720 Sofa 2-seater (Black)
-  ['Ylybxgt16DA8B0918B94B21', 2469, 3228, -90, 205, 285, 2300, 0],  // PARENTESI
   ['ZLDAeRK53BFEDFD0CF2475A', 2977, 4185, 180, 395, 30, 590, 1048],  // 아르덴 미러_거울 (S)블랙
   ['X5S4t1X5DE143AD22764FF9', 2900, 3625, 0, 1000, 1000, 5, 0],  // LOOM+ Tweed Rug (round 1000m
   ['X-bB_LP883ADBC85E374EBB', 4050, 1029, -90, 780, 300, 420, 1382],  // CABINET WITH SLIDING DOORS W
   ['X-bB_LP883ADBC85E374EBB', 4050, 1775, -90, 780, 300, 420, 1382],  // CABINET WITH SLIDING DOORS W
-  ['YgDgtY8090165E920A148CE', 4025, 2444, -90, 250, 250, 799, 0],  // Audiorama 4000(Black)
   ['ZCREWuP85D472F7745C4005', 3734, 4000, 180, 800, 400, 820, 0],  // SIMPLIE 수납장 BC264 (블랙)
   ['E1632324621148B0', 585, 4155, 180, 920, 90, 1300, 990],  // PREMIUM 맞춤 우드 블라인드 에스프레소
   ['E1632324621148B0', 1676, 4155, 180, 920, 90, 1300, 990],  // PREMIUM 맞춤 우드 블라인드 에스프레소
@@ -64,7 +59,6 @@ const ROWS: Row[] = [
   ['YneAfk-85AC7705BADE4E4A', 694, 1087, 90, 67, 112, 30, 630],  // mouse
   ['Ymz-AKZAAF5DF9BAB3E47A8', 240, 666, 90, 100, 250, 300, 630],  // NIMM File Holder
   ['Ymz-AKZAAF5DF9BAB3E47A8', 240, 566, 90, 100, 250, 300, 630],  // NIMM File Holder
-  ['XtdxyE493CC22D0979C4F07', 64, 599, 180, 82, 113, 178, 630],  // DSTL Diffuser + Sticks
   ['Xo35PnA02CC15F5E5C44324', 564, 1815, 135, 270, 180, 80, 630],  // Open book (not for sale)
   ['YVMPHUZ0DEE6D5660DB48B2', 697, 887, 0, 125, 145, 65, 630],  // espresso cup set
   ['YVMPHUe2B4ECE07C08E426B', 1469, 239, 0, 520, 170, 270, 720],  // Book 12set
@@ -100,7 +94,6 @@ const ROWS: Row[] = [
   ['E1632324621148B0', 45, 1558, 90, 920, 90, 1300, 990],  // PREMIUM 맞춤 우드 블라인드 에스프레소
   ['E1632324621148B0', 45, 2640, 90, 920, 90, 1300, 990],  // PREMIUM 맞춤 우드 블라인드 에스프레소
   ['83470177e6504b21bad9d2d15b6d5fba', 1037, 1319, -90, 718, 681, 1156, 0],  // 데스커 GX_HDA(블랙프레임/4C6 메쉬/836 
-  ['ZLDAeRK53BFEDFD0CF2475A', 4185, 341, -90, 395, 30, 590, 1475],  // 아르덴 미러_거울 (S)블랙
   // 처음 읽을 때 빠졌던 책상 위 장비·TV·조명. 조명은 천장 바로 아래(2300-20)에 붙인다.
   ['YSJfCSW3C8249DE736F456A', 493, 731, 90, 165, 175, 385, 218],  // PC 홀더
   ['YneAflHA33DBE2534ED4DC7', 495, 731, 90, 127, 328, 322, 238],  // desktop computer
