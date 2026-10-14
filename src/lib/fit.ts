@@ -250,10 +250,8 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   const under = covering.find((other) => other.underClearance !== undefined && item.h <= other.underClearance) ?? null
   // 내 상판 아래에 들어가 있는 가구(책상 아래 서랍장)와 의자처럼 밀어 넣는 가구는 막는 것으로 보지 않는다.
   const blocking = covering.filter((other) => other !== under && !mayOverlap(item, other) && !(item.underClearance !== undefined && other.h <= item.underClearance))
-  const obstacles: Obstacle[] = [
-    ...others.filter((other) => other !== under).map((other) => ({ name: other.name, rect: footprint(other) })),
-    { name: '문 여닫는 공간', rect: doorSwingRect(room) },
-  ]
+  // 앞쪽 여유를 잴 때 의자(빼고 앉는 가구)와 문 열림 자리(문이 닫혀 있으면 지나다니는 바닥)는 장애물로 보지 않는다. 겹침 판정은 따로 한다.
+  const obstacles: Obstacle[] = others.filter((other) => other !== under && !isChair(other)).map((other) => ({ name: other.name, rect: footprint(other) }))
   const checks: Check[] = []
 
   const outside = Math.max(-rect.minX, -rect.minZ, rect.maxX - room.w, rect.maxZ - room.d)
@@ -266,7 +264,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
 
   const front = frontDir(item.rot)
   // 앞쪽 여유(사람이 서는 자리)는 바닥에 놓인 큰 가구만 따진다. 선반·책상 위 물건, 벽에 건 것, 의자는 제외한다.
-  const standing = (item.elevation ?? 0) === 0 && !isChair(item)
+  const standing = (item.elevation ?? 0) === 0 && !isChair(item) && item.model !== 'tolomeo'
   const gaps: Gap[] = (['+x', '-x', '+z', '-z'] as Dir[]).map((dir) => {
     const gap = gapInDir(rect, dir, room, obstacles)
     const side = dir === front ? '앞' : dir === OPPOSITE[front] ? '뒤' : '옆'
