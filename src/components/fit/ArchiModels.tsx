@@ -63,6 +63,44 @@ export function BlackBed({ item }: Props) {
   )
 }
 
+// 침대 + Villette Blue 침구를 하나로: 검은 프레임·헤드보드·흰 매트리스 위에 푸른 이불이 덮이고(옆과 발치로 늘어짐),
+// 머리맡에 푸른 베개 둘과 뒤에 세운 회색 베개가 놓인다. 크기는 침대(프레임) 기준이고 이불은 프레임보다 조금 넓게 덮는다.
+export function BedWithBedding({ item }: Props) {
+  const w = item.w / M
+  const d = item.d / M
+  const frameH = 0.3
+  const mattressH = 0.22
+  const board = 0.045
+  const mattressTop = frameH + mattressH - 0.01
+  const head = -d / 2 + board + 0.02
+  const length = (d - board) * 0.9
+  const foot = head + length
+  const duvetW = w * 1.08
+  const duvetL = length * 0.72
+  const duvetH = 0.13
+  const duvetZ = foot - duvetL / 2 + 0.06
+  const duvetTop = mattressTop + duvetH - 0.005
+  const blue = '#3c4f78'
+  const pillow = '#42557e'
+  const drop = duvetTop - frameH
+  const layer = (position: [number, number, number], size: [number, number, number], color: string, radius: number, rotation?: [number, number, number]) => (
+    <RoundedBox args={size} radius={Math.min(radius, size[0] / 2.1, size[1] / 2.1, size[2] / 2.1)} smoothness={3} position={position} rotation={rotation} castShadow receiveShadow>
+      <meshStandardMaterial color={color} roughness={0.95} />
+    </RoundedBox>
+  )
+  return (
+    <group>
+      <BlackBed item={item} />
+      {layer([0, mattressTop + duvetH / 2 - 0.005, duvetZ], [duvetW, duvetH, duvetL], blue, 0.06)}
+      {[-1, 1].map((side) => layer([side * (duvetW / 2 - 0.004), duvetTop - drop / 2, duvetZ], [0.016, drop, duvetL * 0.97], blue, 0.006, [0, 0, -side * 0.07]))}
+      {layer([0, duvetTop - drop / 2, foot + 0.06 - 0.006], [duvetW * 0.985, drop, 0.016], blue, 0.006, [0.07, 0, 0])}
+      {layer([0, duvetTop + 0.012, duvetZ - duvetL / 2 + 0.07], [duvetW * 0.99, 0.03, 0.12], '#4b5f8c', 0.012)}
+      {layer([0, mattressTop + 0.15, head + 0.07], [w * 0.62, 0.3, 0.1], '#4b4b4f', 0.04, [-0.1, 0, 0])}
+      {[-1, 1].map((side) => layer([side * w * 0.235, mattressTop + 0.07, head + 0.34], [w * 0.4, 0.13, 0.58], pillow, 0.05, [-0.12, 0, 0]))}
+    </group>
+  )
+}
+
 // H1740 5단 철제선반장(2단 도어): 아래는 양쪽으로 열리는 수납장, 위는 가는 기둥에 얹은 얇은 선반 3장과 뒷판.
 export function SteelShelf({ item }: Props) {
   const w = item.w / M

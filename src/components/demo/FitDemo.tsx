@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
-import { FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { BED_SET_SUFFIX, BUNDLE_OF, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
 import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
 
@@ -115,9 +115,13 @@ export default function FitDemo() {
     say(spot ? `${name}을(를) 3D 영역에 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
   }
 
-  const addFromCatalog = (furniture: Furniture) => {
+  const addFromCatalog = (picked: Furniture) => {
+    // 침구처럼 다른 가구와 하나로 놓이는 것은 짝 가구(침대)로 놓는다.
+    const furniture = FURNITURE.find((f) => f.id === BUNDLE_OF[picked.id]) ?? picked
+    const spec = MODEL_BY_FURNITURE[furniture.id]
     const n = items.filter((item) => item.id.startsWith(`${furniture.id}#`)).length + 1
-    addBox(`${furniture.id}#${n}`, furniture.name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, MODEL_BY_FURNITURE[furniture.id]?.model, MODEL_BY_FURNITURE[furniture.id]?.elevation)
+    const name = spec?.model === 'bedset' ? `${furniture.name}${BED_SET_SUFFIX}` : furniture.name
+    addBox(`${furniture.id}#${n}`, name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, spec?.model, spec?.elevation)
   }
 
   const addCustom = () => {
@@ -347,7 +351,8 @@ export default function FitDemo() {
               ) : (
                 <ul className="mt-3 grid grid-cols-2 gap-2.5">
                   {visibleCatalog.map((furniture) => {
-                    const placedCount = items.filter((item) => item.id.startsWith(`${furniture.id}#`)).length
+                    const bundledInto = BUNDLE_OF[furniture.id]
+                    const placedCount = items.filter((item) => item.id.startsWith(`${bundledInto ?? furniture.id}#`)).length
                     const missing = needsSize(furniture)
                     return (
                       <li key={furniture.id}>
@@ -363,9 +368,10 @@ export default function FitDemo() {
                           </span>
                           <span className="flex flex-1 flex-col gap-0.5 p-2">
                             <span className="line-clamp-2 text-[12px] font-bold leading-4">{furniture.name}</span>
+                            {bundledInto && <span className="text-[11px] font-semibold text-primary-container">침대에 포함돼요(침대 위에 덮임)</span>}
                             <span className="text-[11px] text-text-muted">{missing ? '치수 정보 없음' : sizeText({ w: furniture.size.w, d: furniture.size.d, h: furniture.size.h })}</span>
                             <span className="text-[11px] text-text-secondary">{furniture.price > 0 ? won(furniture.price) : '가격 정보 없음'}</span>
-                            <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : '3D에 놓기'}</span>
+                            <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : bundledInto ? '침대와 함께 놓기' : '3D에 놓기'}</span>
                           </span>
                         </button>
                       </li>

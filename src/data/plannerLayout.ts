@@ -1,4 +1,4 @@
-import { FURNITURE, MODEL_BY_FURNITURE, categoryOf, type FurnitureCategory } from '@/data/furniture'
+import { BED_SET_SUFFIX, FURNITURE, MODEL_BY_FURNITURE, categoryOf, type FurnitureCategory } from '@/data/furniture'
 import type { Item, Rot, Room } from '@/lib/types'
 
 // Archisketch 플래너 프로젝트의 3D 장면에서 읽은 배치(좌표 mm, 방 안쪽 왼쪽 위 모서리가 0,0).
@@ -20,6 +20,7 @@ export const PLANNER_ROOM: Room = {
 }
 
 // [가구 id, 가운데 x, 가운데 z, 각도(도), 가로, 깊이, 높이, 바닥에서 띄운 높이]
+// 플래너의 Villette Blue 침구는 침대와 하나(`bedset` 모델)로 합쳐서 따로 두지 않는다.
 type Row = [string, number, number, number, number, number, number, number]
 
 const ROWS: Row[] = [
@@ -29,7 +30,6 @@ const ROWS: Row[] = [
   ['ZHCng6-9DA238A1CE5340E1', 1609, 190, 0, 800, 380, 1741, 0],  // H1740 5단 철제선반장(2단 도어)
   ['ZHCng6-9DA238A1CE5340E1', 2409, 190, 0, 800, 380, 1741, 0],  // H1740 5단 철제선반장(2단 도어)
   ['XnPfj-S5D34B27A4E7B4B99', 75, 567, 90, 600, 150, 500, 1058],  // 스트링 포켓 (월넛/블랙)
-  ['Ydpb3l75AC40FF808E14852', 1252, 3635, 90, 1419, 2141, 835, 116],  // Villette Blue Bedding Set SS
   ['X8kL5fT81A10556FC5447E5', 10, 3624, 90, 500, 20, 400, 1158],  // Illusion 01 IE - Writer Choi
   ['Yq8D3hC589DB8DF6B7D4EC5', 381, 519, 34, 361, 972, 2050, 0],  // Tolomeo Mega Floor Lamp
   ['Yew1htX9938663D6F624933', 4108, 2440, -90, 270, 183, 270, 1475],  // UFO KID LAMP
@@ -105,7 +105,7 @@ export const plannerItems = (): Item[] => {
     const rot = ((Math.round(deg / 90) % 4) + 4) % 4
     const item: Item = {
       id: `${id}#${count[id]}`,
-      name: furniture.name,
+      name: MODEL_BY_FURNITURE[id]?.model === 'bedset' ? `${furniture.name}${BED_SET_SUFFIX}` : furniture.name,
       kind: RUG_IDS.has(id) ? 'rug' : 'furniture',
       model: MODEL_BY_FURNITURE[id]?.model ?? 'box',
       w,

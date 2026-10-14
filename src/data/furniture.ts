@@ -60,7 +60,7 @@ export const categoryOf = (f: Furniture): FurnitureCategory => {
 // elevation 은 벽에 거는 높이(mm). 없으면 바닥에 놓인다.
 export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: number }> = {
   YSEBSV826EADFB11D0F4FDD: { model: 'roundtable' }, // W1000 원형테이블
-  Xs_Qb6C3D61BBB72B9B4159: { model: 'bedframe' }, // D2178B 슈퍼싱글 침대(블랙)
+  Xs_Qb6C3D61BBB72B9B4159: { model: 'bedset' }, // D2178B 슈퍼싱글 침대(블랙) + Villette Blue 침구(위에 덮임)
   'ZHCng6-9DA238A1CE5340E1': { model: 'steelshelf' }, // H1740 5단 철제선반장
   YneAfk7A250635ACE594C54: { model: 'pegboard', elevation: 1100 }, // perforated board
   ZLDAeRK53BFEDFD0CF2475A: { model: 'mirror', elevation: 900 }, // 아르덴 미러
@@ -127,3 +127,12 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   E976B33E1388415C: { model: 'window', elevation: 900 }, // JELD WEN Windows
   YjCJHDA8B714D95FB9D45DD: { model: 'monitorarm', elevation: 720 }, // 싱글 모니터암(책상 위 높이 720mm 에 얹음, 치수는 추정)
 }
+
+// 한 덩어리로 놓이는 가구. 키 가구를 고르면 값 가구의 크기·이미지·3D 모델로 놓인다(침구는 침대 위에 덮인 채 침대와 하나).
+export const BUNDLE_OF: Record<string, string> = {
+  Ydpb3l75AC40FF808E14852: 'Xs_Qb6C3D61BBB72B9B4159', // Villette Blue 침구 → D2178B 침대
+}
+
+// 침대와 합쳐진 침구를 가리키는 가구 id.
+export const BUNDLED_INTO_BED = new Set(Object.keys(BUNDLE_OF))
+export const BED_SET_SUFFIX = ' + 침구'
