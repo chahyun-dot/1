@@ -30,6 +30,19 @@ export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
   image: `/archisketch/${item.componentId}.png`,
 }))
 
+// 데모 배치에서 뺀 가구. 데모의 "전체 가구" 목록에서도 보이지 않게 한다(가구 목록 `#/furniture` 와 모델 미리보기는 그대로).
+// 아르덴 미러는 배치에 하나가 남아 있어서 여기에 넣지 않았다.
+const DEMO_EXCLUDED = new Set([
+  'XtdxyE493CC22D0979C4F07', // DSTL Diffuser + Sticks
+  'YV_XVxZ6AA659D9487F417E', // chardonnay wine
+  'YV_XVxa64C03905B0F34865', // 2 wine glasses
+  'Ylybxgt16DA8B0918B94B21', // PARENTESI
+  'YgDgtY8090165E920A148CE', // Audiorama 4000
+  'Xr78id08D1C38D7AD0D4D47', // LED 면조명
+  'Xr1ry-I72F798A8F6CB4CAD', // ODDRUN
+])
+export const DEMO_FURNITURE = FURNITURE.filter((f) => !DEMO_EXCLUDED.has(f.id))
+
 export const FURNITURE_PROJECT = raw.projectName
 
 export type FurnitureCategory = '가구' | '소품' | '벽·천장'

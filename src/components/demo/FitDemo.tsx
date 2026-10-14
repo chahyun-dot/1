@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
-import { BED_SET_SUFFIX, BUNDLE_OF, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { BED_SET_SUFFIX, BUNDLE_OF, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
 import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
 
@@ -152,7 +152,7 @@ export default function FitDemo() {
 
   const visibleCatalog = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
+    return DEMO_FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
   }, [query, category])
 
   const listed = items.filter((item) => item.kind !== 'rug')
@@ -289,7 +289,7 @@ export default function FitDemo() {
               >
                 {item.label}
                 {item.id === 'placed' && <span className="text-text-muted">{listed.length}</span>}
-                {item.id === 'catalog' && <span className="text-text-muted">{FURNITURE.length}</span>}
+                {item.id === 'catalog' && <span className="text-text-muted">{DEMO_FURNITURE.length}</span>}
               </button>
             ))}
           </div>
@@ -324,7 +324,7 @@ export default function FitDemo() {
 
           {tab === 'catalog' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">등록된 가구 샘플 {FURNITURE.length}개예요. 누르면 3D 영역에 놓여요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">등록된 가구 샘플 {DEMO_FURNITURE.length}개예요. 누르면 3D 영역에 놓여요.</p>
               <input
                 type="search"
                 value={query}
