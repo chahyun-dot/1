@@ -4,13 +4,13 @@ import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { BED_SET_SUFFIX, BUNDLE_OF, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
-import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
+import type { Check, Gap, Item, Level, Opening, Room, Rot } from '@/lib/types'
 
 // 데모: 현재 "내 공간에 맞는지 확인하기"와 별개로, 3D 영역에 가구를 더하고 크기·여유를 보는 개정판.
 // 오른쪽 탭 = 배치된 가구 / 상품 종류 / 직접 입력.
 
 // 플래너 프로젝트(Archisketch)와 같은 방·배치로 시작한다.
-const room = PLANNER_ROOM
+const BASE_ROOM = PLANNER_ROOM
 
 type Tab = 'placed' | 'catalog' | 'custom'
 
@@ -42,6 +42,29 @@ const initialItems = (): Item[] => plannerItems()
 
 const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
 const won = (value: number) => `${value.toLocaleString()}원`
+
+function CountControls({ name, count, min, onMinus, onPlus }: { name: string; count: number; min: number; onMinus: () => void; onPlus: () => void }) {
+  return (
+    <div className="flex shrink-0 items-center gap-0.5">
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" className="text-[16px]" />
+      </button>
+      <span className="w-5 text-center text-[12px] font-semibold tabular-nums">{count}</span>
+      <button type="button" aria-label={`${name} 하나 늘리기`} onClick={onPlus} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle">
+        <Icon name="add" className="text-[16px]" />
+      </button>
+    </div>
+  )
+}
+
+// 카드 오른쪽 위 모서리에 작게 붙는 "모두 빼기" 버튼.
+function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
+  return (
+    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+      <Icon name="close" className="text-[12px]" />
+    </button>
+  )
+}
 
 function NumberInput({ label, value, max, onChange }: { label: string; value: number; max: number; onChange: (value: number) => void }) {
   const invalid = !(value >= 50 && value <= max)
@@ -85,6 +108,8 @@ function CheckList({ checks }: { checks: Check[] }) {
 
 export default function FitDemo() {
   const [items, setItems] = useState<Item[]>(initialItems)
+  const [windows, setWindows] = useState<Opening[]>(BASE_ROOM.openings!.windows)
+  const room = useMemo<Room>(() => ({ ...BASE_ROOM, openings: { ...BASE_ROOM.openings!, windows } }), [windows])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<View>('persp')
   const [tab, setTab] = useState<Tab>('placed')
@@ -115,7 +140,7 @@ export default function FitDemo() {
     const placed: Item = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
     setItems((prev) => [...prev, placed])
     setSelectedId(placed.id)
-    say(spot ? `${name}을(를) 3D 영역에 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
+    say(spot ? `${name}을(를) 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
   }
 
   const addFromCatalog = (picked: Furniture) => {
@@ -143,6 +168,24 @@ export default function FitDemo() {
     setItems((prev) => [...prev, placed])
     setSelectedId(placed.id)
     say(spot ? `${source.name}을(를) 하나 더 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
+  }
+
+  // 창문은 방 구조라 벽의 빈 구간에 새로 낸다. 문·다른 창과 100mm 이상 띄운다.
+  const addWindow = () => {
+    const width = BASE_ROOM.openings!.windows[0].to - BASE_ROOM.openings!.windows[0].from
+    const gap = 100
+    for (const side of ['-x', '+z', '-z', '+x'] as const) {
+      const length = side === '-x' || side === '+x' ? room.d : room.w
+      const taken = [room.openings!.door, ...windows].filter((open) => open.side === side).sort((a, b) => a.from - b.from)
+      for (let from = gap; from + width <= length - gap; from += 50) {
+        if (taken.every((open) => from + width + gap <= open.from || from >= open.to + gap)) {
+          setWindows((prev) => [...prev, { side, from, to: from + width, bottom: 990, top: 2206 }])
+          say('창문을 하나 더 냈어요')
+          return
+        }
+      }
+    }
+    say('창문을 낼 빈 벽이 없어요')
   }
 
   const remove = (id: string) => {
@@ -179,10 +222,9 @@ export default function FitDemo() {
     })
     return [...map.values()]
   }, [items])
-  const openingRows = ([[DOOR_ID, 1], [WINDOW_ID, room.openings?.windows.length ?? 0]] as const)
-    .map(([id, count]) => ({ furniture: FURNITURE.find((f) => f.id === id), count }))
-    .filter((row) => row.furniture && row.count > 0)
-  const listedCount = groups.length + openingRows.length
+  const doorFurniture = FURNITURE.find((f) => f.id === DOOR_ID)
+  const windowFurniture = FURNITURE.find((f) => f.id === WINDOW_ID)
+  const listedCount = groups.length + (doorFurniture ? 1 : 0) + (windowFurniture && windows.length > 0 ? 1 : 0)
   const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
 
   return (
@@ -226,7 +268,7 @@ export default function FitDemo() {
               { icon: 'rotate_right', label: '90° 회전', onClick: rotate, disabled: !selected },
               { icon: 'vertical_align_top', label: '벽에 붙이기', onClick: () => selected && updateItem(selected.id, (item) => backToWall(item, room)), disabled: !selected },
               { icon: view === 'top' ? 'view_in_ar' : 'grid_view', label: view === 'top' ? '비스듬히 보기' : '위에서 보기', onClick: () => setView(view === 'top' ? 'persp' : 'top'), disabled: false },
-              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setSelectedId(null); say('처음 배치로 되돌렸어요') }, disabled: false },
+              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setWindows(BASE_ROOM.openings!.windows); setSelectedId(null); say('처음 배치로 되돌렸어요') }, disabled: false },
             ].map((button) => (
               <button
                 key={button.label}
@@ -330,7 +372,7 @@ export default function FitDemo() {
                   const last = group[group.length - 1]
                   return (
                     <li key={item.id.split('#')[0]}>
-                      <div className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${group.some((member) => member.id === selectedId) ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
+                      <div className={`relative flex items-center gap-2 rounded-lg border px-2.5 py-2 ${group.some((member) => member.id === selectedId) ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
                         <button type="button" onClick={() => setSelectedId(item.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
                             {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
@@ -341,43 +383,50 @@ export default function FitDemo() {
                           </span>
                         </button>
                         {item.kind !== 'product' && (
-                          <div className="flex items-center gap-0.5">
-                            <button type="button" aria-label={`${item.name} 하나 줄이기`} disabled={group.length < 2} onClick={() => remove(last.id)} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-                              <Icon name="remove" className="text-[16px]" />
-                            </button>
-                            <span className="w-5 text-center text-[12px] font-semibold tabular-nums">{group.length}</span>
-                            <button type="button" aria-label={`${item.name} 하나 늘리기`} onClick={() => duplicate(item)} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle">
-                              <Icon name="add" className="text-[16px]" />
-                            </button>
-                            <button type="button" aria-label={`${item.name} 모두 빼기`} onClick={() => group.forEach((member) => remove(member.id))} className="ml-0.5 cursor-pointer rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-                              <Icon name="close" className="text-[18px]" />
-                            </button>
-                          </div>
+                          <>
+                            <CountControls name={item.name} count={group.length} min={1} onMinus={() => remove(last.id)} onPlus={() => duplicate(item)} />
+                            <RemoveAll name={item.name} onClick={() => group.forEach((member) => remove(member.id))} />
+                          </>
                         )}
                       </div>
                     </li>
                   )
                 })}
-                {openingRows.map(({ furniture, count }) => (
-                  <li key={furniture!.id}>
+                {doorFurniture && (
+                  <li>
                     <div className="flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
-                        <img src={furniture!.image} alt="" className="h-full w-full object-contain" />
+                        <img src={doorFurniture.image} alt="" className="h-full w-full object-contain" />
                       </span>
                       <span className="min-w-0">
-                        <span className="block truncate text-[13px] font-semibold">{furniture!.name}{count > 1 && <span className="ml-1 font-bold text-on-primary-container">×{count}</span>}</span>
+                        <span className="block truncate text-[13px] font-semibold">{doorFurniture.name}</span>
                         <span className="block text-[11px] text-text-muted">방 구조에 포함돼요</span>
                       </span>
                     </div>
                   </li>
-                ))}
+                )}
+                {windowFurniture && (
+                  <li>
+                    <div className="relative flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                        <img src={windowFurniture.image} alt="" className="h-full w-full object-contain" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[13px] font-semibold">{windowFurniture.name}</span>
+                        <span className="block text-[11px] text-text-muted">벽에 낸 창문 · 개수를 조절해요</span>
+                      </span>
+                      <CountControls name={windowFurniture.name} count={windows.length} min={0} onMinus={() => setWindows((prev) => prev.slice(0, -1))} onPlus={addWindow} />
+                      {windows.length > 0 && <RemoveAll name={windowFurniture.name} onClick={() => setWindows([])} />}
+                    </div>
+                  </li>
+                )}
               </ul>
             </section>
           )}
 
           {tab === 'catalog' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">등록된 상품 종류 {DEMO_FURNITURE.length}개예요. 누르면 3D 영역에 놓여요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">등록된 상품 종류 {DEMO_FURNITURE.length}개예요. 누르면 놓여요.</p>
               <input
                 type="search"
                 value={query}
@@ -397,7 +446,7 @@ export default function FitDemo() {
                   </button>
                 ))}
               </div>
-              {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이에요. 3D 모델이 있는 것은 걸리는 높이에 걸리고, 나머지는 바닥에 세워 크기만 확인해요.</p>}
+              {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이에요. 걸리는 높이에 걸려요.</p>}
 
               {visibleCatalog.length === 0 ? (
                 <p className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</p>
@@ -416,7 +465,6 @@ export default function FitDemo() {
                         >
                           <span className="relative block aspect-square bg-surface-subtle">
                             <img src={furniture.image} alt="" loading="lazy" className="h-full w-full object-contain" />
-                            {MODEL_BY_FURNITURE[furniture.id] && <span className="absolute left-1.5 top-1.5 rounded-full bg-inverse-surface px-1.5 py-0.5 text-[10px] font-bold text-white">3D 모델</span>}
                             {placedCount > 0 && <span className="absolute right-1.5 top-1.5 rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-bold text-white">{placedCount}개 배치됨</span>}
                           </span>
                           <span className="flex flex-1 flex-col gap-0.5 p-2">
@@ -424,7 +472,7 @@ export default function FitDemo() {
                             {bundledInto && <span className="text-[11px] font-semibold text-primary-container">침대에 포함돼요(침대 위에 덮임)</span>}
                             <span className="text-[11px] text-text-muted">{missing ? '치수 정보 없음' : sizeText({ w: furniture.size.w, d: furniture.size.d, h: furniture.size.h })}</span>
                             <span className="text-[11px] text-text-secondary">{furniture.price > 0 ? won(furniture.price) : '가격 정보 없음'}</span>
-                            <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : bundledInto ? '침대와 함께 놓기' : '3D에 놓기'}</span>
+                            {(missing || bundledInto) && <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : '침대와 함께 놓기'}</span>}
                           </span>
                         </button>
                       </li>
@@ -461,7 +509,7 @@ export default function FitDemo() {
                 disabled={!draftValid}
                 className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-primary-container py-3 text-[14px] font-bold text-white disabled:cursor-default disabled:opacity-40"
               >
-                <Icon name="add" className="text-[18px]" /> 3D에 놓기
+                <Icon name="add" className="text-[18px]" /> 놓기
               </button>
             </section>
           )}

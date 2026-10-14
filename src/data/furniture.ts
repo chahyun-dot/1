@@ -19,9 +19,55 @@ const ESTIMATED_SIZE: Record<string, { w: number; d: number; h: number }> = {
   YjCJHDA8B714D95FB9D45DD: { w: 120, d: 480, h: 400 }, // 싱글 모니터암(클램프 폭, 팔 뻗은 길이, 기둥+팔 높이)
 }
 
+// 영어 이름을 한국어로 보여 주기 위한 표(원본 데이터는 그대로 둔다). 표에 없는 것은 원래 이름을 쓴다.
+const KO_NAME: Record<string, string> = {
+  Ydpb3l75AC40FF808E14852: '빌레트 블루 침구 세트 (슈퍼싱글)',
+  X8kL5fT81A10556FC5447E5: '일루전 01 IE - 최윤정 작가 (No. 10 피사 애시 그레이)',
+  Yq8D3hC589DB8DF6B7D4EC5: '톨로메오 메가 플로어 램프',
+  Yew1htX9938663D6F624933: 'UFO 키즈 램프',
+  YqRULWb0F39B81582104692: '[샘플] 프로 13인치 노트북',
+  XRxqWHD79D04BB434D74AF9: '[샘플] 제네바 모델 L (블랙)',
+  XwSAxFf68C8240186EB4765: '크로노타임 탁상시계',
+  YneAfk7A250635ACE594C54: '타공판',
+  YN8fSMr84BEC99AE48C4A26: 'LP 3',
+  YeNvIsREA05481C46254539: '체커보드 티슈 케이스',
+  Xhjjsyp24F553380D414A9A: '책 10권 세트',
+  YVMPHUe388DE520FF74407B: '책 2권 세트',
+  YgjU_Ah72C5B21C5B7F4F47: '은색 비즈 타원 트레이',
+  XV5vpP7A568816FF2C2432F: '임스 하우스 버드 (블랙)',
+  XW_VtxtA8DF6CDA88104092: '아이디얼 리빙 액자 (블랙 알루미늄)',
+  YBp1W4_021584BC9C234BDF: 'FK6720 2인 소파 (블랙)',
+  YV8EVEF2D36EE1DB1D44CAB: '드레스 셔츠',
+  'XX-zmmq45F1867DE7EE462B': '옷 2',
+  ZFFQHal586565A1F38B473C: '신발 01',
+  X5S4t1X5DE143AD22764FF9: '룸플러스 트위드 러그 (원형 1000mm, 보더형)',
+  'X-bB_LP883ADBC85E374EBB': '슬라이딩 도어 캐비닛 W78 D30 (블랙 스테인 애시)',
+  ZZHrOv2AC2EF05FF43243FB: '비트 테이블 조명 (블랙)',
+  YneAfk909E36FF912414229: '키보드',
+  'YneAfk-85AC7705BADE4E4A': '마우스',
+  Xo35PnA02CC15F5E5C44324: '펼친 책 (비매품)',
+  YVMPHUZ0DEE6D5660DB48B2: '에스프레소 컵 세트',
+  YVMPHUe2B4ECE07C08E426B: '책 12권 세트',
+  'X-w77FkE525CF8C677A46B0': '유니온 #12',
+  Y3Jvd_BD5EF2B210F564BF1: '북 데코',
+  'Ymz-AKVBAE7A1C5651944C3': '스틸 수납 박스',
+  Ym4zsLYED3C0331F08148F5: '사무용품 책상 소품',
+  '7564995DC96E40A3': '블랙 화병',
+  YdE3dZD86B1AD39B3C1443A: '26CM 블루 화병',
+  Xw0ZynH039E7EE04F954257: '칼데라 인센스 홀더',
+  XtdxyE4131F59D7EE0040B4: '4 센츠 X 미니 룸 스프레이',
+  'YV_XVxW9536C02931594E10': '딥티크',
+  YneAflHA33DBE2534ED4DC7: '데스크탑 컴퓨터',
+  XNpyDGd4339E9DBCEE941AC: '다이닝 체어 6',
+  YvLiCvk04866276686B40C7: '에르바 더리 러그',
+  YHx4J5H2C427AA8FBFD482A: '코어렉(CORE RACK) (블랙)',
+  YPGPhJp77841A682B5A4CD2: '현관문 (1000)',
+  E976B33E1388415C: '젤드웬 창문',
+}
+
 export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
   id: item.componentId,
-  name: item.name,
+  name: KO_NAME[item.componentId] ?? item.name,
   brand: item.brand,
   quantity: item.quantity,
   price: item.retailPrice.value,
@@ -41,6 +87,7 @@ const DEMO_EXCLUDED = new Set([
   'Xr78id08D1C38D7AD0D4D47', // LED 면조명
   'Xr1ry-I72F798A8F6CB4CAD', // ODDRUN
   'YV_XVxTA1102E846ACA437E', // Aralia Large
+  'Ymz-AKZAAF5DF9BAB3E47A8', // NIMM 파일 홀더
 ])
 export const DEMO_FURNITURE = FURNITURE.filter((f) => !DEMO_EXCLUDED.has(f.id))
 

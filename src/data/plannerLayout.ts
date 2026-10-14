@@ -56,8 +56,6 @@ const ROWS: Row[] = [
   ['ZZHrOv2AC2EF05FF43243FB', 198, 2795, 90, 185, 300, 531, 564],  // Beat Table Light (Black)
   ['YneAfk909E36FF912414229', 697, 1422, 90, 445, 137, 39, 630],  // keyboard
   ['YneAfk-85AC7705BADE4E4A', 694, 1087, 90, 67, 112, 30, 630],  // mouse
-  ['Ymz-AKZAAF5DF9BAB3E47A8', 240, 666, 90, 100, 250, 300, 630],  // NIMM File Holder
-  ['Ymz-AKZAAF5DF9BAB3E47A8', 240, 566, 90, 100, 250, 300, 630],  // NIMM File Holder
   ['Xo35PnA02CC15F5E5C44324', 564, 1815, 135, 270, 180, 80, 630],  // Open book (not for sale)
   ['YVMPHUZ0DEE6D5660DB48B2', 697, 887, 0, 125, 145, 65, 630],  // espresso cup set
   ['YVMPHUe2B4ECE07C08E426B', 1469, 239, 0, 520, 170, 270, 720],  // Book 12set

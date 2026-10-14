@@ -285,6 +285,11 @@ export function WoodBlind({ item }: Props) {
         <boxGeometry args={[w, railH, 0.07]} />
         <meshStandardMaterial color="#4a3f3a" roughness={0.6} />
       </mesh>
+      {/* 완전히 내려온 블라인드: 슬랫 뒤를 막아 뒤의 창이 비치지 않게 한다 */}
+      <mesh position={[0, h - railH - 0.01 - span / 2, z - 0.012]}>
+        <boxGeometry args={[w * 0.985, span, 0.004]} />
+        <meshStandardMaterial color="#5f524b" roughness={0.8} />
+      </mesh>
       {Array.from({ length: count }, (_, index) => (
         <mesh key={index} position={[0, h - railH - 0.01 - (1 - (1 - index / (count - 1)) ** 1.7) * span, z]} rotation={[-0.45, 0, 0]}>
           <boxGeometry args={[w * 0.985, 0.006, 0.05]} />
