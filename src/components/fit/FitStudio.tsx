@@ -852,7 +852,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                         const memberOptions = member.kind === 'product' ? undefined : COLOR_OPTIONS[keyOf(member)]
                         const resizable = member.model !== 'motiondesk'
                         return (
-                          <li key={member.id} className={`rounded-xl border px-3 py-3 ${target?.id === member.id ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
+                          <li key={member.id} className="rounded-xl border border-border-default px-3 py-3">
                             <div className="flex items-center gap-2">
                               <button type="button" onClick={() => setSelectedId(member.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
                                 <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
