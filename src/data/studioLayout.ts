@@ -89,7 +89,8 @@ export const studioItems = (productColor: string): Item[] => {
   }
   // 책상 위에 놓인 물건(노트북, 키보드, 모니터암, TV 등)은 책상이 높아진 만큼 올린다.
   const onDesk = (item: Item) => (item.elevation ?? 0) >= 500 && item.x > area.minX && item.x < area.maxX && item.z > area.minZ && item.z < area.maxZ
-  const furniture = all.map((item) => (item === oldDesk ? desk : onDesk(item) ? { ...item, elevation: (item.elevation ?? 0) + raise } : item))
+  // 데스커 의자는 서랍장(왼쪽 다리 쪽) 앞을 막지 않게 오른쪽 다리 쪽으로 170mm 옮긴다.
+  const furniture = all.map((item) => (item === oldDesk ? desk : keyOf(item) === DESK_CHAIR_ID ? { ...item, z: item.z - 170 } : onDesk(item) ? { ...item, elevation: (item.elevation ?? 0) + raise } : item))
 
   const product: Item = {
     id: 'product',
@@ -105,7 +106,8 @@ export const studioItems = (productColor: string): Item[] => {
     rot: 0,
     color: productColor,
   }
-  return [...furniture, { ...product, ...placeUnderDesk(desk, product, 'right') }]
+  // 오른쪽 다리 쪽은 톨로메오 램프가 있어서, 램프와 창가 커튼 라인을 피해 왼쪽 다리 쪽(뒤에서 120mm 띄움)에 넣는다.
+  return [...furniture, { ...product, ...placeUnderDesk(desk, product, 'left', 30, 120) }]
 }
 
 // 상세 보기로 묶이는 가구 세 묶음. 값은 상품 id(같은 상품이 여러 개면 모두).
