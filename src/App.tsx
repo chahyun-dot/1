@@ -17,14 +17,18 @@ import { usePurchase } from '@/components/page/usePurchase'
 import type { ColorId } from '@/data/catalog'
 
 const FitModal = lazy(() => import('@/components/fit/FitModal'))
+const FitStudio = lazy(() => import('@/components/fit/FitStudio'))
 const FurnitureCatalog = lazy(() => import('@/components/page/FurnitureCatalog'))
 const FitDemo = lazy(() => import('@/components/demo/FitDemo'))
 const ModelPreview = lazy(() => import('@/components/demo/ModelPreview'))
 
 // 주소 끝이 #/furniture 이면 가구 목록, #/demo 이면 데모 페이지, #/models 이면 3D 모델 미리보기를 상품 페이지 대신 보여 준다.
-type Route = 'home' | 'furniture' | 'demo' | 'models'
+type Route = 'home' | 'furniture' | 'demo' | 'demo2' | 'models'
 
-const ROUTES: Record<string, Route> = { '#/furniture': 'furniture', '#/demo': 'demo', '#/models': 'models' }
+const ROUTES: Record<string, Route> = { '#/furniture': 'furniture', '#/demo': 'demo', '#/demo2': 'demo2', '#/models': 'models' }
+
+// 주소 뒤에 ?fit=old 를 붙이면 합치기 전 "내 공간에 맞는지 확인하기" 팝업을 연다.
+const useOldFit = () => new URLSearchParams(window.location.search).get('fit') === 'old'
 
 const routeOf = (): Route => ROUTES[window.location.hash] ?? 'home'
 
@@ -59,7 +63,14 @@ export default function App() {
   const route = useRoute()
   const openFit = () => setFitOpen(true)
 
-  if (route !== 'home') {
+  const demo2 = route === 'demo2'
+  const fitShown = fitOpen || demo2
+  const closeFit = () => {
+    setFitOpen(false)
+    if (demo2) window.location.hash = '#/'
+  }
+
+  if (route !== 'home' && !demo2) {
     return (
       <Suspense fallback={<ModalLoading />}>
         {route === 'furniture' ? <FurnitureCatalog /> : route === 'models' ? <ModelPreview /> : <FitDemo />}
@@ -103,9 +114,9 @@ export default function App() {
         <SiteFooter />
       </div>
       <TopButton />
-      {fitOpen && (
+      {fitShown && (
         <Suspense fallback={<ModalLoading />}>
-          <FitModal colorId={colorId} onColor={setColorId} onClose={() => setFitOpen(false)} />
+          {useOldFit() ? <FitModal colorId={colorId} onColor={setColorId} onClose={closeFit} /> : <FitStudio colorId={colorId} onColor={setColorId} onClose={closeFit} />}
         </Suspense>
       )}
     </>

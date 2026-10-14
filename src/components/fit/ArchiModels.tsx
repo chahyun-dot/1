@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { lighten } from '@/lib/color'
+import { legCenter } from '@/lib/desk'
 import type { Item } from '@/lib/types'
 
 // Archisketch 가구 이미지(public/archisketch)를 보고 코드로 모양을 만든 모델들.
@@ -94,11 +95,11 @@ export function BedWithBedding({ item }: Props) {
     <group>
       <BlackBed item={item} />
       {layer([0, mattressTop + duvetH / 2 - 0.005, duvetZ], [duvetW, duvetH, duvetL], blue, 0.06)}
-      {[-1, 1].map((side) => layer([side * (duvetW / 2 - 0.004), duvetTop - drop / 2, duvetZ], [0.016, drop, duvetL * 0.97], blue, 0.006, [0, 0, -side * 0.07]))}
+      {[-1, 1].map((side) => <group key={side}>{layer([side * (duvetW / 2 - 0.004), duvetTop - drop / 2, duvetZ], [0.016, drop, duvetL * 0.97], blue, 0.006, [0, 0, -side * 0.07])}</group>)}
       {layer([0, duvetTop - drop / 2, foot + 0.06 - 0.006], [duvetW * 0.985, drop, 0.016], blue, 0.006, [0.07, 0, 0])}
       {layer([0, duvetTop + 0.012, duvetZ - duvetL / 2 + 0.07], [duvetW * 0.99, 0.03, 0.12], fold, 0.012)}
       {layer([0, mattressTop + 0.15, head + 0.07], [w * 0.62, 0.3, 0.1], '#4b4b4f', 0.04, [-0.1, 0, 0])}
-      {[-1, 1].map((side) => layer([side * w * 0.235, mattressTop + 0.07, head + 0.34], [w * 0.4, 0.13, 0.58], pillow, 0.05, [-0.12, 0, 0]))}
+      {[-1, 1].map((side) => <group key={side}>{layer([side * w * 0.235, mattressTop + 0.07, head + 0.34], [w * 0.4, 0.13, 0.58], pillow, 0.05, [-0.12, 0, 0])}</group>)}
     </group>
   )
 }
@@ -469,8 +470,18 @@ export function MotionDesk({ item }: Props) {
   const h = item.h / M
   const top = 0.03
   const black = '#1b1b1c'
+  // 다리 간격·상판 아래 높이를 입력한 책상(내 공간 확인 팝업)은 그 값을 따르고, 없으면 기본 다리 자리를 쓴다.
+  const legX = item.legGap !== undefined ? legCenter(item) / M : w / 2 - 0.12
+  const underside = item.underClearance !== undefined ? item.underClearance / M : undefined
+  const apron = underside !== undefined ? h - top - underside : 0
   return (
     <group>
+      {apron > 0.004 && underside !== undefined && (
+        <mesh position={[0, underside + apron / 2, 0]} castShadow>
+          <boxGeometry args={[legX * 2 - 0.07, apron, d * 0.9]} />
+          <meshStandardMaterial color="#cdb897" roughness={0.7} />
+        </mesh>
+      )}
       <mesh position={[0, h - top / 2, 0]} castShadow receiveShadow>
         <boxGeometry args={[w, top, d]} />
         <meshStandardMaterial color="#cdb897" roughness={0.7} />
@@ -480,7 +491,7 @@ export function MotionDesk({ item }: Props) {
         <meshStandardMaterial color="#3a3b3a" roughness={0.8} />
       </mesh>
       {[-1, 1].map((side) => {
-        const x = side * (w / 2 - 0.12)
+        const x = side * legX
         return (
           <group key={side}>
             <mesh position={[x, 0.025, 0]} castShadow>

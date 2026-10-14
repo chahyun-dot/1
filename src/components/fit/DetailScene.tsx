@@ -4,7 +4,7 @@ import { ContactShadows, Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import ItemModel from '@/components/fit/Models'
 import { LEVEL_COLOR } from '@/components/fit/Scene'
-import { fromDeskLocal, measureAgainstDesk, type DeskMeasure } from '@/lib/desk'
+import { fromDeskLocal, measureAgainstDesk, toDeskLocal, type DeskMeasure } from '@/lib/desk'
 import { UNDER_MARGIN_MIN } from '@/lib/fit'
 import type { Item, Level } from '@/lib/types'
 
@@ -21,13 +21,15 @@ type DetailSceneProps = {
   showDims: boolean
   autoRotate: boolean
   onMove: (x: number, z: number) => void
+  // 책상 옆에 함께 보여 줄 가구(의자 등). 책상 기준 위치 그대로 그린다.
+  extras?: Item[]
 }
 
 const mm = (value: number) => `${Math.round(value).toLocaleString()}mm`
 
 const gapLevel = (mm: number): Level => (mm < 0 ? 'bad' : mm < UNDER_MARGIN_MIN ? 'warn' : 'ok')
 
-function Dim({ from, to, label, color = NEUTRAL, labelAt }: { from: V3; to: V3; label: string; color?: string; labelAt?: V3 }) {
+export function Dim({ from, to, label, color = NEUTRAL, labelAt }: { from: V3; to: V3; label: string; color?: string; labelAt?: V3 }) {
   const mid: V3 = labelAt ?? [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2]
   return (
     <group>
@@ -169,10 +171,10 @@ function DraggableProduct({ desk, product, m, drawersOpen, onMove, onDrag }: {
   )
 }
 
-export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove }: DetailSceneProps) {
+export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [] }: DetailSceneProps) {
   const [dragging, setDragging] = useState(false)
   const m = measureAgainstDesk(desk, product)
-  const span = Math.max(desk.w, desk.d, 900) / M
+  const span = Math.max(desk.w, desk.d, 900, extras.length ? 1900 : 0) / M
 
   return (
     <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.02, far: 50, position: [span * 0.9, span * 0.75, span * 1.15] }}>
@@ -183,6 +185,15 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
 
       <group>
         <ItemModel item={{ ...desk, rot: 0 }} />
+        {extras.map((extra) => {
+          const [lx, lz] = toDeskLocal(desk, extra.x, extra.z)
+          const relRot = (((extra.rot - desk.rot) % 4) + 4) % 4
+          return (
+            <group key={extra.id} position={[lx / M, 0, lz / M]} rotation={[0, (relRot * Math.PI) / 2, 0]}>
+              <ItemModel item={extra} />
+            </group>
+          )
+        })}
         <DraggableProduct desk={desk} product={product} m={m} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />
         {showDims && <Dimensions desk={desk} product={product} m={m} />}
       </group>

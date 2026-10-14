@@ -121,7 +121,7 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     })
   })
 
-  if (under?.model === 'desk') {
+  if (under?.model === 'desk' || under?.model === 'motiondesk') {
     const m = measureAgainstDesk(under, item)
     if (m.hitsLeg) {
       checks.push({

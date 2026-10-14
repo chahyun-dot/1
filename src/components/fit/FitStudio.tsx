@@ -1,0 +1,933 @@
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import Icon from '@/components/Icon'
+import ClusterScene, { gapOf, moveToGap, type PairGap } from '@/components/fit/ClusterScene'
+import DetailScene from '@/components/fit/DetailScene'
+import type { FitSummary } from '@/components/fit/FitModal'
+import Scene, { type View } from '@/components/fit/Scene'
+import { COLORS, PRODUCT, ROOM_PRESETS, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
+import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { CLUSTERS, MAX_WINDOWS, STUDIO_DIMS, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
+import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
+import { DRAWER_PULL, backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
+import type { FitResult, Item, Level, Rot } from '@/lib/types'
+
+// 데모와 "내 공간에 맞는지 확인하기" 팝업을 합친 화면(데모 2번).
+// 6×6m 방에 데모 가구와 책상 아래 서랍장으로 시작하고, 오른쪽 탭은 내 공간 치수 / 통합(배치된 가구·상품 종류) / 직접 입력이다.
+
+type Props = {
+  colorId?: ColorId
+  onColor?: (id: ColorId) => void
+  onClose: () => void
+  onDone?: (summary: FitSummary) => void
+}
+
+type Tab = 'space' | 'all' | 'custom'
+type DetailTab = 'desk' | 'cabinet' | 'gaps'
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'space', label: '내 공간 치수' },
+  { id: 'all', label: '통합' },
+  { id: 'custom', label: '직접 입력' },
+]
+
+const VERDICT: Record<Level, { label: string; icon: string; box: string; text: string }> = {
+  ok: { label: '입력한 치수 기준으로 배치 가능해요', icon: 'check_circle', box: 'bg-status-success-bg', text: 'text-status-success' },
+  warn: { label: '둘 수 있지만 확인이 필요해요', icon: 'error', box: 'bg-status-warn-bg', text: 'text-amber-600' },
+  bad: { label: '현재 배치에서는 사용 공간이 부족해요', icon: 'cancel', box: 'bg-status-bad-bg', text: 'text-status-bad' },
+}
+
+const CHECK_ICON: Record<Level, string> = { ok: 'text-status-success', warn: 'text-amber-500', bad: 'text-status-bad' }
+
+const ROOM_FIELDS: { key: keyof RoomDims; label: string }[] = [
+  { key: 'w', label: '가로 (문 ↔ 창)' },
+  { key: 'd', label: '세로 (책상 벽 ↔ 맞은편)' },
+  { key: 'h', label: '천장 높이' },
+  { key: 'doorWidth', label: '방문 폭' },
+]
+
+const CATEGORY_COLOR: Record<FurnitureCategory | '직접 입력', string> = { 가구: '#9aa6b2', 소품: '#d1b58a', '벽·천장': '#7fb0cf', '직접 입력': '#a89be0' }
+const CUSTOM_KINDS = ['침대', '테이블·식탁·책상', '소파', '서랍·수납장', '선반', '의자', '진열장·책장', '거울']
+const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
+const WINDOW_ID = 'E976B33E1388415C'
+
+const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
+
+function StageButton({ icon, label, onClick, active = false, disabled = false }: { icon: string; label: string; onClick: () => void; active?: boolean; disabled?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex items-center gap-1 px-2 py-1 text-[12px] transition-colors disabled:opacity-40 ${active ? 'font-bold text-primary-container' : 'font-medium text-text-secondary hover:text-primary-container'}`}
+    >
+      <Icon name={icon} className="text-[15px]" /> {label}
+    </button>
+  )
+}
+
+function NumberField({ label, value, min, max, onCommit, pill = false }: { label: string; value: number; min: number; max: number; onCommit: (value: number) => void; pill?: boolean }) {
+  const [draft, setDraft] = useState<string | null>(null)
+  const parsed = draft === null ? value : Number(draft)
+  const invalid = draft !== null && !(parsed >= min && parsed <= max)
+  const input = (
+    <input
+      type="number"
+      step={10}
+      min={min}
+      max={max}
+      value={draft ?? value}
+      onChange={(event) => {
+        const next = Number(event.target.value)
+        setDraft(event.target.value)
+        if (next >= min && next <= max) onCommit(Math.round(next))
+      }}
+      onBlur={() => setDraft(null)}
+      className={`border bg-surface-base text-text-primary outline-none focus:ring-2 ${pill ? 'h-10 min-w-0 flex-1 rounded-full px-4 text-[15px]' : 'h-9 w-full rounded-lg pl-2.5 pr-9 text-[14px]'} ${
+        invalid ? 'border-status-bad focus:ring-status-bad/20' : 'border-border-default focus:border-primary-container focus:ring-primary-container/20'
+      }`}
+    />
+  )
+  return (
+    <label className={pill ? 'text-[13px] text-text-secondary' : 'text-[12px] text-text-secondary'}>
+      {label}
+      {pill ? (
+        <div className="mt-1 flex items-center gap-1.5">
+          {input}
+          <span className="text-[13px] text-text-muted">mm</span>
+        </div>
+      ) : (
+        <div className="relative mt-1">
+          {input}
+          <span className="pointer-events-none absolute right-2.5 top-2 text-[12px] text-text-muted">mm</span>
+        </div>
+      )}
+      {invalid && <span className="mt-0.5 block text-[11px] text-status-bad">{min.toLocaleString()}~{max.toLocaleString()}mm</span>}
+    </label>
+  )
+}
+
+function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
+  return (
+    <div className="ml-2 mr-5 flex shrink-0 items-center gap-0.5">
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" size={10} />
+      </button>
+      <span className="w-4 text-center text-[10px] font-semibold tabular-nums">{count}</span>
+      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="add" size={10} />
+      </button>
+    </div>
+  )
+}
+
+function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
+  return (
+    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-1 top-1 flex h-[15px] w-[15px] cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+      <Icon name="close" size={16} />
+    </button>
+  )
+}
+
+function ColorChips({ options, isOn, onPick }: { options: ColorOption[]; isOn: (option: ColorOption) => boolean; onPick: (option: ColorOption) => void }) {
+  const current = options.find(isOn) ?? options[0]
+  return (
+    <div className="mt-3">
+      <p className="text-[12px] font-bold">
+        색상 <span className="font-medium text-text-secondary">{current.name}</span>
+      </p>
+      <div className="mt-1.5 flex flex-wrap gap-1.5">
+        {options.map((option) => {
+          const on = isOn(option)
+          return (
+            <button
+              key={option.name}
+              type="button"
+              title={option.name}
+              aria-label={`${option.name} 색상`}
+              aria-pressed={on}
+              onClick={() => onPick(option)}
+              className={`h-6 w-6 cursor-pointer rounded-full border ${on ? 'border-primary-container ring-2 ring-primary-container/40' : 'border-black/15'}`}
+              style={{ background: option.hex2 && option.hex2 !== option.hex ? `linear-gradient(135deg, ${option.hex} 50%, ${option.hex2} 50%)` : option.hex }}
+            />
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+const PRODUCT_COLOR_OPTIONS: (ColorOption & { id: ColorId })[] = COLORS.map((color) => ({ id: color.id, name: color.label.replace(/\s*[\d.]+$/, ''), hex: color.hex }))
+
+function Section({ children }: { children: ReactNode }) {
+  return <section className="border-b border-border-subtle px-5 py-5">{children}</section>
+}
+
+export default function FitStudio({ colorId: colorFromPage, onColor, onClose, onDone }: Props) {
+  const [colorId, setColorId] = useState<ColorId>(colorFromPage ?? 'white')
+  const [dims, setDims] = useState<RoomDims>(STUDIO_DIMS)
+  const [presetId, setPresetId] = useState<string | null>(ROOM_PRESETS[0].id)
+  const [windowCount, setWindowCount] = useState(MAX_WINDOWS)
+  const room = useMemo(() => studioRoom(dims, windowCount), [dims, windowCount])
+  const [items, setItems] = useState<Item[]>(() => studioItems(colorOf(colorFromPage ?? 'white').hex))
+  const [selectedId, setSelectedId] = useState<string | null>('product')
+  const [view, setView] = useState<View>('persp')
+  const [drawersOpen, setDrawersOpen] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [gapsOpen, setGapsOpen] = useState(false)
+  const [tab, setTab] = useState<Tab>('space')
+  const [sub, setSub] = useState<'placed' | 'catalog'>('placed')
+  const [detail, setDetail] = useState<ClusterId | null>(null)
+  const [detailTab, setDetailTab] = useState<DetailTab>('desk')
+  const [deskSizeOpen, setDeskSizeOpen] = useState(true)
+  const [autoRotate, setAutoRotate] = useState(true)
+  const [showDims, setShowDims] = useState(true)
+  const [toast, setToast] = useState<string | null>(null)
+  const [query, setQuery] = useState('')
+  const [category, setCategory] = useState<FurnitureCategory | '전체'>('전체')
+  const [draft, setDraft] = useState({ name: '', w: 600, d: 600, h: 800 })
+  const counter = useRef(0)
+  const toastTimer = useRef<number | undefined>(undefined)
+
+  const product = items.find((item) => item.kind === 'product') ?? null
+  const desk = items.find((item) => item.model === 'motiondesk') ?? null
+  const selected = items.find((item) => item.id === selectedId) ?? null
+  const cluster = detail ? (CLUSTERS.find((c) => c.id === detail) ?? null) : null
+  const members = useMemo(() => (cluster ? items.filter((item) => cluster.keys.includes(keyOf(item))) : []), [cluster, items])
+  const inDetail = Boolean(cluster && (cluster.id !== 'desk' || (desk && product)))
+  const deskChairs = useMemo(() => (cluster?.id === 'desk' ? members.filter((item) => item.model === 'meshchair') : []), [cluster, members])
+  const gaps: PairGap[] = useMemo(() => {
+    if (!cluster) return []
+    return cluster.pairs.flatMap(([ka, kb]) => items.filter((a) => keyOf(a) === ka).flatMap((a) => items.filter((b) => keyOf(b) === kb).map((b) => gapOf(a, b))))
+  }, [cluster, items])
+
+  // 진단 대상: 고른 가구. 상세 보기에서는 묶음의 가구(책상 묶음은 서랍장)를 본다.
+  const target = inDetail ? (cluster!.id === 'desk' ? product : (members.find((item) => item.id === selectedId) ?? members[0] ?? null)) : (selected ?? product)
+  const fit: FitResult | null = useMemo(() => {
+    if (!target) return null
+    return target.kind === 'product' ? evaluate(target, room, items) : measureFurniture(target, room, items)
+  }, [target, room, items])
+  const verdict = fit ? VERDICT[fit.verdict] : null
+  const frontGap = fit?.gaps.find((gap) => gap.side === '앞')
+  const spaceLabel = ROOM_PRESETS.find((p) => p.id === presetId)?.label ?? '직접 입력한 공간'
+  const offsets = desk && product ? underOffsets(desk, product) : null
+
+  useEffect(() => {
+    if (colorFromPage) setColorId(colorFromPage)
+  }, [colorFromPage])
+
+  useEffect(() => {
+    setItems((prev) => prev.map((item) => (item.kind === 'product' ? { ...item, color: colorOf(colorId).hex } : item)))
+  }, [colorId])
+
+  useEffect(() => {
+    const previous = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = previous
+    }
+  }, [])
+
+  const say = (message: string) => {
+    setToast(message)
+    window.clearTimeout(toastTimer.current)
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200)
+  }
+
+  const updateItem = (id: string, patch: (item: Item) => Item) => setItems((prev) => prev.map((item) => (item.id === id ? patch(item) : item)))
+  const clampTo = (item: Item, x: number, z: number) => ({ ...item, ...clampToRoom(item, x, z, room) })
+
+  const rotateSelected = () => {
+    if (!selected) return
+    updateItem(selected.id, (item) => clampTo({ ...item, rot: ((item.rot + 1) % 4) as Rot }, item.x, item.z))
+  }
+
+  const reset = () => {
+    setItems(studioItems(colorOf(colorId).hex))
+    setSelectedId('product')
+    setDrawersOpen(false)
+    say('처음 배치로 되돌렸어요')
+  }
+
+  const openDetail = (id: ClusterId) => {
+    setDetail(id)
+    setDetailTab(id === 'desk' ? 'desk' : 'gaps')
+  }
+
+  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box', elevation?: number) => {
+    const item: Item = { id, name, kind: 'furniture', model, elevation, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
+    const spot = findFreeSpot(item, room, items)
+    const placed = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
+    setItems((prev) => [...prev, placed])
+    setSelectedId(placed.id)
+    say(spot ? `${name}을(를) 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
+  }
+
+  const addFromCatalog = (picked: Furniture) => {
+    const furniture = FURNITURE.find((f) => f.id === BUNDLE_OF[picked.id]) ?? picked
+    const spec = MODEL_BY_FURNITURE[furniture.id]
+    const n = Math.max(0, ...items.filter((item) => keyOf(item) === furniture.id).map((item) => Number(item.id.split('#')[1] ?? 1))) + 1
+    const name = spec?.model === 'bedset' ? `${furniture.name}${BED_SET_SUFFIX}` : furniture.name
+    addBox(`${furniture.id}#${n}`, name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, spec?.model, spec?.elevation)
+  }
+
+  const addCustom = () => {
+    counter.current += 1
+    const name = draft.name.trim() || `내 가구 ${counter.current}`
+    addBox(`custom-${counter.current}`, name, { w: draft.w, d: draft.d, h: draft.h }, CATEGORY_COLOR['직접 입력'])
+  }
+
+  const duplicate = (source: Item) => {
+    const key = keyOf(source)
+    const n = Math.max(0, ...items.filter((item) => keyOf(item) === key).map((item) => Number(item.id.split('#')[1] ?? 1))) + 1
+    const item: Item = { ...source, id: `${key}#${n}`, x: room.w / 2, z: room.d / 2 }
+    const spot = findFreeSpot(item, room, items)
+    const placed = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
+    setItems((prev) => [...prev, placed])
+    setSelectedId(placed.id)
+    say(spot ? `${source.name}을(를) 하나 더 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
+  }
+
+  const remove = (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id))
+    if (selectedId === id) setSelectedId(null)
+  }
+
+  const needsSize = (furniture: Furniture) => !hasSize(furniture)
+  const openCustomFor = (furniture: Furniture) => {
+    setDraft({ name: furniture.name, w: furniture.size.w || 600, d: furniture.size.d || 600, h: furniture.size.h || 800 })
+    setTab('custom')
+    say('치수를 알려 주세요. 입력하면 3D에 놓을 수 있어요.')
+  }
+
+  // 서랍장: 바퀴 유무·높이에 따라 제품 높이가 바뀐다. 위치는 그대로 둔다.
+  const setCaster = (caster: number) => updateItem('product', (item) => ({ ...item, caster, h: PRODUCT.bodyH + caster }))
+  const moveProduct = (x: number, z: number) => updateItem('product', (item) => clampTo(item, x, z))
+  const placeProduct = (place: (deskItem: Item, item: Item) => { x: number; z: number; rot: Rot }) => {
+    if (!desk) return
+    updateItem('product', (item) => {
+      const next = { ...item, ...place(desk, item) }
+      return clampTo(next, next.x, next.z)
+    })
+  }
+  const setOffsets = (patch: Partial<UnderOffsets>) => {
+    const next = { side: 'right', leg: 30, back: 30, ...offsets, ...patch } as UnderOffsets
+    placeProduct((d, item) => placeUnderDesk(d, item, next.side, next.leg, next.back))
+  }
+
+  // 책상 치수를 바꿔도 서랍장은 다리·뒤 간격을 그대로 유지한 채 따라간다.
+  const updateDesk = (patch: Partial<Item>) => {
+    if (!desk) return
+    const keep = product ? underOffsets(desk, product) : null
+    const nextDesk = clampTo({ ...desk, ...patch }, desk.x, desk.z)
+    setItems((prev) =>
+      prev.map((item) => {
+        if (item.id === nextDesk.id) return nextDesk
+        if (keep && item.kind === 'product') {
+          const next = { ...item, ...placeUnderDesk(nextDesk, item, keep.side, keep.leg, keep.back) }
+          return clampTo(next, next.x, next.z)
+        }
+        return item
+      }),
+    )
+  }
+
+  const setGap = (gap: PairGap, dist: number) => {
+    const next = moveToGap(gap, dist)
+    updateItem(gap.b.id, (item) => clampTo(item, next.x, next.z))
+  }
+
+  const close = () => {
+    const productFit = product ? evaluate(product, room, items) : null
+    if (productFit) onDone?.({ verdict: productFit.verdict, title: productFit.checks[0]?.title ?? VERDICT[productFit.verdict].label, space: spaceLabel })
+    onClose()
+  }
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (detail) setDetail(null)
+        else close()
+        return
+      }
+      if (event.target instanceof HTMLInputElement) return
+      if (event.key === 'r' || event.key === 'R') rotateSelected()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  const groups = useMemo(() => {
+    const map = new Map<string, Item[]>()
+    items.forEach((item) => {
+      const key = keyOf(item)
+      map.set(key, [...(map.get(key) ?? []), item])
+    })
+    return [...map.values()]
+  }, [items])
+  const doorFurniture = FURNITURE.find((f) => f.id === DOOR_ID)
+  const windowFurniture = FURNITURE.find((f) => f.id === WINDOW_ID)
+  const listedCount = groups.length + (doorFurniture ? 1 : 0) + (windowFurniture && windowCount > 0 ? 1 : 0)
+  const visibleCatalog = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    return DEMO_FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
+  }, [query, category])
+  const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
+
+  const options = target && target.kind !== 'product' ? COLOR_OPTIONS[keyOf(target)] : undefined
+  const targetCluster = target ? clusterOf(target) : null
+
+  return (
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] lg:p-8" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <div role="dialog" aria-modal="true" aria-labelledby="fit-title" className="flex h-[min(880px,94vh)] w-full max-w-[1320px] flex-col overflow-hidden rounded-2xl bg-surface-base shadow-2xl">
+        <header className="flex items-start justify-between gap-4 border-b border-border-subtle px-6 py-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full border border-brand-sky-border bg-brand-sky-light px-2.5 py-0.5 text-[12px] font-bold text-primary-container">NEW 내 공간 맞춤 시뮬레이션</span>
+              <span className="text-[12px] text-text-muted">오늘의집 3D 공간엔진</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <h2 id="fit-title" className="text-[22px] font-bold tracking-tight text-text-primary">내 공간에 맞는지 확인하기</h2>
+              <span className="group relative inline-flex">
+                <button type="button" aria-label="사용 방법 안내" className="rounded-full p-0.5 text-primary-container outline-none hover:bg-brand-sky-light focus-visible:bg-brand-sky-light">
+                  <Icon name="info" className="text-[20px]" />
+                </button>
+                <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-[300px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                  가구 드래그로 옮기기 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
+                </span>
+              </span>
+            </div>
+            <p className="text-[13px] font-medium text-primary-container">
+              {inDetail ? (cluster!.id === 'desk' ? '책상 치수와 서랍장 위치를 조정하고, 설치 조건을 확인해 보세요.' : '가구 사이 간격을 조정하고, 어떻게 놓이는지 확인해 보세요.') : '방을 둘러보고, 가구를 배치해 보세요.'}
+            </p>
+          </div>
+          <button type="button" onClick={close} aria-label="닫기" className="rounded-full p-2 text-text-secondary hover:bg-surface-subtle">
+            <Icon name="close" className="text-[22px]" />
+          </button>
+        </header>
+
+        <div className="flex min-h-0 flex-1">
+          <div className="relative flex min-w-0 flex-1 flex-col">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle bg-surface-base px-5 py-3">
+              {inDetail ? (
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setDetail(null)} className="flex items-center gap-0.5 rounded-md px-1.5 py-1 text-[13px] font-semibold text-text-secondary hover:bg-surface-subtle">
+                    <Icon name="arrow_back" className="text-[17px]" /> 방 전체
+                  </button>
+                  <span className="text-[14px] font-bold text-text-primary">{cluster!.title} 자세히 보기</span>
+                  <span className="rounded-full bg-brand-sky-light px-2 py-0.5 text-[11px] font-semibold text-primary-container">360° 회전</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-status-success" />
+                  <span className="text-[14px] font-bold text-text-primary">{spaceLabel} (가상 시뮬레이션 중)</span>
+                  <span className="rounded-full bg-brand-sky-light px-2 py-0.5 text-[11px] font-semibold text-primary-container">실측 치수 1:1</span>
+                </div>
+              )}
+            </div>
+
+            <div className="relative min-h-0 flex-1 bg-surface-subtle">
+              {inDetail && cluster!.id === 'desk' && desk && product ? (
+                <DetailScene desk={desk} product={product} drawersOpen={drawersOpen} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} />
+              ) : inDetail ? (
+                <ClusterScene members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} />
+              ) : (
+                <Scene
+                  room={room}
+                  items={items}
+                  selectedId={selectedId}
+                  focus={target}
+                  fit={fit}
+                  view={view}
+                  drawersOpen={drawersOpen}
+                  showFrontZone={target?.kind === 'product'}
+                  onSelect={setSelectedId}
+                  onMove={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))}
+                  onOpenDetail={() => openDetail('desk')}
+                  canOpenDetail={(item) => item.model === 'motiondesk'}
+                />
+              )}
+
+              {toast && (
+                <p role="status" className="pointer-events-none absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-inverse-surface/90 px-4 py-2 text-[13px] text-inverse-on-surface shadow-lg">
+                  {toast}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setExpanded(!expanded)}
+                aria-pressed={expanded}
+                aria-label={expanded ? '3D 화면 축소' : '3D 화면 확장'}
+                title={expanded ? '3D 화면 축소 (상세 내용 보기)' : '3D 화면 확장 (상세 내용 숨기기)'}
+                className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-border-default bg-surface-base/95 text-text-secondary shadow-md backdrop-blur-md hover:text-on-primary-container"
+              >
+                <Icon name={expanded ? 'close_fullscreen' : 'open_in_full'} className="text-[18px]" />
+              </button>
+
+              {!inDetail && target && (
+                <div className="pointer-events-none absolute bottom-16 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-inverse-surface/90 px-3 py-1 text-[12px] font-medium text-inverse-on-surface shadow-md">
+                  <span>실측 규격 W{target.w} × D{target.d} × H{target.h}mm</span>
+                  {target.kind === 'product' && frontGap && <span className="font-bold text-primary-container">| 서랍 앞 여유 {frontGap.distance.toLocaleString()}mm</span>}
+                </div>
+              )}
+
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full border border-border-default bg-surface-base/95 px-3 py-1.5 shadow-md backdrop-blur-md">
+                {inDetail ? (
+                  <>
+                    <StageButton icon="360" label="360° 자동 회전" active={autoRotate} onClick={() => setAutoRotate(!autoRotate)} />
+                    <span className="text-border-default">|</span>
+                    <StageButton icon="straighten" label="간격 표시" active={showDims} onClick={() => setShowDims(!showDims)} />
+                    {cluster!.id === 'desk' && (
+                      <>
+                        <span className="text-border-default">|</span>
+                        <StageButton icon="open_in_full" label={drawersOpen ? '서랍 닫기' : '서랍 열어보기'} active={drawersOpen} onClick={() => setDrawersOpen(!drawersOpen)} />
+                        <span className="text-border-default">|</span>
+                        <StageButton icon="align_horizontal_left" label="아래 왼쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'left'))} />
+                        <StageButton icon="align_horizontal_right" label="아래 오른쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'right'))} />
+                        <StageButton icon="east" label="책상 옆" onClick={() => placeProduct(placeBesideDesk)} />
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <StageButton icon="rotate_90_degrees_cw" label="90° 회전 (R)" onClick={rotateSelected} disabled={!selected} />
+                    <span className="text-border-default">|</span>
+                    <StageButton icon="vertical_align_top" label="벽에 붙이기" onClick={() => selected && updateItem(selected.id, (item) => backToWall(item, room))} disabled={!selected} />
+                    <span className="text-border-default">|</span>
+                    <StageButton icon="open_in_full" label={drawersOpen ? '서랍 닫기' : '서랍 열어보기'} active={drawersOpen} onClick={() => setDrawersOpen(!drawersOpen)} />
+                    <span className="text-border-default">|</span>
+                    <StageButton icon={view === 'persp' ? 'grid_view' : 'view_in_ar'} label={view === 'persp' ? '위에서 보기' : '3D로 보기'} active={view === 'top'} onClick={() => setView(view === 'persp' ? 'top' : 'persp')} />
+                    <span className="text-border-default">|</span>
+                    <StageButton icon="refresh" label="초기화" onClick={reset} />
+                  </>
+                )}
+              </div>
+
+              {inDetail && (
+                <p className="pointer-events-none absolute right-16 top-4 rounded-lg bg-inverse-surface/75 px-3 py-1.5 text-[12px] text-white">
+                  {cluster!.id === 'desk' ? '드래그: 360° 돌려 보기 · 서랍장 끌기: 위치 옮기기 · 휠: 확대' : '드래그: 360° 돌려 보기 · 휠: 확대'}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {!expanded && (
+            <aside className="flex w-[400px] shrink-0 flex-col overflow-y-auto border-l border-border-default">
+              {!inDetail && target && (
+                <section className="border-b border-border-subtle px-5 py-4">
+                  <div className="flex gap-3">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-surface-subtle">
+                      {target.image ? <img src={target.image} alt="" className="h-full w-full object-contain" /> : <Icon name="chair" className="text-[28px] text-text-muted" />}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-bold text-primary-container">선택한 가구</p>
+                      <h2 className="line-clamp-2 text-[15px] font-bold leading-snug">{target.name}</h2>
+                      <p className="mt-0.5 text-[12px] text-text-secondary">{sizeText(target)}</p>
+                    </div>
+                  </div>
+                  {target.kind === 'product' && (
+                    <ColorChips
+                      options={PRODUCT_COLOR_OPTIONS}
+                      isOn={(option) => (option as ColorOption & { id: ColorId }).id === colorId}
+                      onPick={(option) => {
+                        const id = (option as ColorOption & { id: ColorId }).id
+                        setColorId(id)
+                        onColor?.(id)
+                      }}
+                    />
+                  )}
+                  {options && (
+                    <ColorChips
+                      options={options}
+                      isOn={(option) => (target.tint ? option.hex === target.tint && option.hex2 === target.tint2 : !!option.isDefault)}
+                      onPick={(option) => updateItem(target.id, (item) => ({ ...item, tint: option.isDefault ? undefined : option.hex, tint2: option.isDefault ? undefined : option.hex2 }))}
+                    />
+                  )}
+                  {targetCluster && (
+                    <button type="button" onClick={() => openDetail(targetCluster.id)} className="mt-3 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-surface-subtle py-2 text-[12px] font-semibold text-text-secondary hover:bg-brand-sky-light hover:text-on-primary-container">
+                      <Icon name="straighten" className="text-[15px]" /> {targetCluster.title} 자세히 보기
+                    </button>
+                  )}
+                </section>
+              )}
+
+              <div role="tablist" aria-label="설정" className="sticky top-0 z-10 flex border-b border-border-default bg-surface-base">
+                {inDetail
+                  ? (cluster!.id === 'desk'
+                      ? ([{ id: 'desk', label: '내 책상 치수' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }] as { id: DetailTab; label: string }[])
+                      : ([{ id: 'gaps', label: '간격 조절' }] as { id: DetailTab; label: string }[])
+                    ).map((item) => (
+                      <button key={item.id} type="button" role="tab" aria-selected={detailTab === item.id} onClick={() => setDetailTab(item.id)} className={`flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-[13px] transition-colors ${detailTab === item.id ? 'border-primary-container font-bold text-on-primary-container' : 'border-transparent font-medium text-text-secondary hover:text-text-primary'}`}>
+                        {item.label}
+                      </button>
+                    ))
+                  : TABS.map((item) => (
+                      <button key={item.id} type="button" role="tab" aria-selected={tab === item.id} onClick={() => setTab(item.id)} className={`flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-[13px] transition-colors ${tab === item.id ? 'border-primary-container font-bold text-on-primary-container' : 'border-transparent font-medium text-text-secondary hover:text-text-primary'}`}>
+                        {item.label}
+                      </button>
+                    ))}
+              </div>
+
+              {inDetail && cluster!.id === 'desk' && desk && product && detailTab === 'desk' && (
+                <Section>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">책상 아래 공간을 기준으로 서랍장 배치를 확인해요.</p>
+                  <div className="mt-4 border-t border-border-subtle pt-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[17px] font-bold text-text-primary">설치 공간 치수</h4>
+                      <span className="rounded-full bg-surface-subtle px-2.5 py-1 text-[11px] font-medium text-text-secondary">중요</span>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
+                      <NumberField pill label="상판 아래 높이" value={undersideOf(desk)} min={300} max={desk.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
+                      <NumberField pill label="다리 안쪽 폭" value={legInner(desk) * 2} min={300} max={maxLegGap(desk.w)} onCommit={(legGap) => updateDesk({ legGap })} />
+                    </div>
+                  </div>
+                  <div className="mt-5 border-t border-border-subtle pt-4">
+                    <button type="button" aria-expanded={deskSizeOpen} onClick={() => setDeskSizeOpen((v) => !v)} className="flex w-full items-start justify-between text-left">
+                      <span>
+                        <span className="block text-[17px] font-bold text-text-primary">책상 전체 크기</span>
+                        <span className="mt-1 block text-[13px] text-text-secondary">가로 {desk.w} · 깊이 {desk.d} · 높이 {desk.h}mm</span>
+                      </span>
+                      <Icon name={deskSizeOpen ? 'expand_less' : 'expand_more'} className="text-[24px] text-text-secondary" />
+                    </button>
+                    {deskSizeOpen && (
+                      <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
+                        <NumberField
+                          pill
+                          label="책상 가로"
+                          value={desk.w}
+                          min={600}
+                          max={room.w}
+                          onCommit={(w) => {
+                            const gap = legInner(desk) * 2 + (w - desk.w)
+                            updateDesk({ w, legGap: Math.max(300, Math.min(gap, maxLegGap(w))) })
+                          }}
+                        />
+                        <NumberField pill label="책상 깊이" value={desk.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
+                        <NumberField pill label="책상 높이" value={desk.h} min={500} max={1200} onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(desk) + h - desk.h, h - DESK_TOP) })} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-5 rounded-xl bg-surface-subtle px-4 py-3">
+                    <p className="flex items-center gap-1.5 text-[13px] font-semibold text-text-primary">
+                      <Icon name="info" className="text-[18px] text-primary-container" /> 치수 입력 안내
+                    </p>
+                    <p className="mt-1.5 text-[12px] leading-relaxed text-text-secondary">상판 아래 높이는 바닥에서 상판 밑면까지, 다리 안쪽 폭은 양쪽 다리 사이의 거리예요.</p>
+                  </div>
+                </Section>
+              )}
+
+              {inDetail && cluster!.id === 'desk' && desk && product && detailTab === 'cabinet' && (
+                <Section>
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-[13px] font-bold text-text-primary">서랍장 위치</h4>
+                    {offsets && (
+                      <div className="flex rounded-lg bg-surface-subtle p-0.5">
+                        {(['left', 'right'] as const).map((side) => (
+                          <button key={side} type="button" onClick={() => setOffsets({ side })} className={`rounded-md px-2.5 py-1 text-[12px] ${offsets.side === side ? 'bg-surface-base font-semibold text-on-primary-container shadow-xs' : 'text-text-secondary'}`}>
+                            {side === 'left' ? '왼쪽 다리 쪽' : '오른쪽 다리 쪽'}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {offsets ? (
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <NumberField label={`${offsets.side === 'left' ? '왼쪽' : '오른쪽'} 다리와 간격`} value={offsets.leg} min={0} max={Math.max(0, Math.round(legInner(desk) * 2 - product.w))} onCommit={(leg) => setOffsets({ leg })} />
+                      <NumberField label="뒤(벽 쪽) 간격" value={offsets.back} min={0} max={Math.max(0, desk.d - product.d)} onCommit={(back) => setOffsets({ back })} />
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => setOffsets({})} className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg border border-primary-container bg-brand-sky-light py-2 text-[13px] font-semibold text-on-primary-container">
+                      <Icon name="south" className="text-[16px]" /> 책상 아래로 넣기
+                    </button>
+                  )}
+                  <div className="mt-4 border-t border-border-subtle pt-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="text-[13px] font-bold text-text-primary">바퀴</h4>
+                        <p className="text-[11px] text-text-muted">{(product.caster ?? 0) > 0 ? `바퀴 ${product.caster}mm 포함 · 높이 ${product.h}mm` : `바퀴 없음 · 높이 ${product.h}mm`}</p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={(product.caster ?? 0) > 0}
+                        aria-label="바퀴 유무"
+                        onClick={() => setCaster((product.caster ?? 0) > 0 ? 0 : WHEEL_DEFAULT)}
+                        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${(product.caster ?? 0) > 0 ? 'bg-primary-container' : 'bg-border-default'}`}
+                      >
+                        <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-surface-base shadow transition-all ${(product.caster ?? 0) > 0 ? 'left-[22px]' : 'left-0.5'}`} />
+                      </button>
+                    </div>
+                    {(product.caster ?? 0) > 0 && (
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        <NumberField label="바퀴 높이" value={product.caster ?? WHEEL_DEFAULT} min={WHEEL_MIN} max={WHEEL_MAX} onCommit={setCaster} />
+                      </div>
+                    )}
+                  </div>
+                </Section>
+              )}
+
+              {inDetail && cluster!.id !== 'desk' && (
+                <Section>
+                  <p className="text-[13px] leading-relaxed text-text-secondary">가구 사이 거리를 입력하면 뒤쪽 가구가 그만큼 옮겨져요. 벽 밖으로는 나가지 않아요.</p>
+                  <div className="mt-3 grid grid-cols-1 gap-3">
+                    {gaps.map((gap) => {
+                      const same = gaps.filter((other) => other.b.name === gap.b.name)
+                      const suffix = same.length > 1 ? ` ${same.indexOf(gap) + 1}` : ''
+                      return <NumberField key={`${gap.a.id}-${gap.b.id}`} pill label={`${gap.a.name} ↔ ${gap.b.name}${suffix}`} value={Math.max(0, gap.dist)} min={0} max={3000} onCommit={(dist) => setGap(gap, dist)} />
+                    })}
+                  </div>
+                  <p className="mt-3 text-[11px] text-text-muted">3D에서 가구의 이름과 크기, 가구 사이 거리(mm)를 볼 수 있어요.</p>
+                </Section>
+              )}
+
+              {!inDetail && tab === 'space' && (
+                <Section>
+                  <div className="mb-3 flex flex-wrap gap-1.5">
+                    {ROOM_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setPresetId(preset.id)
+                          setDims(STUDIO_DIMS)
+                          reset()
+                        }}
+                        className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${preset.id === presetId ? 'bg-primary-container text-surface-base' : 'bg-surface-subtle text-text-secondary hover:bg-brand-sky-light hover:text-on-primary-container'}`}
+                      >
+                        {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ROOM_FIELDS.map((field) => (
+                      <label key={field.key} className="text-[12px] text-text-secondary">
+                        {field.label}
+                        <div className="relative mt-1">
+                          <input
+                            type="number"
+                            step={10}
+                            min={500}
+                            value={dims[field.key]}
+                            onChange={(event) => {
+                              const value = Number(event.target.value)
+                              if (value > 0) {
+                                setPresetId(null)
+                                setDims({ ...dims, [field.key]: value })
+                              }
+                            }}
+                            className="h-9 w-full rounded-lg border border-border-default bg-surface-base pl-2.5 pr-9 text-[14px] text-text-primary outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
+                          />
+                          <span className="pointer-events-none absolute right-2.5 top-2 text-[12px] text-text-muted">mm</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="mt-3 space-y-1.5">
+                    {CLUSTERS.map((c) => (
+                      <button key={c.id} type="button" onClick={() => openDetail(c.id)} className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-surface-subtle py-2 text-[12px] font-semibold text-text-secondary hover:bg-brand-sky-light hover:text-on-primary-container">
+                        <Icon name="straighten" className="text-[15px]" /> {c.title} 자세히 보기
+                      </button>
+                    ))}
+                  </div>
+                </Section>
+              )}
+
+              {!inDetail && tab === 'all' && (
+                <section className="px-5 py-4">
+                  <div className="mb-3 flex rounded-lg bg-surface-subtle p-0.5">
+                    {([['placed', `배치된 가구 ${listedCount}`], ['catalog', `상품 종류 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
+                      <button key={id} type="button" aria-pressed={sub === id} onClick={() => setSub(id)} className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] ${sub === id ? 'bg-surface-base font-semibold text-on-primary-container shadow-xs' : 'text-text-secondary'}`}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {sub === 'placed' && (
+                    <>
+                      <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 3D 영역에서 선택돼요.</p>
+                      <ul className="space-y-1.5">
+                        {groups.map((group) => {
+                          const item = group.find((member) => member.id === selectedId) ?? group[0]
+                          const last = group[group.length - 1]
+                          return (
+                            <li key={keyOf(item)}>
+                              <div className={`relative flex items-center gap-2 rounded-lg border px-2.5 py-2 ${group.some((member) => member.id === selectedId) ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
+                                <button type="button" onClick={() => setSelectedId(item.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
+                                  <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                                    {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
+                                  </span>
+                                  <span className="min-w-0">
+                                    <span className="block truncate text-[13px] font-semibold">{item.name}</span>
+                                    <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
+                                  </span>
+                                </button>
+                                {item.kind !== 'product' && (
+                                  <>
+                                    <CountControls name={item.name} count={group.length} min={1} onMinus={() => remove(last.id)} onPlus={() => duplicate(item)} />
+                                    <RemoveAll name={item.name} onClick={() => group.forEach((member) => remove(member.id))} />
+                                  </>
+                                )}
+                              </div>
+                            </li>
+                          )
+                        })}
+                        {doorFurniture && (
+                          <li>
+                            <div className="flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
+                              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                                <img src={doorFurniture.image} alt="" className="h-full w-full object-contain" />
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block truncate text-[13px] font-semibold">{doorFurniture.name}</span>
+                                <span className="block text-[11px] text-text-muted">방 구조에 포함돼요</span>
+                              </span>
+                            </div>
+                          </li>
+                        )}
+                        {windowFurniture && (
+                          <li>
+                            <div className="relative flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
+                              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                                <img src={windowFurniture.image} alt="" className="h-full w-full object-contain" />
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-[13px] font-semibold">{windowFurniture.name}</span>
+                                <span className="block text-[11px] text-text-muted">벽에 낸 창문 · 최대 {MAX_WINDOWS}개</span>
+                              </span>
+                              <CountControls name={windowFurniture.name} count={windowCount} min={0} max={MAX_WINDOWS} onMinus={() => setWindowCount((n) => n - 1)} onPlus={() => setWindowCount((n) => n + 1)} />
+                              {windowCount > 0 && <RemoveAll name={windowFurniture.name} onClick={() => setWindowCount(0)} />}
+                            </div>
+                          </li>
+                        )}
+                      </ul>
+                    </>
+                  )}
+
+                  {sub === 'catalog' && (
+                    <>
+                      <p className="mb-3 text-[12px] text-text-secondary">등록된 상품 종류 {DEMO_FURNITURE.length}개예요. 누르면 놓여요.</p>
+                      <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름·브랜드 검색" className="h-9 w-full rounded-full border border-border-default bg-surface-base px-4 text-[13px] outline-none focus:border-primary-container" />
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {(['전체', '가구', '소품', '벽·천장'] as const).map((id) => (
+                          <button key={id} type="button" onClick={() => setCategory(id)} className={`cursor-pointer rounded-full border px-3 py-1 text-[12px] ${category === id ? 'border-primary-container bg-brand-sky-light font-semibold text-on-primary-container' : 'border-border-default text-text-secondary'}`}>
+                            {id}
+                          </button>
+                        ))}
+                      </div>
+                      {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이에요. 걸리는 높이에 걸려요.</p>}
+                      {visibleCatalog.length === 0 ? (
+                        <p className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</p>
+                      ) : (
+                        <ul className="mt-3 grid grid-cols-2 gap-2.5">
+                          {visibleCatalog.map((furniture) => {
+                            const bundledInto = BUNDLE_OF[furniture.id]
+                            const placedCount = items.filter((item) => keyOf(item) === (bundledInto ?? furniture.id)).length
+                            const missing = needsSize(furniture)
+                            return (
+                              <li key={furniture.id}>
+                                <button type="button" onClick={() => (missing ? openCustomFor(furniture) : addFromCatalog(furniture))} className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-lg border border-border-default bg-surface-base text-left hover:border-primary-container">
+                                  <span className="relative block aspect-square bg-surface-subtle">
+                                    <img src={furniture.image} alt="" loading="lazy" className="h-full w-full object-contain" />
+                                    {placedCount > 0 && <span aria-label="배치됨" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary-container" />}
+                                  </span>
+                                  <span className="flex flex-1 flex-col gap-0.5 p-2">
+                                    <span className="line-clamp-2 text-[12px] font-bold leading-4">{furniture.name}</span>
+                                    {bundledInto && <span className="text-[11px] font-semibold text-primary-container">침대에 포함돼요(침대 위에 덮임)</span>}
+                                    <span className="text-[11px] text-text-muted">{missing ? '치수 정보 없음' : sizeText({ w: furniture.size.w, d: furniture.size.d, h: furniture.size.h })}</span>
+                                    {(missing || bundledInto) && <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : '침대와 함께 놓기'}</span>}
+                                  </span>
+                                </button>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </section>
+              )}
+
+              {!inDetail && tab === 'custom' && (
+                <section className="border-b border-border-subtle px-5 py-4">
+                  <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="block text-[13px] text-text-secondary">가구 종류 (선택)</span>
+                      <div className="mt-1.5 flex flex-wrap gap-1.5">
+                        {CUSTOM_KINDS.map((kind) => (
+                          <button key={kind} type="button" aria-pressed={draft.name === kind} onClick={() => setDraft({ ...draft, name: draft.name === kind ? '' : kind })} className={`cursor-pointer rounded-full border px-3 py-1 text-[12px] ${draft.name === kind ? 'border-primary-container bg-brand-sky-light font-semibold text-on-primary-container' : 'border-border-default text-text-secondary'}`}>
+                            {kind}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-3">
+                      <NumberField pill label="가로" value={draft.w} min={50} max={room.w} onCommit={(w) => setDraft({ ...draft, w })} />
+                      <NumberField pill label="세로(깊이)" value={draft.d} min={50} max={room.d} onCommit={(d) => setDraft({ ...draft, d })} />
+                      <NumberField pill label="높이" value={draft.h} min={50} max={room.h} onCommit={(h) => setDraft({ ...draft, h })} />
+                    </div>
+                  </div>
+                  <button type="button" onClick={addCustom} disabled={!draftValid} className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-primary-container py-3 text-[14px] font-bold text-white disabled:cursor-default disabled:opacity-40">
+                    <Icon name="add" className="text-[18px]" /> 놓기
+                  </button>
+                </section>
+              )}
+
+              <section className="px-5 py-5">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-[15px] font-bold text-text-primary">공간 적합도 진단</h3>
+                  <span className="text-[11px] text-text-muted">{target ? target.name : '실측 규격 기준'}</span>
+                </div>
+                {fit && verdict ? (
+                  <>
+                    <div className={`-mx-3 flex gap-2 rounded-xl px-3 py-3 ${verdict.box}`}>
+                      <Icon name={verdict.icon} filled className={`mt-px text-[18px] ${verdict.text}`} />
+                      <span className={`text-[15px] font-bold leading-snug ${verdict.text}`}>{verdict.label}</span>
+                    </div>
+                    <ul className="mt-3 space-y-2.5">
+                      {fit.checks.map((check, index) => (
+                        <li key={index} className="flex gap-2">
+                          <Icon name={check.level === 'ok' ? 'check_circle' : check.level === 'warn' ? 'error' : 'cancel'} filled className={`mt-0.5 text-[18px] ${CHECK_ICON[check.level]}`} />
+                          <div>
+                            <p className="text-[13px] font-semibold text-text-primary">{check.title}</p>
+                            <p className="text-[12px] leading-relaxed text-text-secondary">{check.detail}</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-4 overflow-hidden rounded-xl bg-surface-alt">
+                      <button type="button" onClick={() => setGapsOpen(!gapsOpen)} aria-expanded={gapsOpen} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-[13px] font-semibold text-text-primary">
+                        <span>주변 간격 (앞 · 뒤 · 옆)</span>
+                        <span className="flex items-center gap-1.5">
+                          {!gapsOpen && frontGap && <span className={`text-[12px] font-semibold ${CHECK_ICON[frontGap.level]}`}>앞 {cm(frontGap.distance)}</span>}
+                          <Icon name="expand_more" className={`text-[20px] text-text-secondary transition-transform ${gapsOpen ? 'rotate-180' : ''}`} />
+                        </span>
+                      </button>
+                      {gapsOpen && (
+                        <ul className="divide-y divide-border-subtle px-3">
+                          {[...fit.gaps]
+                            .sort((a, b) => ['앞', '뒤', '옆'].indexOf(a.side) - ['앞', '뒤', '옆'].indexOf(b.side))
+                            .map((gap) => (
+                              <li key={gap.dir} className="flex items-center justify-between py-2 text-[13px]">
+                                <span className="text-text-secondary">
+                                  <span className="font-semibold text-text-primary">{gap.side}</span> · {gap.target}까지
+                                </span>
+                                <span className={`font-semibold ${gap.side === '앞' ? CHECK_ICON[gap.level] : 'text-text-primary'}`}>{gap.distance < 5 ? '붙어 있음' : cm(gap.distance)}</span>
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                    </div>
+                    {target?.kind === 'product' && <p className="mt-3 text-[11px] leading-relaxed text-text-muted">서랍 완전 개폐에 앞쪽 {cm(DRAWER_PULL)}가 필요해요. 바닥의 파란 영역이 서랍이 열리는 자리예요.</p>}
+                  </>
+                ) : (
+                  <p className="text-[13px] text-text-muted">가구를 누르면 진단이 나와요. 서랍장이 공간에 없으면 초기화를 눌러 주세요.</p>
+                )}
+              </section>
+            </aside>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

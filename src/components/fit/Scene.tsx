@@ -29,6 +29,8 @@ type SceneProps = {
   onSelect: (id: string | null) => void
   onMove: (id: string, x: number, z: number) => void
   onOpenDetail: (id: string) => void
+  // 눌렀을 때 상세 보기로 넘어가는 가구. 기본은 책상 모델(desk)이다.
+  canOpenDetail?: (item: Item) => boolean
 }
 
 const CLICK_SLOP = 5
@@ -207,7 +209,7 @@ function DraggableItem({
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk' }: SceneProps) {
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => () => {
@@ -247,7 +249,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
           onSelect={onSelect}
           onMove={onMove}
           onDragChange={setDragging}
-          onClick={item.model === 'desk' ? () => onOpenDetail(item.id) : undefined}
+          onClick={canOpenDetail(item) ? () => onOpenDetail(item.id) : undefined}
         />
       ))}
 
