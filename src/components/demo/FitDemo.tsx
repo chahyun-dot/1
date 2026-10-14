@@ -38,12 +38,12 @@ const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d
 function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
   return (
     <div className="ml-2 mr-5 flex shrink-0 items-center gap-0.5">
-      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="remove" size={7} />
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-3 w-3 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" size={9} />
       </button>
       <span className="w-4 text-center text-[10px] font-semibold tabular-nums">{count}</span>
-      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="add" size={7} />
+      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-3 w-3 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="add" size={9} />
       </button>
     </div>
   )
@@ -296,7 +296,7 @@ export default function FitDemo() {
                             {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
                           </span>
                           <span className="min-w-0">
-                            <span className="line-clamp-2 break-keep text-[13px] font-semibold leading-snug">{item.name}</span>
+                            <span className="block truncate text-[13px] font-semibold">{item.name}</span>
                             <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
                           </span>
                         </button>
