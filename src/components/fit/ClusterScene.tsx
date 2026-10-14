@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
-import { ContactShadows, Html, OrbitControls } from '@react-three/drei'
+import { ContactShadows, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Dim } from '@/components/fit/DetailScene'
 import ItemModel from '@/components/fit/Models'
@@ -107,6 +107,12 @@ function DraggableMember({ position, yaw, onMove, onDrag, children }: { position
 
 export default function ClusterScene({ members, gaps, showDims, autoRotate, isDrawerOpen, onMoveMember, onReady }: ClusterSceneProps) {
   const [dragging, setDragging] = useState(false)
+  // 첫 Html(drei) 라벨이 StrictMode 이중 마운트에서 사라지는 문제가 있어, 장면이 한 번 그려진 뒤에 라벨을 붙인다.
+  const [labelsOn, setLabelsOn] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLabelsOn(true), 400)
+    return () => window.clearTimeout(timer)
+  }, [])
   // 가구를 끌어도 장면이 같이 움직이지 않도록 가운데와 카메라 거리는 처음 한 번만 잰다.
   const frame = useRef<{ cx: number; cz: number; span: number; tallest: number } | null>(null)
   if (!frame.current) {
@@ -138,16 +144,9 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
             onDrag={setDragging}
           >
             <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
-            {showDims && member.kind !== 'rug' && !['shirt', 'folded', 'shoes'].includes(member.model) && (
-              <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
-                <span className="whitespace-nowrap rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">
-                  {shortName(member.name)} · W{member.w} × D{member.d} × H{member.h}
-                </span>
-              </Html>
-            )}
           </DraggableMember>
         ))}
-        {showDims &&
+        {showDims && labelsOn &&
           gaps.map((gap) => (
             <Dim
               key={`${gap.a.id}-${gap.b.id}`}

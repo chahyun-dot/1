@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -230,6 +230,12 @@ function DraggableProduct({ desk, product, drawersOpen, onMove, onDrag }: {
 
 export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [], onMoveExtra, onReady }: DetailSceneProps) {
   const [dragging, setDragging] = useState(false)
+  // 첫 Html(drei) 라벨이 StrictMode 이중 마운트에서 사라지는 문제가 있어, 장면이 한 번 그려진 뒤에 라벨을 붙인다.
+  const [labelsOn, setLabelsOn] = useState(false)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLabelsOn(true), 400)
+    return () => window.clearTimeout(timer)
+  }, [])
   const m = product ? measureAgainstDesk(desk, product) : null
   const span = Math.max(desk.w, desk.d, 900, extras.length ? 1900 : 0) / M
 
@@ -246,8 +252,8 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
           <DraggableProduct key={extra.id} desk={desk} product={extra} drawersOpen={false} onMove={(x, z) => onMoveExtra?.(extra.id, x, z)} onDrag={setDragging} />
         ))}
         {product && <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />}
-        {showDims && <Dimensions desk={desk} product={product} m={m} />}
-        {showDims && extras.map((extra) => <ChairDims key={extra.id} desk={desk} chair={extra} />)}
+        {showDims && labelsOn && <Dimensions desk={desk} product={product} m={m} />}
+        {showDims && labelsOn && extras.map((extra) => <ChairDims key={extra.id} desk={desk} chair={extra} />)}
       </group>
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
