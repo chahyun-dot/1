@@ -37,13 +37,13 @@ const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d
 
 function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
   return (
-    <div className="mx-2 flex shrink-0 items-center gap-0.5">
-      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="remove" size={9} />
+    <div className="ml-2 mr-4 flex shrink-0 items-center gap-0.5">
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" size={7} />
       </button>
       <span className="w-4 text-center text-[10px] font-semibold tabular-nums">{count}</span>
-      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="add" size={9} />
+      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="add" size={7} />
       </button>
     </div>
   )
@@ -53,7 +53,7 @@ function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { 
 function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   return (
     <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-      <Icon name="close" size={1} />
+      <Icon name="close" size={5} />
     </button>
   )
 }
