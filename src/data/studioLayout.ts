@@ -8,9 +8,22 @@ import type { Item, Opening, Room } from '@/lib/types'
 // "내 공간에 맞는지 확인하기" 팝업의 처음 화면. 데모(#/demo)와 같은 플래너 방·가구에 책상 아래 마켓비 피하 서랍장만 더했다.
 export type RoomDims = { w: number; d: number; h: number; doorWidth: number }
 
-export const STUDIO_DIMS: RoomDims = { w: PLANNER_ROOM.w, d: PLANNER_ROOM.d, h: PLANNER_ROOM.h, doorWidth: PLANNER_ROOM.doorWidth }
+// 방을 4.2×4.2m 에서 4.5×4.5m 로 넓힌다. 늘어난 300mm 는 가구가 걸치지 않는 선(가로 2875mm, 세로 2150mm)에 끼워 넣어서,
+// 그 선보다 오른쪽·아래쪽에 있는 가구와 벽의 문·창은 300mm 밀리고 나머지는 그대로 둔다(붙어 있던 가구가 떨어지지 않는다).
+const GROW = 300
+const CUT_X = 2875
+const CUT_Z = 2150
+const shiftX = (v: number) => (v > CUT_X ? v + GROW : v)
+const shiftZ = (v: number) => (v > CUT_Z ? v + GROW : v)
 
-export const STUDIO_PRESET = { id: 'planner', label: '플래너 배치 · 책상 아래 (4.2×4.2m)' }
+export const STUDIO_DIMS: RoomDims = { w: PLANNER_ROOM.w + GROW, d: PLANNER_ROOM.d + GROW, h: PLANNER_ROOM.h, doorWidth: PLANNER_ROOM.doorWidth }
+
+export const STUDIO_PRESET = { id: 'planner', label: '플래너 배치 · 책상 아래 (4.5×4.5m)' }
+
+const grownOpening = (opening: Opening): Opening => {
+  const along = opening.side === '-x' || opening.side === '+x' ? shiftZ : shiftX
+  return { ...opening, from: along(opening.from), to: along(opening.to) }
+}
 
 export const MAX_WINDOWS = 4
 
@@ -27,7 +40,8 @@ const sameDims = (a: RoomDims, b: RoomDims) => a.w === b.w && a.d === b.d && a.h
 
 export const studioRoom = (dims: RoomDims, windowCount: number): Room => {
   if (sameDims(dims, STUDIO_DIMS)) {
-    return { ...PLANNER_ROOM, openings: { ...PLANNER_ROOM.openings!, windows: PLANNER_ROOM.openings!.windows.slice(0, windowCount) } }
+    const { door, windows } = PLANNER_ROOM.openings!
+    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map(grownOpening) } }
   }
   const doorFrom = Math.max(0, dims.d - 150 - dims.doorWidth)
   return {
@@ -61,7 +75,9 @@ const DESK_LEG_FOOT = 70
 export const keyOf = (item: Item) => item.id.split('#')[0]
 
 export const studioItems = (productColor: string): Item[] => {
-  const all = plannerItems().filter((item) => !HIDDEN_IN_STUDIO.has(keyOf(item)))
+  const all = plannerItems()
+    .filter((item) => !HIDDEN_IN_STUDIO.has(keyOf(item)))
+    .map((item) => ({ ...item, x: shiftX(item.x), z: shiftZ(item.z) }))
   const oldDesk = all.find((item) => keyOf(item) === DESK_ID)!
   const raise = DESK_HEIGHT - oldDesk.h
   const area = footprint(oldDesk)
