@@ -126,19 +126,16 @@ function ItemLabel({ item, onClick, detailButton }: { item: Item; onClick?: () =
   return (
     <Html position={[0, item.h / M + 0.18, 0]} center style={{ pointerEvents: 'none' }}>
       {detailButton ? (
-        <div className="flex flex-col items-center gap-1">
-          <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">{item.name}</span>
-          {onClick && (
-            <button
-              type="button"
-              onClick={onClick}
-              style={{ pointerEvents: 'auto' }}
-              className="cursor-pointer whitespace-nowrap rounded-full bg-primary-container px-2 py-[3px] text-[8px] font-bold text-white shadow-md hover:opacity-90"
-            >
-              제품 상세 페이지 이동
-            </button>
-          )}
-        </div>
+        onClick && (
+          <button
+            type="button"
+            onClick={onClick}
+            style={{ pointerEvents: 'auto' }}
+            className="cursor-pointer whitespace-nowrap rounded-full bg-primary-container px-2.5 py-1 text-[10px] font-bold text-white shadow-md hover:opacity-90"
+          >
+            제품 상세 페이지 이동
+          </button>
+        )
       ) : (
         <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">
           {onClick ? <span className="text-primary-container">상품 자세히 보기</span> : item.name}
@@ -174,24 +171,11 @@ function DraggableItem({
   const hit = useRef(new THREE.Vector3())
   const [x, z] = toWorld(room, item.x, item.z)
 
-  if (item.kind === 'rug') {
+  // 옛 팝업에서는 러그를 고정해 둔다. 새 화면(detailButton)에서는 러그도 다른 가구처럼 끌어 옮기고 고를 수 있다.
+  if (item.kind === 'rug' && !detailButton) {
     return (
-      <group
-        position={[x, 0, z]}
-        rotation={[0, yawOf(item), 0]}
-        onClick={
-          detailButton
-            ? (event) => {
-                event.stopPropagation()
-                onSelect(item.id)
-              }
-            : undefined
-        }
-        onPointerOver={detailButton ? () => (document.body.style.cursor = 'pointer') : undefined}
-        onPointerOut={detailButton ? () => (document.body.style.cursor = '') : undefined}
-      >
+      <group position={[x, 0, z]} rotation={[0, yawOf(item), 0]}>
         <ItemModel item={item} />
-        {detailButton && selected && <ItemLabel item={item} onClick={onClick} detailButton />}
       </group>
     )
   }

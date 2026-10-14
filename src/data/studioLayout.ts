@@ -103,18 +103,22 @@ export const studioItems = (productColor: string): Item[] => {
   const onDesk = (item: Item) => (item.elevation ?? 0) >= 500 && item.x > area.minX && item.x < area.maxX && item.z > area.minZ && item.z < area.maxZ
   let furniture = all.map((item) => (item === oldDesk ? desk : onDesk(item) ? { ...item, elevation: (item.elevation ?? 0) + raise } : item))
 
-  // 책상 묶음: 왼쪽 벽 창 커튼 라인(200mm)을 벗어나도록 책상과 그 위 물건, 의자를 115mm(모니터암·TV 는 175mm) 오른쪽으로. 의자는 서랍장(왼쪽 다리 쪽) 앞을 비우려고 170mm 위로.
-  furniture = move(furniture, (item) => keyOf(item) === DESK_ID || keyOf(item) === DESK_CHAIR_ID || onDesk(item), (item) => ({ x: item.x + 115 }))
+  // 책상 묶음: 책상을 왼쪽 벽에 붙이고(깊이 816mm 의 절반이 가운데) 그 위 물건과 의자도 같이 옮긴다. 의자는 서랍장(왼쪽 다리 쪽) 앞을 비우려고 170mm 위로.
+  const deskShift = oldDesk.d / 2 - oldDesk.x
+  furniture = move(furniture, (item) => keyOf(item) === DESK_ID || keyOf(item) === DESK_CHAIR_ID || onDesk(item), (item) => ({ x: item.x + deskShift }))
   furniture = move(furniture, KEY(DESK_CHAIR_ID), (item) => ({ z: item.z - 170 }))
-  furniture = move(furniture, (item) => keyOf(item) === 'YjCJHDA8B714D95FB9D45DD' || keyOf(item) === 'ZGXmJUk293C2AE613ED4B4B', (item) => ({ x: item.x + 60 }))
+  // 싱글 모니터암도 벽에 붙이고(가로 방향 길이 521mm 의 절반), 그 끝에 달린 TV 는 같이 옮긴다.
+  const ARM_KEY = 'YjCJHDA8B714D95FB9D45DD'
+  const armDelta = 260.5 - furniture.find(KEY(ARM_KEY))!.x
+  furniture = move(furniture, (item) => keyOf(item) === ARM_KEY || keyOf(item) === 'ZGXmJUk293C2AE613ED4B4B', (item) => ({ x: item.x + armDelta }))
   // 왼쪽 벽 창 둘의 간격은 앞쪽 벽 창 둘의 간격(184mm)과 같다(방을 넓히며 벌어진 두 번째 창과 그 블라인드를 원래 자리로).
   furniture = move(furniture, (item) => keyOf(item) === 'E1632324621148B0' && item.x < 100 && item.z > 2150, (item) => ({ z: item.z - GROW }))
   // 블라인드는 창에 맞춰 1300mm 부터 걸게 한다.
   furniture = move(furniture, KEY('E1632324621148B0'), { elevation: WINDOW_SILL, h: BLIND_HEIGHT })
-  // 침대 묶음: 침대 머리를 왼쪽 벽에 붙이고(창 커튼 라인은 z 3100 까지라 그 아래로), 3단 서랍은 침대 머리 옆(커튼 라인 때문에 벽에서 200mm), 그 위 조명과 머리 위 액자는 같이.
+  // 침대 묶음: 침대 머리와 3단 수납형 서랍을 왼쪽 벽에 붙이고(서랍은 침대 머리 옆), 그 위 조명과 머리 위 액자는 같이.
   furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3702 })
-  furniture = move(furniture, KEY(DRAWER_ID), { x: 451, z: 2888 })
-  furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 350, z: 2888 })
+  furniture = move(furniture, KEY(DRAWER_ID), { x: 250.5, z: 2888 })
+  furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 150.5, z: 2888 })
   furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3726 })
   // 행거 묶음: 침대 발치와 60cm 띄워 옷 걸리는 면(+x)이 오른쪽 벽의 문을 보게 하고, 둥근 러그를 그 아래에 깐다.
   const hanger = all.find(KEY('YSBhD9T1E65915F80104295'))!

@@ -436,7 +436,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <Icon name="info" className="text-[20px]" />
                 </button>
                 <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-[300px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  가구 드래그로 옮기기 · 가구를 누르면 뜨는 "제품 상세 페이지 이동" 버튼으로 자세히 볼 수 있어요 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
+                  가구 드래그로 옮기기 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
                 </span>
               </span>
             </div>
@@ -479,7 +479,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!mount ? null : inDetail && cluster!.id === 'desk' && desk && product ? (
                 <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen('product')} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : inDetail ? (
-                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onReady={() => setReady(true)} />
+                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onMoveMember={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : (
                 <Scene
                   key="room"
@@ -929,7 +929,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {!inDetail && tab === 'custom' && (
                 <section className="relative border-b border-border-subtle px-5 py-4">
-                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-30">
+                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-60">
                   <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
                   <div className="space-y-3">
                     <div>
@@ -952,8 +952,10 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     <Icon name="add" className="text-[18px]" /> 놓기
                   </button>
                   </div>
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/60">
-                    <span className="rounded-full bg-surface-base px-5 py-2 text-[18px] font-bold tracking-tight text-text-secondary shadow-md">Coming Soon…</span>
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/35">
+                    <span className="text-[20px] font-bold tracking-tight text-text-primary" style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.28)' }}>
+                      Coming Soon…
+                    </span>
                   </div>
                 </section>
               )}

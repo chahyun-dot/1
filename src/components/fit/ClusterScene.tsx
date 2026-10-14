@@ -1,4 +1,5 @@
-import { Canvas } from '@react-three/fiber'
+import { useRef, useState } from 'react'
+import { Canvas, type ThreeEvent } from '@react-three/fiber'
 import { ContactShadows, Html, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { Dim } from '@/components/fit/DetailScene'
@@ -8,6 +9,7 @@ import { footprint } from '@/lib/fit'
 import type { Item, Level } from '@/lib/types'
 
 const M = 1000
+const FLOOR = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
 
 export type PairGap = { a: Item; b: Item; axis: 'x' | 'z'; dist: number; from: [number, number]; to: [number, number] }
 
@@ -50,19 +52,68 @@ type ClusterSceneProps = {
   showDims: boolean
   autoRotate: boolean
   isDrawerOpen?: (item: Item) => boolean
+  // 가구를 끌어서 옮길 때 방 좌표(mm)로 불린다.
+  onMoveMember?: (id: string, x: number, z: number) => void
   onReady?: () => void
 }
 
-export default function ClusterScene({ members, gaps, showDims, autoRotate, isDrawerOpen, onReady }: ClusterSceneProps) {
-  const rects = members.map((member) => footprint(member))
-  const minX = Math.min(...rects.map((r) => r.minX))
-  const maxX = Math.max(...rects.map((r) => r.maxX))
-  const minZ = Math.min(...rects.map((r) => r.minZ))
-  const maxZ = Math.max(...rects.map((r) => r.maxZ))
-  const cx = (minX + maxX) / 2
-  const cz = (minZ + maxZ) / 2
-  const span = Math.max(maxX - minX, maxZ - minZ, 900) / M
-  const tallest = Math.max(...members.map((member) => (member.elevation ?? 0) + member.h)) / M
+// 바닥 위에서 끌어 옮길 수 있는 가구 하나.
+function DraggableMember({ position, yaw, onMove, onDrag, children }: { position: [number, number, number]; yaw: number; onMove: (wx: number, wz: number) => void; onDrag: (dragging: boolean) => void; children: React.ReactNode }) {
+  const offset = useRef<[number, number] | null>(null)
+  const hit = useRef(new THREE.Vector3())
+  const floor = (event: ThreeEvent<PointerEvent>) => (event.ray.intersectPlane(FLOOR, hit.current) ? ([hit.current.x, hit.current.z] as [number, number]) : null)
+  return (
+    <group
+      position={position}
+      rotation={[0, yaw, 0]}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return
+        event.stopPropagation()
+        const point = floor(event)
+        if (!point) return
+        offset.current = [position[0] - point[0], position[2] - point[1]]
+        ;(event.target as unknown as Element).setPointerCapture(event.pointerId)
+        onDrag(true)
+        document.body.style.cursor = 'grabbing'
+      }}
+      onPointerMove={(event) => {
+        if (!offset.current) return
+        event.stopPropagation()
+        const point = floor(event)
+        if (point) onMove(point[0] + offset.current[0], point[1] + offset.current[1])
+      }}
+      onPointerUp={(event) => {
+        if (!offset.current) return
+        offset.current = null
+        ;(event.target as unknown as Element).releasePointerCapture(event.pointerId)
+        onDrag(false)
+        document.body.style.cursor = 'grab'
+      }}
+      onPointerOver={() => {
+        if (!offset.current) document.body.style.cursor = 'grab'
+      }}
+      onPointerOut={() => {
+        if (!offset.current) document.body.style.cursor = ''
+      }}
+    >
+      {children}
+    </group>
+  )
+}
+
+export default function ClusterScene({ members, gaps, showDims, autoRotate, isDrawerOpen, onMoveMember, onReady }: ClusterSceneProps) {
+  const [dragging, setDragging] = useState(false)
+  // 가구를 끌어도 장면이 같이 움직이지 않도록 가운데와 카메라 거리는 처음 한 번만 잰다.
+  const frame = useRef<{ cx: number; cz: number; span: number; tallest: number } | null>(null)
+  if (!frame.current) {
+    const first = members.map((member) => footprint(member))
+    const x0 = Math.min(...first.map((r) => r.minX))
+    const x1 = Math.max(...first.map((r) => r.maxX))
+    const z0 = Math.min(...first.map((r) => r.minZ))
+    const z1 = Math.max(...first.map((r) => r.maxZ))
+    frame.current = { cx: (x0 + x1) / 2, cz: (z0 + z1) / 2, span: Math.max(x1 - x0, z1 - z0, 900) / M, tallest: Math.max(...members.map((member) => (member.elevation ?? 0) + member.h)) / M }
+  }
+  const { cx, cz, span, tallest } = frame.current
   const wx = (x: number) => (x - cx) / M
   const wz = (z: number) => (z - cz) / M
 
@@ -75,7 +126,13 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
 
       <group>
         {members.map((member) => (
-          <group key={member.id} position={[wx(member.x), (member.elevation ?? 0) / M, wz(member.z)]} rotation={[0, yawOf(member), 0]}>
+          <DraggableMember
+            key={member.id}
+            position={[wx(member.x), (member.elevation ?? 0) / M, wz(member.z)]}
+            yaw={yawOf(member)}
+            onMove={(mx, mz) => onMoveMember?.(member.id, mx * M + cx, mz * M + cz)}
+            onDrag={setDragging}
+          >
             <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
             {showDims && member.kind !== 'rug' && (
               <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
@@ -84,7 +141,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
                 </span>
               </Html>
             )}
-          </group>
+          </DraggableMember>
         ))}
         {showDims &&
           gaps.map((gap) => (
@@ -112,8 +169,9 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
 
       <OrbitControls
         makeDefault
+        enabled={!dragging}
         enableDamping
-        autoRotate={autoRotate}
+        autoRotate={autoRotate && !dragging}
         autoRotateSpeed={1.6}
         target={[0, Math.min(0.5, tallest / 2), 0]}
         minDistance={0.8}
