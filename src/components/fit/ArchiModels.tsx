@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
+import { lighten } from '@/lib/color'
 import type { Item } from '@/lib/types'
 
 // Archisketch 가구 이미지(public/archisketch)를 보고 코드로 모양을 만든 모델들.
@@ -80,8 +81,9 @@ export function BedWithBedding({ item }: Props) {
   const duvetH = 0.13
   const duvetZ = foot - duvetL / 2 + 0.06
   const duvetTop = mattressTop + duvetH - 0.005
-  const blue = '#3c4f78'
-  const pillow = '#42557e'
+  const blue = item.tint ?? '#3c4f78'
+  const pillow = item.tint ? lighten(item.tint, 0.05) : '#42557e'
+  const fold = item.tint ? lighten(item.tint, 0.1) : '#4b5f8c'
   const drop = duvetTop - frameH
   const layer = (position: [number, number, number], size: [number, number, number], color: string, radius: number, rotation?: [number, number, number]) => (
     <RoundedBox args={size} radius={Math.min(radius, size[0] / 2.1, size[1] / 2.1, size[2] / 2.1)} smoothness={3} position={position} rotation={rotation} castShadow receiveShadow>
@@ -94,7 +96,7 @@ export function BedWithBedding({ item }: Props) {
       {layer([0, mattressTop + duvetH / 2 - 0.005, duvetZ], [duvetW, duvetH, duvetL], blue, 0.06)}
       {[-1, 1].map((side) => layer([side * (duvetW / 2 - 0.004), duvetTop - drop / 2, duvetZ], [0.016, drop, duvetL * 0.97], blue, 0.006, [0, 0, -side * 0.07]))}
       {layer([0, duvetTop - drop / 2, foot + 0.06 - 0.006], [duvetW * 0.985, drop, 0.016], blue, 0.006, [0.07, 0, 0])}
-      {layer([0, duvetTop + 0.012, duvetZ - duvetL / 2 + 0.07], [duvetW * 0.99, 0.03, 0.12], '#4b5f8c', 0.012)}
+      {layer([0, duvetTop + 0.012, duvetZ - duvetL / 2 + 0.07], [duvetW * 0.99, 0.03, 0.12], fold, 0.012)}
       {layer([0, mattressTop + 0.15, head + 0.07], [w * 0.62, 0.3, 0.1], '#4b4b4f', 0.04, [-0.1, 0, 0])}
       {[-1, 1].map((side) => layer([side * w * 0.235, mattressTop + 0.07, head + 0.34], [w * 0.4, 0.13, 0.58], pillow, 0.05, [-0.12, 0, 0]))}
     </group>
@@ -107,7 +109,7 @@ export function SteelShelf({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
   const cabinetH = Math.min(0.74, h * 0.43)
-  const dark = '#46474b'
+  const dark = item.tint ?? '#46474b'
   const body = dark
   const door = dark
   const rod = '#1c1c1e'
@@ -335,7 +337,7 @@ export function FkSofa({ item }: Props) {
   const seatY = 0.4
   const seatW = (w - 0.12) / 2 - 0.004
   const backH = h - seatY - 0.02
-  const leather = <meshStandardMaterial color="#1f1f21" roughness={0.45} />
+  const leather = <meshStandardMaterial color={item.tint ?? '#1f1f21'} roughness={0.45} />
   return (
     <group>
       {[-1, 1].map((side) => (
@@ -435,7 +437,7 @@ export function WalnutDiningChair({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
   const seatY = 0.45
-  const wood = '#8a5a35'
+  const wood = item.tint ?? '#8a5a35'
   const black = '#161616'
   const backZ = -d / 2 + 0.03
   const legSpread = 0.04
@@ -628,7 +630,7 @@ export function DrawerUnit({ item }: Props) {
   const h = item.h / M
   const foot = 0.05
   const bodyH = h - foot
-  const dark = '#3a3a3c'
+  const dark = item.tint ? lighten(item.tint, 0.05) : '#3a3a3c'
   const fronts = [
     { y: foot + bodyH * 0.8, height: bodyH * 0.32 },
     { y: foot + bodyH * 0.47, height: bodyH * 0.3 },
@@ -638,7 +640,7 @@ export function DrawerUnit({ item }: Props) {
     <group>
       <mesh position={[0, foot + bodyH / 2, -0.01]} castShadow receiveShadow>
         <boxGeometry args={[w, bodyH, d - 0.02]} />
-        <meshStandardMaterial color="#2c2c2e" roughness={0.65} />
+        <meshStandardMaterial color={item.tint ?? '#2c2c2e'} roughness={0.65} />
       </mesh>
       {fronts.map((front, index) => (
         <group key={index}>

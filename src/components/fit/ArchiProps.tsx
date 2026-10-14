@@ -2,6 +2,7 @@ import { useMemo, type ComponentType } from 'react'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { CHROME, Rod } from '@/components/fit/ArchiModels'
+import { lighten } from '@/lib/color'
 import type { Item, PropModel } from '@/lib/types'
 
 // 작은 가구·소품·벽 가구 모델들. 기준은 Models.tsx 와 같다: 가구 가운데 바닥이 (0,0,0), 앞이 +z, 단위 m.
@@ -545,9 +546,9 @@ function WallHanger({ item }: Props) {
   const h = item.h / M
   return (
     <group>
-      <Slab size={[w - 0.04, h - 0.1, 0.01]} position={[0, h / 2 + 0.02, -d / 2 + 0.01]} color="#2a2a2c" />
+      <Slab size={[w - 0.04, h - 0.1, 0.01]} position={[0, h / 2 + 0.02, -d / 2 + 0.01]} color={item.tint ?? '#2a2a2c'} />
       {[-1, 1].map((side) => (
-        <Rod key={side} from={[side * (w / 2 - 0.012), 0, -d / 2 + 0.02]} to={[side * (w / 2 - 0.012), h, -d / 2 + 0.02]} r={0.01} color="#232325" />
+        <Rod key={side} from={[side * (w / 2 - 0.012), 0, -d / 2 + 0.02]} to={[side * (w / 2 - 0.012), h, -d / 2 + 0.02]} r={0.01} color={item.tint ?? '#232325'} />
       ))}
       <Rod from={[-w / 2 + 0.012, h - 0.04, 0]} to={[w / 2 - 0.012, h - 0.04, 0]} r={0.008} color={CHROME} metal />
       <Rod from={[-w / 2 + 0.012, h - 0.04, -d / 2 + 0.02]} to={[-w / 2 + 0.012, h - 0.04, 0]} r={0.008} color={CHROME} metal />
@@ -909,7 +910,7 @@ function SteelBox({ item }: Props) {
   const h = item.h / M
   return (
     <group>
-      <Slab size={[w, h, d]} position={[0, h / 2, 0]} color="#1b1b1d" radius={0.03} roughness={0.35} metalness={0.3} />
+      <Slab size={[w, h, d]} position={[0, h / 2, 0]} color={item.tint ?? '#1b1b1d'} radius={0.03} roughness={0.35} metalness={0.3} />
       <Rod from={[-w * 0.3, h * 0.28, d / 2 + 0.004]} to={[w * 0.3, h * 0.28, d / 2 + 0.004]} r={0.004} color={CHROME} metal />
     </group>
   )
@@ -1099,11 +1100,11 @@ function Cushion({ item }: Props) {
   return (
     <group>
       <RoundedBox args={[w, h, d]} radius={Math.min(d * 0.3, 0.05)} smoothness={6} position={[0, h / 2, 0]} castShadow receiveShadow>
-        {std('#c79c62', 0.98)}
+        {std(item.tint ?? '#c79c62', 0.98)}
       </RoundedBox>
       <mesh position={[0, h / 2, 0]} scale={[w / 2 * 0.98, h / 2 * 0.98, d / 2 * 1.04]}>
         <sphereGeometry args={[1, 28, 18]} />
-        {std('#cba26a', 0.98)}
+        {std(item.tint ? lighten(item.tint, 0.04) : '#cba26a', 0.98)}
       </mesh>
     </group>
   )
