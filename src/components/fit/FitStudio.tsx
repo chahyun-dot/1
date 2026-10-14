@@ -27,7 +27,7 @@ type DetailTab = 'cabinet' | 'members'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'space', label: '내 공간 치수' },
-  { id: 'all', label: '통합' },
+  { id: 'all', label: '가구 목록' },
   { id: 'custom', label: '직접 입력' },
 ]
 
@@ -581,8 +581,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
         <div className="flex min-h-0 flex-1">
           <div className="relative flex min-w-0 flex-1 flex-col">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle bg-surface-base px-5 py-3">
-              {inDetail ? (
+            {inDetail && (
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-subtle bg-surface-base px-5 py-3">
                 <div className="flex items-center gap-2">
                   <button type="button" onClick={() => setDetail(null)} className="flex items-center gap-0.5 rounded-md px-1.5 py-1 text-[13px] font-semibold text-text-secondary hover:bg-surface-subtle">
                     <Icon name="arrow_back" className="text-[17px]" /> 방 전체
@@ -590,14 +590,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <span className="text-[14px] font-bold text-text-primary">{cluster!.title} 자세히 보기</span>
                   <span className="rounded-full bg-brand-sky-light px-2 py-0.5 text-[11px] font-semibold text-primary-container">360° 회전</span>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-status-success" />
-                  <span className="text-[14px] font-bold text-text-primary">{spaceLabel} (가상 시뮬레이션 중)</span>
-                  <span className="rounded-full bg-brand-sky-light px-2 py-0.5 text-[11px] font-semibold text-primary-container">실측 치수 1:1</span>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="relative min-h-0 flex-1 bg-surface-subtle">
               {!ready && (
@@ -946,7 +940,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!inDetail && tab === 'all' && (
                 <section className="px-5 py-4">
                   <div className="mb-3 flex rounded-lg bg-surface-subtle p-0.5">
-                    {([['placed', `배치된 가구 ${listedCount}`], ['catalog', `상품 종류 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
+                    {([['placed', `배치된 가구 ${listedCount}`], ['catalog', `전체 가구 목록 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
                       <button key={id} type="button" aria-pressed={sub === id} onClick={() => setSub(id)} className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] ${sub === id ? 'bg-surface-base font-semibold text-on-primary-container shadow-xs' : 'text-text-secondary'}`}>
                         {label}
                       </button>
