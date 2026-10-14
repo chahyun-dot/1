@@ -960,6 +960,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </section>
               )}
 
+              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. */}
+              {(inDetail || tab !== 'custom') && (
               <section className="px-5 py-5">
                 <div className="mb-3 flex items-center justify-between">
                   <h3 className="text-[15px] font-bold text-text-primary">공간 적합도 진단</h3>
@@ -1011,6 +1013,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <p className="text-[13px] text-text-muted">가구를 누르면 진단이 나와요. 서랍장이 공간에 없으면 초기화를 눌러 주세요.</p>
                 )}
               </section>
+              )}
             </aside>
           )}
         </div>
