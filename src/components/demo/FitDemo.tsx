@@ -7,7 +7,7 @@ import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture }
 import type { Check, Gap, Item, Level, Rot } from '@/lib/types'
 
 // 데모: 현재 "내 공간에 맞는지 확인하기"와 별개로, 3D 영역에 가구를 더하고 크기·여유를 보는 개정판.
-// 오른쪽 탭 = 배치된 가구 / 전체 가구 / 직접 입력.
+// 오른쪽 탭 = 배치된 가구 / 상품 종류 / 직접 입력.
 
 // 플래너 프로젝트(Archisketch)와 같은 방·배치로 시작한다.
 const room = PLANNER_ROOM
@@ -16,7 +16,7 @@ type Tab = 'placed' | 'catalog' | 'custom'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'placed', label: '배치된 가구' },
-  { id: 'catalog', label: '전체 가구' },
+  { id: 'catalog', label: '상품 종류' },
   { id: 'custom', label: '직접 입력' },
 ]
 
@@ -34,6 +34,9 @@ const LEVEL_STYLE: Record<Level, { icon: string; text: string; box: string; labe
 }
 
 const DIR_NAME: Record<Gap['dir'], string> = { '-x': '왼쪽 벽 쪽', '+x': '오른쪽 벽 쪽', '-z': '뒷벽 쪽', '+z': '앞벽 쪽' }
+
+const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
+const WINDOW_ID = 'E976B33E1388415C'
 
 const initialItems = (): Item[] => plannerItems()
 
@@ -155,7 +158,19 @@ export default function FitDemo() {
     return DEMO_FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
   }, [query, category])
 
-  const listed = items
+  // 같은 상품은 3D 에 몇 개를 놓았든 목록에서 한 줄(상품 종류 1개)로 센다. 문·창문도 한 종류씩 센다.
+  const groups = useMemo(() => {
+    const map = new Map<string, Item[]>()
+    items.forEach((item) => {
+      const key = item.id.split('#')[0]
+      map.set(key, [...(map.get(key) ?? []), item])
+    })
+    return [...map.values()]
+  }, [items])
+  const openingRows = ([[DOOR_ID, 1], [WINDOW_ID, room.openings?.windows.length ?? 0]] as const)
+    .map(([id, count]) => ({ furniture: FURNITURE.find((f) => f.id === id), count }))
+    .filter((row) => row.furniture && row.count > 0)
+  const listedCount = groups.length + openingRows.length
   const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
 
   return (
@@ -288,7 +303,7 @@ export default function FitDemo() {
                 }`}
               >
                 {item.label}
-                {item.id === 'placed' && <span className="text-text-muted">{listed.length}</span>}
+                {item.id === 'placed' && <span className="text-text-muted">{listedCount}</span>}
                 {item.id === 'catalog' && <span className="text-text-muted">{DEMO_FURNITURE.length}</span>}
               </button>
             ))}
@@ -296,25 +311,42 @@ export default function FitDemo() {
 
           {tab === 'placed' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">지금 3D 영역에 놓인 가구예요. 누르면 크기와 여유를 볼 수 있어요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, ×개수). 누르면 크기와 여유를 볼 수 있어요.</p>
               <ul className="space-y-1.5">
-                {listed.map((item) => (
-                  <li key={item.id}>
-                    <div className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${item.id === selectedId ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
-                      <button type="button" onClick={() => setSelectedId(item.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
-                          {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-[13px] font-semibold">{item.name}</span>
-                          <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
-                        </span>
-                      </button>
-                      {item.kind !== 'product' && (
-                        <button type="button" aria-label={`${item.name} 빼기`} onClick={() => remove(item.id)} className="cursor-pointer rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-                          <Icon name="close" className="text-[18px]" />
+                {groups.map((group) => {
+                  const item = group.find((member) => member.id === selectedId) ?? group[0]
+                  const last = group[group.length - 1]
+                  return (
+                    <li key={item.id.split('#')[0]}>
+                      <div className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 ${group.some((member) => member.id === selectedId) ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
+                        <button type="button" onClick={() => setSelectedId(item.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
+                          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                            {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate text-[13px] font-semibold">{item.name}{group.length > 1 && <span className="ml-1 font-bold text-on-primary-container">×{group.length}</span>}</span>
+                            <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
+                          </span>
                         </button>
-                      )}
+                        {item.kind !== 'product' && (
+                          <button type="button" aria-label={`${item.name} 빼기`} onClick={() => remove(last.id)} className="cursor-pointer rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+                            <Icon name="close" className="text-[18px]" />
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+                {openingRows.map(({ furniture, count }) => (
+                  <li key={furniture!.id}>
+                    <div className="flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                        <img src={furniture!.image} alt="" className="h-full w-full object-contain" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block truncate text-[13px] font-semibold">{furniture!.name}{count > 1 && <span className="ml-1 font-bold text-on-primary-container">×{count}</span>}</span>
+                        <span className="block text-[11px] text-text-muted">방 구조에 포함돼요</span>
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -324,7 +356,7 @@ export default function FitDemo() {
 
           {tab === 'catalog' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">등록된 가구 샘플 {DEMO_FURNITURE.length}개예요. 누르면 3D 영역에 놓여요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">등록된 상품 종류 {DEMO_FURNITURE.length}개예요. 누르면 3D 영역에 놓여요.</p>
               <input
                 type="search"
                 value={query}
