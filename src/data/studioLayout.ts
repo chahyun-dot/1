@@ -192,7 +192,7 @@ export const studioItems = (productColor: string): Item[] => {
 export type ClusterId = 'bed' | 'desk' | 'table'
 
 export const CLUSTERS: { id: ClusterId; title: string; keys: string[]; pairs: ([string, string] | [string, string, 'on'])[] }[] = [
-  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID, BEAT_LIGHT_ID, ...HANGER_KEYS], pairs: [[BED_ID, DRAWER_ID], [BED_ID, HANGER_ID], [DRAWER_ID, BEAT_LIGHT_ID, 'on']] },
+  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID, BEAT_LIGHT_ID, ...HANGER_KEYS], pairs: [[BED_ID, DRAWER_ID], [BED_ID, HANGER_ID]] },
   { id: 'desk', title: '책상 & 의자 & 서랍장', keys: [DESK_ID, DESK_CHAIR_ID, 'product'], pairs: [] },
   { id: 'table', title: '원형 테이블 & 의자 & 소파', keys: [TABLE_ID, DINING_CHAIR_ID, SOFA_ID, BIG_RUG_ID, CUSHION_ID], pairs: [[TABLE_ID, DINING_CHAIR_ID], [TABLE_ID, SOFA_ID]] },
 ]

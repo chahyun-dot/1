@@ -45,6 +45,9 @@ const yawOf = (item: Item) => (item.yaw !== undefined ? (item.yaw * Math.PI) / 1
 
 const levelOf = (dist: number): Level => (dist < 0 ? 'bad' : dist < 20 ? 'warn' : 'ok')
 
+// 3D 영역 글자에서는 침대 이름의 브랜드·모델 머리말(뷰티레스트 스위트 슈퍼싱글)을 뺀다.
+const shortName = (name: string) => name.replace('뷰티레스트 스위트 슈퍼싱글 ', '')
+
 const mm = (value: number) => `${Math.round(value).toLocaleString()}mm`
 
 type ClusterSceneProps = {
@@ -138,7 +141,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
             {showDims && member.kind !== 'rug' && !['shirt', 'folded', 'shoes'].includes(member.model) && (
               <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
                 <span className="whitespace-nowrap rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">
-                  {member.name} · W{member.w} × D{member.d} × H{member.h}
+                  {shortName(member.name)} · W{member.w} × D{member.d} × H{member.h}
                 </span>
               </Html>
             )}
@@ -153,13 +156,13 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
               label={
                 gap.rest
                   ? gap.dist < 0
-                    ? `${gap.b.name}이(가) ${gap.a.name} 위에 놓여 있어요`
-                    : `${gap.b.name}이(가) ${gap.a.name}에서 ${mm(gap.dist)} 떨어져 있어요`
+                    ? `${shortName(gap.b.name)}이(가) ${shortName(gap.a.name)} 위에 놓여 있어요`
+                    : `${shortName(gap.b.name)}이(가) ${shortName(gap.a.name)}에서 ${mm(gap.dist)} 떨어져 있어요`
                   : gap.dist < 0
                   ? gap.b.model.includes('chair')
-                    ? `${gap.b.name}가 ${gap.a.name} 아래로 ${mm(-gap.dist)} 들어가 있어요`
-                    : `${gap.b.name}와 ${mm(-gap.dist)} 겹침`
-                  : `${gap.a.name} ↔ ${gap.b.name} ${mm(gap.dist)}`
+                    ? `${shortName(gap.b.name)}가 ${shortName(gap.a.name)} 아래로 ${mm(-gap.dist)} 들어가 있어요`
+                    : `${shortName(gap.b.name)}와 ${mm(-gap.dist)} 겹침`
+                  : `${shortName(gap.a.name)} ↔ ${shortName(gap.b.name)} ${mm(gap.dist)}`
               }
               color={LEVEL_COLOR[gap.rest ? (gap.dist < 0 ? 'ok' : 'warn') : gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
             />
