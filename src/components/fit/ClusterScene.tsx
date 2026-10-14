@@ -12,7 +12,7 @@ const M = 1000
 const FLOOR = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
 
 // rest: b 가 a 위에 얹혀 있는 짝(서랍 위 조명, 소파 위 쿠션, 러그 위 테이블). 겹쳐 있는 것이 정상이다.
-export type PairGap = { a: Item; b: Item; axis: 'x' | 'z'; dist: number; from: [number, number]; to: [number, number]; rest?: boolean }
+export type PairGap = { a: Item; b: Item; axis: 'x' | 'z'; dist: number; from: [number, number]; to: [number, number]; rest?: boolean; heightOnly?: boolean }
 
 // 두 가구 사이의 가장 가까운 면 거리. 한 방향으로 마주 볼 때만 잰다(대각선이면 더 먼 방향).
 export const gapOf = (a: Item, b: Item): PairGap => {
@@ -107,7 +107,7 @@ function DraggableMember({ position, yaw, onMove, onDrag, children }: { position
 
 // 다른 가구 위에 얹힌 가구(서랍 위 조명, 소파 위 쿠션, 러그 위 테이블): 받치는 가구의 네 끝까지 남은 거리와 바닥에서의 높이.
 // 받치는 가구 밖으로 나가면 빨갛게 "밖으로 N mm"가 된다. 시점이 돌아가도 헷갈리지 않게 방향 말 없이 끝까지 거리만 적는다.
-function InsetDims({ a, b, wx, wz }: { a: Item; b: Item; wx: (x: number) => number; wz: (z: number) => number }) {
+function InsetDims({ a, b, wx, wz, heightOnly = false }: { a: Item; b: Item; wx: (x: number) => number; wz: (z: number) => number; heightOnly?: boolean }) {
   const ra = footprint(a)
   const rb = footprint(b)
   const y = Math.max(0.02, (b.elevation ?? 0) / M)
@@ -125,10 +125,10 @@ function InsetDims({ a, b, wx, wz }: { a: Item; b: Item; wx: (x: number) => numb
   )
   return (
     <group>
-      {side(rb.minX - ra.minX, [ra.minX, cz], [rb.minX, cz])}
-      {side(ra.maxX - rb.maxX, [rb.maxX, cz], [ra.maxX, cz])}
-      {side(rb.minZ - ra.minZ, [cx, ra.minZ], [cx, rb.minZ])}
-      {side(ra.maxZ - rb.maxZ, [cx, rb.maxZ], [cx, ra.maxZ])}
+      {!heightOnly && side(rb.minX - ra.minX, [ra.minX, cz], [rb.minX, cz])}
+      {!heightOnly && side(ra.maxX - rb.maxX, [rb.maxX, cz], [ra.maxX, cz])}
+      {!heightOnly && side(rb.minZ - ra.minZ, [cx, ra.minZ], [cx, rb.minZ])}
+      {!heightOnly && side(ra.maxZ - rb.maxZ, [cx, rb.maxZ], [cx, ra.maxZ])}
       {(b.elevation ?? 0) > 0 && <Dim from={[wx(cx), 0, wz(cz)]} to={[wx(cx), (b.elevation ?? 0) / M, wz(cz)]} label={`바닥에서 ${mm(b.elevation ?? 0)}`} />}
     </group>
   )
@@ -175,7 +175,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
             <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
           </DraggableMember>
         ))}
-        {showDims && labelsOn && gaps.filter((gap) => gap.rest).map((gap) => <InsetDims key={`on-${gap.a.id}-${gap.b.id}`} a={gap.a} b={gap.b} wx={wx} wz={wz} />)}
+        {showDims && labelsOn && gaps.filter((gap) => gap.rest).map((gap) => <InsetDims key={`on-${gap.a.id}-${gap.b.id}`} a={gap.a} b={gap.b} wx={wx} wz={wz} heightOnly={gap.heightOnly} />)}
         {showDims && labelsOn &&
           gaps.filter((gap) => !gap.rest).map((gap) => (
             <Dim

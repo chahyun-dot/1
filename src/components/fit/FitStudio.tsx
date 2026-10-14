@@ -246,7 +246,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const deskChairs = useMemo(() => (cluster?.id === 'desk' ? members.filter((item) => item.model === 'meshchair') : []), [cluster, members])
   const gaps: PairGap[] = useMemo(() => {
     if (!cluster) return []
-    return cluster.pairs.flatMap(([ka, kb, kind]) => items.filter((a) => keyOf(a) === ka).flatMap((a) => items.filter((b) => keyOf(b) === kb).map((b) => ({ ...gapOf(a, b), rest: kind === 'on' }))))
+    return cluster.pairs.flatMap(([ka, kb, kind]) => items.filter((a) => keyOf(a) === ka).flatMap((a) => items.filter((b) => keyOf(b) === kb).map((b) => ({ ...gapOf(a, b), rest: kind === 'on' || kind === 'height', heightOnly: kind === 'height' }))))
   }, [cluster, items])
 
   const bedItem = members.find((item) => keyOf(item) === BED_ID)
