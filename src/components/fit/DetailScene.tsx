@@ -130,7 +130,7 @@ function Dimensions({ desk, product, m }: { desk: Item; product: Item | null; m:
   )
 }
 
-// 서랍장이 없을 때 의자를 끌어 옮기면 따라 바뀌는 책상과의 간격(책상 앞 끝, 아래로 들어간 깊이, 다리·뒤 간격).
+// 의자를 끌어 옮기면 따라 바뀌는 책상과의 간격(책상 앞 끝, 아래로 들어간 깊이, 다리·뒤 간격).
 function ChairDims({ desk, chair }: { desk: Item; chair: Item }) {
   const m = measureAgainstDesk(desk, chair)
   const halfD = desk.d / 2 / M
@@ -247,7 +247,7 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
         ))}
         {product && <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />}
         {showDims && <Dimensions desk={desk} product={product} m={m} />}
-        {showDims && !product && extras.map((extra) => <ChairDims key={extra.id} desk={desk} chair={extra} />)}
+        {showDims && extras.map((extra) => <ChairDims key={extra.id} desk={desk} chair={extra} />)}
       </group>
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>

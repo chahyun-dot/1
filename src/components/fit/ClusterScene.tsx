@@ -11,7 +11,8 @@ import type { Item, Level } from '@/lib/types'
 const M = 1000
 const FLOOR = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
 
-export type PairGap = { a: Item; b: Item; axis: 'x' | 'z'; dist: number; from: [number, number]; to: [number, number] }
+// rest: b 가 a 위에 얹혀 있는 짝(서랍 위 조명, 소파 위 쿠션, 러그 위 테이블). 겹쳐 있는 것이 정상이다.
+export type PairGap = { a: Item; b: Item; axis: 'x' | 'z'; dist: number; from: [number, number]; to: [number, number]; rest?: boolean }
 
 // 두 가구 사이의 가장 가까운 면 거리. 한 방향으로 마주 볼 때만 잰다(대각선이면 더 먼 방향).
 export const gapOf = (a: Item, b: Item): PairGap => {
@@ -150,13 +151,17 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
               from={[wx(gap.from[0]), 0.05, wz(gap.from[1])]}
               to={[wx(gap.to[0]), 0.05, wz(gap.to[1])]}
               label={
-                gap.dist < 0
+                gap.rest
+                  ? gap.dist < 0
+                    ? `${gap.b.name}이(가) ${gap.a.name} 위에 놓여 있어요`
+                    : `${gap.b.name}이(가) ${gap.a.name}에서 ${mm(gap.dist)} 떨어져 있어요`
+                  : gap.dist < 0
                   ? gap.b.model.includes('chair')
                     ? `${gap.b.name}가 ${gap.a.name} 아래로 ${mm(-gap.dist)} 들어가 있어요`
                     : `${gap.b.name}와 ${mm(-gap.dist)} 겹침`
                   : `${gap.a.name} ↔ ${gap.b.name} ${mm(gap.dist)}`
               }
-              color={LEVEL_COLOR[gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
+              color={LEVEL_COLOR[gap.rest ? (gap.dist < 0 ? 'ok' : 'warn') : gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
             />
           ))}
       </group>
