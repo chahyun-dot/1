@@ -852,9 +852,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                         const memberOptions = member.kind === 'product' ? undefined : COLOR_OPTIONS[keyOf(member)]
                         const resizable = member.model !== 'motiondesk'
                         return (
-                          <li key={member.id} className="rounded-xl border border-border-default px-3 py-3">
+                          <li key={member.id} className={`rounded-xl border px-3 py-3 ${target?.id === member.id ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
                             <div className="flex items-center gap-2">
-                              <div className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
+                              <div onClick={() => setSelectedId(member.id)} className="flex min-w-0 flex-1 items-center gap-2.5 text-left">
                                 <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
                                   {member.image ? <img src={member.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: member.color }} />}
                                 </span>
