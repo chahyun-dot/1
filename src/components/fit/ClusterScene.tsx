@@ -49,9 +49,11 @@ type ClusterSceneProps = {
   gaps: PairGap[]
   showDims: boolean
   autoRotate: boolean
+  drawersOpen?: boolean
+  onReady?: () => void
 }
 
-export default function ClusterScene({ members, gaps, showDims, autoRotate }: ClusterSceneProps) {
+export default function ClusterScene({ members, gaps, showDims, autoRotate, drawersOpen = false, onReady }: ClusterSceneProps) {
   const rects = members.map((member) => footprint(member))
   const minX = Math.min(...rects.map((r) => r.minX))
   const maxX = Math.max(...rects.map((r) => r.maxX))
@@ -65,7 +67,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate }: Cl
   const wz = (z: number) => (z - cz) / M
 
   return (
-    <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.02, far: 60, position: [span * 1.0, span * 1.05 + 0.5, span * 1.6] }}>
+    <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.02, far: 60, position: [span * 1.0, span * 1.05 + 0.5, span * 1.6] }} onCreated={() => requestAnimationFrame(() => requestAnimationFrame(() => onReady?.()))}>
       <color attach="background" args={['#f7f8fa']} />
       <hemisphereLight args={['#ffffff', '#e6e2dc', 1.2]} />
       <directionalLight position={[1.5, 3, 2]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} />
@@ -74,7 +76,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate }: Cl
       <group>
         {members.map((member) => (
           <group key={member.id} position={[wx(member.x), (member.elevation ?? 0) / M, wz(member.z)]} rotation={[0, yawOf(member), 0]}>
-            <ItemModel item={member} />
+            <ItemModel item={member} drawersOpen={drawersOpen} />
             {showDims && member.kind !== 'rug' && (
               <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
                 <span className="whitespace-nowrap rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">

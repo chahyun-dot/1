@@ -31,6 +31,8 @@ type SceneProps = {
   onOpenDetail: (id: string) => void
   // 눌렀을 때 상세 보기로 넘어가는 가구. 기본은 책상 모델(desk)이다.
   canOpenDetail?: (item: Item) => boolean
+  // 첫 화면이 그려진 뒤 한 번 불린다(로딩 표시를 끄는 용도).
+  onReady?: () => void
 }
 
 const CLICK_SLOP = 5
@@ -141,7 +143,20 @@ function DraggableItem({
 
   if (item.kind === 'rug') {
     return (
-      <group position={[x, 0, z]} rotation={[0, yawOf(item), 0]}>
+      <group
+        position={[x, 0, z]}
+        rotation={[0, yawOf(item), 0]}
+        onClick={
+          onClick
+            ? (event) => {
+                event.stopPropagation()
+                onClick()
+              }
+            : undefined
+        }
+        onPointerOver={onClick ? () => (document.body.style.cursor = 'pointer') : undefined}
+        onPointerOut={onClick ? () => (document.body.style.cursor = '') : undefined}
+      >
         <ItemModel item={item} />
       </group>
     )
@@ -209,7 +224,7 @@ function DraggableItem({
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk' }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady }: SceneProps) {
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => () => {
@@ -222,6 +237,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
       dpr={[1, 2]}
       camera={{ fov: 24, near: 0.1, far: 200, position: [-10.8, 8, 10.8] }}
       onPointerMissed={(event) => event.button === 0 && onSelect(null)}
+      onCreated={() => requestAnimationFrame(() => requestAnimationFrame(() => onReady?.()))}
     >
       <color attach="background" args={['#2b2c2f']} />
       <hemisphereLight args={['#ffffff', '#8a8d93', 1.25]} />

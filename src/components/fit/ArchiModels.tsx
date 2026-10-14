@@ -635,7 +635,7 @@ export function AraliaPlant({ item }: Props) {
 }
 
 // W400 3단 서랍(바퀴 달림): 어두운 본체 앞에 서랍 3개(윗칸이 가장 높고 열쇠 구멍 있음), 합판 색 단면, 아래 바퀴 4개.
-export function DrawerUnit({ item }: Props) {
+export function DrawerUnit({ item, drawersOpen = false }: Props & { drawersOpen?: boolean }) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
@@ -654,7 +654,7 @@ export function DrawerUnit({ item }: Props) {
         <meshStandardMaterial color={item.tint ?? '#2c2c2e'} roughness={0.65} />
       </mesh>
       {fronts.map((front, index) => (
-        <group key={index}>
+        <group key={index} position={[0, 0, drawersOpen ? 0.2 * (index === 0 ? 0.8 : 1) : 0]}>
           <mesh position={[0, front.y, d / 2 - 0.01]} castShadow>
             <boxGeometry args={[w - 0.05, front.height, 0.016]} />
             <meshStandardMaterial color="#c9a77c" roughness={0.7} />

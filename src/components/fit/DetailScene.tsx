@@ -23,6 +23,7 @@ type DetailSceneProps = {
   onMove: (x: number, z: number) => void
   // 책상 옆에 함께 보여 줄 가구(의자 등). 책상 기준 위치 그대로 그린다.
   extras?: Item[]
+  onReady?: () => void
 }
 
 const mm = (value: number) => `${Math.round(value).toLocaleString()}mm`
@@ -171,13 +172,13 @@ function DraggableProduct({ desk, product, m, drawersOpen, onMove, onDrag }: {
   )
 }
 
-export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [] }: DetailSceneProps) {
+export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [], onReady }: DetailSceneProps) {
   const [dragging, setDragging] = useState(false)
   const m = measureAgainstDesk(desk, product)
   const span = Math.max(desk.w, desk.d, 900, extras.length ? 1900 : 0) / M
 
   return (
-    <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.02, far: 50, position: [span * 0.9, span * 0.75, span * 1.15] }}>
+    <Canvas shadows dpr={[1, 2]} camera={{ fov: 38, near: 0.02, far: 50, position: [span * 0.9, span * 0.75, span * 1.15] }} onCreated={() => requestAnimationFrame(() => requestAnimationFrame(() => onReady?.()))}>
       <color attach="background" args={['#f7f8fa']} />
       <hemisphereLight args={['#ffffff', '#e6e2dc', 1.2]} />
       <directionalLight position={[1.5, 3, 2]} intensity={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.0004} />
