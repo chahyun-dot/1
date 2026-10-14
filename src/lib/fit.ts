@@ -189,7 +189,7 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     checks.push({ level: 'warn', title: `옆 ${tightSide.target}와 ${cm(tightSide.distance)}만 떨어져 있어요`, detail: caster > 0 ? '바퀴로 넣고 뺄 때 긁힐 수 있어요. 2cm 이상 띄워 주세요.' : '바퀴가 없어 끌면 바닥과 옆면이 긁힐 수 있어요. 들어서 옮기고 2cm 이상 띄워 주세요.' })
   }
 
-  if (curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0))) {
+  if (curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0) + SILL_TOLERANCE)) {
     checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
   }
 
@@ -242,6 +242,9 @@ const rests = (top: Item, base: Item) => {
 }
 
 // 데모용: 서랍 전용 규칙 없이, 고른 가구 하나의 위치 문제와 앞뒤좌우 여유만 본다.
+// 창턱 위로 100mm 이하로 살짝 걸친 가구(책상 위 모니터암 등)는 커튼 라인에 닿는 것으로 보지 않는다.
+const SILL_TOLERANCE = 100
+
 export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResult => {
   const rect = footprint(item)
   const flat = item.h <= FLAT_MAX
@@ -262,7 +265,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   blocking.forEach((other) => checks.push({ level: 'bad', title: `${other.name}와 겹쳐요`, detail: '같은 자리에 둘 수 없어요. 끌어서 옮겨 주세요.' }))
   if (under) checks.push({ level: 'ok', title: `${under.name} 아래에 들어가요`, detail: `${under.name} 아래 높이 ${cm(under.underClearance!)}, 가구 높이 ${cm(item.h)}예요.` })
   if (!flat && overlaps(rect, doorSwingRect(room))) checks.push({ level: 'bad', title: '문 여닫는 공간을 막아요', detail: `문 폭 ${cm(room.doorWidth)}만큼 문이 열리는 자리예요.` })
-  if (item.model !== 'blind' && curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
+  if (item.model !== 'blind' && curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0) + SILL_TOLERANCE)) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
 
   const front = frontDir(item.rot)
   // 앞쪽 여유(사람이 서는 자리)는 바닥에 놓인 큰 가구만 따진다. 선반·책상 위 물건, 벽에 건 것, 의자는 제외한다.

@@ -1,4 +1,5 @@
 import { PRODUCT, WHEEL_DEFAULT } from '@/data/catalog'
+import { GALLERY } from '@/data/ohou'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { placeUnderDesk } from '@/lib/desk'
 import { footprint } from '@/lib/fit'
@@ -29,13 +30,13 @@ const grownOpening = (opening: Opening): Opening => {
 
 export const MAX_WINDOWS = 4
 
-// 창 아래 높이를 990 → 1300mm 로 올려(창 높이 1216 → 906mm) 침대 머리·책상·3단 서랍·모니터암처럼 낮은 가구가 벽에 붙어도 창 커튼 라인에 걸리지 않게 한다. 블라인드도 1300mm 부터 2290mm 까지로 맞춘다.
-const WINDOW_SILL = 1300
-// 블라인드는 창 위(2290mm)에서 창턱보다 100mm 더 내려온다.
-const BLIND_BOTTOM = WINDOW_SILL - 100
-const BLIND_HEIGHT = 2290 - BLIND_BOTTOM
-// 모든 창은 폭을 같게 맞춘다(자리는 그대로, 가운데 기준).
-const WINDOW_LENGTH = 908
+// 창 아래 높이를 990 → 1200mm 로 올려(침대 머리·책상·3단 서랍·모니터암처럼 낮은 가구가 벽에 붙어도 창 커튼 라인에 걸리지 않게) 블라인드(1200~2290mm)와 같은 크기로 맞춘다.
+const WINDOW_SILL = 1200
+// 블라인드는 1200~2290mm 에 걸리고(폭 920mm), 모든 창을 같은 높이·폭으로 블라인드에 맞춘다.
+const BLIND_BOTTOM = 1200
+const BLIND_TOP = 2290
+const BLIND_HEIGHT = BLIND_TOP - BLIND_BOTTOM
+const WINDOW_LENGTH = 920
 
 const sameLength = (opening: Opening, length = WINDOW_LENGTH): Opening => {
   const mid = (opening.from + opening.to) / 2
@@ -47,10 +48,10 @@ const windowSlots = ({ w, d }: RoomDims): Opening[] => {
   // 벽 길이가 달라도 창은 모두 같은 폭(방이 작으면 가장 짧은 벽의 1/4)으로 맞춘다.
   const length = Math.min(WINDOW_LENGTH, Math.round(Math.min(w, d) * 0.25))
   return ([
-    { side: '+x', from: d * 0.17, to: d * 0.42, bottom: WINDOW_SILL, top: 2206 },
-    { side: '+x', from: d * 0.58, to: d * 0.83, bottom: WINDOW_SILL, top: 2206 },
-    { side: '+z', from: w * 0.1, to: w * 0.35, bottom: WINDOW_SILL, top: 2206 },
-    { side: '+z', from: w * 0.67, to: w * 0.92, bottom: WINDOW_SILL, top: 2206 },
+    { side: '+x', from: d * 0.17, to: d * 0.42, bottom: WINDOW_SILL, top: BLIND_TOP },
+    { side: '+x', from: d * 0.58, to: d * 0.83, bottom: WINDOW_SILL, top: BLIND_TOP },
+    { side: '+z', from: w * 0.1, to: w * 0.35, bottom: WINDOW_SILL, top: BLIND_TOP },
+    { side: '+z', from: w * 0.67, to: w * 0.92, bottom: WINDOW_SILL, top: BLIND_TOP },
   ] as Opening[]).map((slot) => sameLength(slot, length))
 }
 
@@ -59,7 +60,7 @@ const sameDims = (a: RoomDims, b: RoomDims) => a.w === b.w && a.d === b.d && a.h
 export const studioRoom = (dims: RoomDims, windowCount: number): Room => {
   if (sameDims(dims, STUDIO_DIMS)) {
     const { door, windows } = PLANNER_ROOM.openings!
-    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map((win) => ({ ...sameLength(grownOpening(win)), bottom: WINDOW_SILL })) } }
+    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map((win) => ({ ...sameLength(grownOpening(win)), bottom: WINDOW_SILL, top: BLIND_TOP })) } }
   }
   const doorFrom = Math.max(0, dims.d - 150 - dims.doorWidth)
   return {
@@ -175,6 +176,7 @@ export const studioItems = (productColor: string): Item[] => {
     d: PRODUCT.size.d,
     h: PRODUCT.bodyH + WHEEL_DEFAULT,
     caster: WHEEL_DEFAULT,
+    image: GALLERY[0],
     x: 0,
     z: 0,
     rot: 0,

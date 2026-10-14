@@ -4,7 +4,7 @@ import ClusterScene, { gapOf, type PairGap } from '@/components/fit/ClusterScene
 import DetailScene from '@/components/fit/DetailScene'
 import type { FitSummary } from '@/components/fit/FitModal'
 import Scene, { type View } from '@/components/fit/Scene'
-import { COLORS, PRODUCT, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
+import { COLORS, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
 import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, HANGER_KEYS, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
 import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
@@ -36,6 +36,8 @@ const VERDICT: Record<Level, { label: string; icon: string; box: string; text: s
   warn: { label: '둘 수 있지만 확인이 필요해요', icon: 'error', box: 'bg-status-warn-bg', text: 'text-amber-600' },
   bad: { label: '현재 배치에서는 사용 공간이 부족해요', icon: 'cancel', box: 'bg-status-bad-bg', text: 'text-status-bad' },
 }
+
+const VERDICT_SHORT: Record<Level, string> = { ok: '배치 가능', warn: '확인 필요', bad: '공간 부족' }
 
 const CHECK_ICON: Record<Level, string> = { ok: 'text-status-success', warn: 'text-amber-500', bad: 'text-status-bad' }
 
@@ -224,6 +226,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [category, setCategory] = useState<FurnitureCategory | '전체'>('전체')
   const [draft, setDraft] = useState({ name: '', w: 600, d: 600, h: 800 })
   const counter = useRef(0)
+  const asideRef = useRef<HTMLElement>(null)
+  const [scrolled, setScrolled] = useState(false)
   const toastTimer = useRef<number | undefined>(undefined)
 
   const product = items.find((item) => item.kind === 'product') ?? null
@@ -360,7 +364,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   }
 
   // 서랍장: 바퀴 유무·높이에 따라 제품 높이가 바뀐다. 위치는 그대로 둔다.
-  const setCaster = (caster: number) => updateItem('product', (item) => ({ ...item, caster, h: PRODUCT.bodyH + caster }))
+  const setCaster = (caster: number) => updateItem('product', (item) => ({ ...item, caster, h: item.h - (item.caster ?? 0) + caster }))
   const moveProduct = (x: number, z: number) => updateItem('product', (item) => clampTo(item, x, z))
   const placeProduct = (place: (deskItem: Item, item: Item) => { x: number; z: number; rot: Rot }) => {
     if (!desk) return
@@ -404,11 +408,13 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const initialOf = (id: string) => initialItems.find((item) => item.id === id)
   const sizeChanged = (item: Item) => {
     const first = initialOf(item.id)
-    return !!first && (first.w !== item.w || first.d !== item.d || first.h !== item.h)
+    return !!first && (first.w !== item.w || first.d !== item.d || first.h !== item.h || first.caster !== item.caster)
   }
   const resetSize = (id: string) => {
     const first = initialOf(id)
-    if (first) setSize(id, { w: first.w, d: first.d, h: first.h })
+    if (!first) return
+    // 서랍장은 높이에 바퀴가 들어 있어서 바퀴도 처음(30mm)으로 돌린다.
+    updateItem(id, (item) => clampTo({ ...item, w: first.w, d: first.d, h: first.h, caster: first.caster ?? item.caster }, item.x, item.z))
   }
   // 책상은 크기를 바꾸면 서랍장이 따라가므로 updateDesk 로 되돌린다.
   const deskSizeChanged = (item: Item) => {
@@ -528,13 +534,13 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 <button type="button" aria-label="사용 방법 안내" className="rounded-full p-0.5 text-primary-container outline-none hover:bg-brand-sky-light focus-visible:bg-brand-sky-light">
                   <Icon name="info" className="text-[20px]" />
                 </button>
-                <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-[300px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  <ol className="list-decimal space-y-0.5 pl-4">
-                    <li>가구 드래그로 옮기기</li>
-                    <li>빈 곳 드래그로 시점 돌리기</li>
-                    <li>휠로 확대</li>
-                    <li>모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.</li>
-                  </ol>
+                <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-max rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+                  <ul className="space-y-0.5 whitespace-nowrap">
+                    <li>- 가구 드래그로 옮기기</li>
+                    <li>- 빈 곳 드래그로 시점 돌리기</li>
+                    <li>- 휠로 확대</li>
+                    <li>- 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.</li>
+                  </ul>
                 </span>
               </span>
             </div>
@@ -621,10 +627,18 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 <Icon name={expanded ? 'close_fullscreen' : 'open_in_full'} className="text-[18px]" />
               </button>
 
-              {inDetail && (
-                <section aria-label="공간 적합도 진단" style={{ zIndex: 16777300 }} className="absolute left-4 top-4 max-h-[calc(100%-6.5rem)] w-[300px] overflow-y-auto rounded-xl border border-border-default bg-surface-base/95 px-4 py-4 shadow-lg backdrop-blur-md">
-                  {diagnosis}
-                </section>
+              {inDetail && fit && verdict && (
+                <div aria-label="공간 적합도 핵심" className="pointer-events-none absolute left-4 top-4 flex max-w-[260px] flex-col items-start gap-1" style={{ zIndex: 16777300 }}>
+                  <span className="flex items-center gap-1 rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-semibold text-inverse-on-surface shadow">
+                    <Icon name={verdict.icon} filled size={12} className={CHECK_ICON[fit.verdict]} /> {VERDICT_SHORT[fit.verdict]}
+                  </span>
+                  {fit.checks.map((check, index) => (
+                    <span key={index} className="flex items-center gap-1 rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">
+                      <Icon name={check.level === 'ok' ? 'check_circle' : check.level === 'warn' ? 'error' : 'cancel'} filled size={12} className={CHECK_ICON[check.level]} /> {check.title}
+                    </span>
+                  ))}
+                  {frontGap && <span className="rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">앞 여유 {cm(frontGap.distance)}</span>}
+                </div>
               )}
 
               {!inDetail && target && (
@@ -699,7 +713,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
           </div>
 
           {!expanded && (
-            <aside className="flex w-[400px] shrink-0 flex-col overflow-y-auto border-l border-border-default">
+            <aside ref={asideRef} onScroll={(event) => setScrolled(event.currentTarget.scrollTop > 120)} className="flex w-[400px] shrink-0 flex-col overflow-y-auto border-l border-border-default">
               {!inDetail && target && (
                 <section className="border-b border-border-subtle px-5 py-4">
                   <div className="flex gap-3">
@@ -822,7 +836,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                       .filter((member) => (member.kind !== 'rug' || cluster!.id !== 'desk') && !HANGER_KEYS.slice(1).includes(keyOf(member)))
                       .map((member) => {
                         const memberOptions = member.kind === 'product' ? undefined : COLOR_OPTIONS[keyOf(member)]
-                        const resizable = member.kind !== 'product' && member.model !== 'motiondesk'
+                        const resizable = member.model !== 'motiondesk'
                         return (
                           <li key={member.id} className={`rounded-xl border px-3 py-3 ${target?.id === member.id ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
                             <div className="flex items-center gap-2">
@@ -1062,8 +1076,15 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </section>
               )}
 
-              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. 상세 보기에서는 3D 영역에 보인다. */}
-              {!inDetail && tab !== 'custom' && <section className="px-5 py-5">{diagnosis}</section>}
+              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. 상세 보기에서는 3D 영역에도 핵심만 보인다. */}
+              {tab !== 'custom' || inDetail ? <section className="px-5 py-5">{diagnosis}</section> : null}
+              {!inDetail && tab === 'all' && scrolled && (
+                <div className="pointer-events-none sticky bottom-3 z-10 -mt-8 flex h-8 shrink-0 justify-end pr-4">
+                  <button type="button" aria-label="맨 위로 올라가기" title="맨 위로" onClick={() => asideRef.current?.scrollTo({ top: 0, behavior: 'smooth' })} className="pointer-events-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-border-default bg-surface-base/95 text-text-secondary shadow-md hover:border-primary-container hover:text-primary-container">
+                    <Icon name="keyboard_arrow_up" size={18} />
+                  </button>
+                </div>
+              )}
             </aside>
           )}
         </div>
