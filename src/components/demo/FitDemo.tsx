@@ -3,8 +3,8 @@ import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { BED_SET_SUFFIX, BUNDLE_OF, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
-import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
-import type { Check, Gap, Item, Level, Room, Rot } from '@/lib/types'
+import { backToWall, clampToRoom, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
+import type { Item, Room, Rot } from '@/lib/types'
 
 // 데모: 현재 "내 공간에 맞는지 확인하기"와 별개로, 3D 영역에 가구를 더하고 크기·여유를 보는 개정판.
 // 오른쪽 탭 = 배치된 가구 / 상품 종류 / 직접 입력.
@@ -27,14 +27,6 @@ const CATEGORY_COLOR: Record<FurnitureCategory | '직접 입력', string> = {
   '직접 입력': '#a89be0',
 }
 
-const LEVEL_STYLE: Record<Level, { icon: string; text: string; box: string; label: string }> = {
-  ok: { icon: 'check_circle', text: 'text-status-success', box: 'bg-status-success-bg', label: '둘 수 있어요' },
-  warn: { icon: 'error', text: 'text-status-warn', box: 'bg-status-warn-bg', label: '주의가 필요해요' },
-  bad: { icon: 'cancel', text: 'text-status-bad', box: 'bg-status-bad-bg', label: '이대로는 어려워요' },
-}
-
-const DIR_NAME: Record<Gap['dir'], string> = { '-x': '왼쪽 벽 쪽', '+x': '오른쪽 벽 쪽', '-z': '뒷벽 쪽', '+z': '앞벽 쪽' }
-
 const CUSTOM_KINDS = ['침대', '테이블·식탁·책상', '소파', '서랍·수납장', '선반', '의자', '진열장·책장', '거울']
 const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
 const WINDOW_ID = 'E976B33E1388415C'
@@ -46,12 +38,12 @@ const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d
 function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
   return (
     <div className="flex shrink-0 items-center gap-0.5">
-      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="remove" className="text-[14px]" />
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" className="text-[9px]" />
       </button>
-      <span className="w-4 text-center text-[11px] font-semibold tabular-nums">{count}</span>
-      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="add" className="text-[14px]" />
+      <span className="w-4 text-center text-[10px] font-semibold tabular-nums">{count}</span>
+      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-[13px] w-[13px] cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="add" className="text-[9px]" />
       </button>
     </div>
   )
@@ -61,7 +53,7 @@ function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { 
 function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   return (
     <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-      <Icon name="close" className="text-[6px]" />
+      <Icon name="close" className="text-[10px]" />
     </button>
   )
 }
@@ -87,22 +79,6 @@ function NumberInput({ label, value, max, onChange }: { label: string; value: nu
       </div>
       {invalid && <span className="mt-0.5 block text-[11px] text-status-bad">50~{max.toLocaleString()}mm 로 입력해 주세요</span>}
     </label>
-  )
-}
-
-function CheckList({ checks }: { checks: Check[] }) {
-  return (
-    <ul className="space-y-2">
-      {checks.map((check, index) => (
-        <li key={index} className="flex gap-2">
-          <Icon name={LEVEL_STYLE[check.level].icon} filled className={`mt-0.5 text-[18px] ${LEVEL_STYLE[check.level].text}`} />
-          <div>
-            <p className="text-[13px] font-semibold text-text-primary">{check.title}</p>
-            <p className="text-[12px] leading-relaxed text-text-secondary">{check.detail}</p>
-          </div>
-        </li>
-      ))}
-    </ul>
   )
 }
 
@@ -280,27 +256,10 @@ export default function FitDemo() {
                 </div>
               </div>
 
-              <h3 className="mb-1.5 mt-3 text-[13px] font-bold">여유 사이즈</h3>
-              <ul className="grid grid-cols-2 gap-2">
-                {[...fit.gaps]
-                  .sort((a, b) => ['앞', '뒤', '옆'].indexOf(a.side) - ['앞', '뒤', '옆'].indexOf(b.side))
-                  .map((gap) => (
-                    <li key={gap.dir} className={`rounded-lg border px-3 py-2 ${gap.level === 'warn' ? 'border-status-warn bg-status-warn-bg' : 'border-border-default'}`}>
-                      <p className="text-[11px] text-text-muted">
-                        {gap.side} · {DIR_NAME[gap.dir]}
-                      </p>
-                      <p className="text-[15px] font-bold">{gap.distance < 5 ? '붙어 있음' : cm(gap.distance)}</p>
-                      <p className="truncate text-[11px] text-text-secondary">{gap.target}까지</p>
-                    </li>
-                  ))}
-              </ul>
-
-              <h3 className="mb-1.5 mt-4 text-[13px] font-bold">공간 적합도 진단</h3>
-              <CheckList checks={fit.checks} />
 
             </section>
           ) : (
-            <section className="border-b border-border-subtle px-5 py-6 text-[13px] text-text-secondary">3D 영역의 가구를 누르거나, 아래 목록에서 골라 보세요. 크기와 여유 사이즈가 여기에 나와요.</section>
+            <section className="border-b border-border-subtle px-5 py-6 text-[13px] text-text-secondary">3D 영역의 가구를 누르거나, 아래 목록에서 골라 보세요. 크기가 여기에 나와요.</section>
           )}
 
           <div role="tablist" aria-label="가구" className="sticky top-0 z-10 flex border-b border-border-default bg-surface-base">
@@ -324,7 +283,7 @@ export default function FitDemo() {
 
           {tab === 'placed' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 크기와 여유를 볼 수 있어요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 3D 영역에서 선택돼요.</p>
               <ul className="space-y-1.5">
                 {groups.map((group) => {
                   const item = group.find((member) => member.id === selectedId) ?? group[0]
