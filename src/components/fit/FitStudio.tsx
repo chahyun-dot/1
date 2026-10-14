@@ -224,6 +224,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [toast, setToast] = useState<string | null>(null)
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<FurnitureCategory | '전체'>('전체')
+  const [placedQuery, setPlacedQuery] = useState('')
+  const [placedCategory, setPlacedCategory] = useState<FurnitureCategory | '전체'>('전체')
   const [draft, setDraft] = useState({ name: '', w: 600, d: 600, h: 800 })
   const counter = useRef(0)
   const asideRef = useRef<HTMLElement>(null)
@@ -455,6 +457,13 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     })
     return [...map.values()]
   }, [items])
+  // 배치된 가구 목록의 검색·분류(상품 종류와 같은 방식). 서랍장 제품·직접 입력한 가구는 '가구'로 본다.
+  const matchesPlaced = (id: string, name: string) => {
+    const furniture = FURNITURE.find((f) => f.id === id)
+    const q = placedQuery.trim().toLowerCase()
+    return (placedCategory === '전체' || (furniture ? categoryOf(furniture) : '가구') === placedCategory) && (q === '' || `${name} ${furniture?.brand ?? ''}`.toLowerCase().includes(q))
+  }
+  const visibleGroups = groups.filter((group) => matchesPlaced(keyOf(group[0]), group[0].name))
   const doorFurniture = FURNITURE.find((f) => f.id === DOOR_ID)
   const windowFurniture = FURNITURE.find((f) => f.id === WINDOW_ID)
   const listedCount = groups.length + (doorFurniture ? 1 : 0) + (windowFurniture && windowCount > 0 ? 1 : 0)
@@ -951,8 +960,16 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   {sub === 'placed' && (
                     <>
                       <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 3D 영역에서 선택돼요.</p>
+                      <input type="search" value={placedQuery} onChange={(event) => setPlacedQuery(event.target.value)} placeholder="이름·브랜드 검색" className="h-9 w-full rounded-full border border-border-default bg-surface-base px-4 text-[13px] outline-none focus:border-primary-container" />
+                      <div className="mb-3 mt-2 flex flex-wrap gap-1.5">
+                        {(['전체', '가구', '소품', '벽·천장'] as const).map((id) => (
+                          <button key={id} type="button" onClick={() => setPlacedCategory(id)} className={`cursor-pointer rounded-full border px-3 py-1 text-[12px] ${placedCategory === id ? 'border-primary-container bg-brand-sky-light font-semibold text-on-primary-container' : 'border-border-default text-text-secondary'}`}>
+                            {id}
+                          </button>
+                        ))}
+                      </div>
                       <ul className="space-y-1.5">
-                        {groups.map((group) => {
+                        {visibleGroups.map((group) => {
                           const item = group.find((member) => member.id === selectedId) ?? group[0]
                           const last = group[group.length - 1]
                           return (
@@ -977,7 +994,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                             </li>
                           )
                         })}
-                        {doorFurniture && (
+                        {doorFurniture && matchesPlaced(DOOR_ID, doorFurniture.name) && (
                           <li>
                             <div className="flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
                               <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
@@ -990,7 +1007,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                             </div>
                           </li>
                         )}
-                        {windowFurniture && (
+                        {windowFurniture && matchesPlaced(WINDOW_ID, windowFurniture.name) && (
                           <li>
                             <div className="relative flex items-center gap-2 rounded-lg border border-border-default px-2.5 py-2">
                               <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
@@ -1005,6 +1022,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                             </div>
                           </li>
                         )}
+                        {visibleGroups.length === 0 && !(doorFurniture && matchesPlaced(DOOR_ID, doorFurniture.name)) && !(windowFurniture && matchesPlaced(WINDOW_ID, windowFurniture.name)) && <li className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</li>}
                       </ul>
                     </>
                   )}
