@@ -730,49 +730,32 @@ function Audiorama({ item }: Props) {
   )
 }
 
-// Beat Table Light: 둥근 검은 받침(놋쇠 단추)과 가는 몸대, 목이 가늘다가 아래로 나팔처럼 벌어지는 검은 갓(안쪽 금색 망치 무늬)과 그 안의 전구.
+// Beat Table Light: 검은 받침과 가는 몸대, 앞으로 기울어진 원뿔 갓(안쪽 금색).
 function BeatLight({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
-  const shadeH = Math.min(0.26, h * 0.46)
-  const neck = 0.014
-  const mouth = Math.min(item.w, item.d) / M * 0.46
-  const stemZ = -d * 0.2
-  const profile = useMemo<[number, number][]>(() => Array.from({ length: 16 }, (_, index) => {
-    const t = index / 15 // 0 = 갓 입구(아래), 1 = 목(위)
-    return [neck + (mouth - neck) * Math.pow(1 - t, 2.3), t * shadeH]
-  }), [mouth, shadeH])
-  const outer = useMemo(() => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 40), [profile])
-  const inner = useMemo(() => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(Math.max(0.004, r - 0.003), y)), 40), [profile])
+  const shadeH = 0.22
+  const topR = 0.03
+  const botR = Math.min(item.w, item.d) / M * 0.45
   return (
     <group>
-      <mesh position={[0, 0.008, stemZ]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.085, 0.092, 0.016, 40]} />
-        {std('#222225', 0.55, 0.3)}
+      <mesh position={[0, 0.01, -d * 0.2]} castShadow>
+        <cylinderGeometry args={[0.09, 0.09, 0.02, 32]} />
+        {std('#1b1b1d', 0.4, 0.4)}
       </mesh>
-      <mesh position={[0, 0.02, stemZ + 0.045]} castShadow>
-        <cylinderGeometry args={[0.011, 0.011, 0.018, 20]} />
-        {std('#c8a24c', 0.35, 0.8)}
-      </mesh>
-      <mesh position={[0, 0.026, stemZ]}>
-        <sphereGeometry args={[0.014, 16, 12]} />
-        {std('#1c1c1f', 0.4, 0.3)}
-      </mesh>
-      <Rod from={[0, 0.026, stemZ]} to={[0, h - shadeH * 0.7, stemZ]} r={0.0065} color="#18181b" />
-      <group position={[0, h - shadeH * 0.78, stemZ + 0.03]} rotation={[0.45, 0, 0]}>
-        <mesh geometry={outer} castShadow>
-          <meshStandardMaterial color="#26282b" roughness={0.45} metalness={0.25} side={THREE.FrontSide} />
+      <Rod from={[0, 0.02, -d * 0.2]} to={[0, h - shadeH * 0.8, -d * 0.2]} r={0.007} color="#17171a" />
+      <group position={[0, h - shadeH * 0.5, -d * 0.2 + 0.07]} rotation={[0.4, 0, 0]}>
+        <mesh castShadow>
+          <cylinderGeometry args={[topR, botR, shadeH, 32, 1, true]} />
+          <meshStandardMaterial color="#1b1b1d" roughness={0.4} metalness={0.3} side={THREE.FrontSide} />
         </mesh>
-        <mesh geometry={inner}>
-          <meshStandardMaterial color="#d6a23c" roughness={0.35} metalness={0.7} emissive="#c98a1c" emissiveIntensity={0.3} side={THREE.BackSide} />
+        <mesh>
+          <cylinderGeometry args={[topR * 0.96, botR * 0.96, shadeH * 0.99, 32, 1, true]} />
+          <meshStandardMaterial color="#d9a441" roughness={0.3} metalness={0.7} side={THREE.BackSide} emissive="#ffcf66" emissiveIntensity={0.35} />
         </mesh>
-        <mesh position={[0, shadeH + 0.012, 0]} castShadow>
-          <cylinderGeometry args={[0.009, 0.013, 0.026, 14]} />
-          {std('#26282b', 0.45, 0.25)}
-        </mesh>
-        <mesh position={[0, shadeH * 0.2, 0]}>
-          <sphereGeometry args={[0.03, 20, 16]} />
-          <meshStandardMaterial color="#fff4c9" emissive="#ffe9a0" emissiveIntensity={1} />
+        <mesh position={[0, -shadeH * 0.2, 0]}>
+          <sphereGeometry args={[0.025, 14, 12]} />
+          <meshStandardMaterial color="#fff1b8" emissive="#fff1b8" emissiveIntensity={0.9} />
         </mesh>
       </group>
     </group>
@@ -1286,28 +1269,60 @@ function WindowFrame({ item }: Props) {
   )
 }
 
-// Tolomeo Mega Floor Lamp: 둥근 알루미늄 받침에서 곧은 기둥이 올라가 종 모양 흰 갓 바로 아래까지 닿고, 맨 위에 작은 도르래와 뒤로 젖힌 가는 팔이 있다.
+// Tolomeo Mega Floor Lamp: 솔질한 알루미늄 원판 받침에서 곧은 기둥이 올라가 종 모양 크림색 갓 아래 가운데에 닿고,
+// 갓은 아래가 환하게 빛나며, 맨 위에 도르래 바퀴와 뒤로 젖힌 가는 팔·균형추, 갓으로 내려오는 가는 줄이 있다.
 export function TolomeoLamp({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
   const baseZ = -d / 2 + 0.17
   const shadeH = h * 0.22
   const shadeBottom = h * 0.66
-  const shade: [number, number][] = [[0.21, 0], [0.17, shadeH * 0.4], [0.1, shadeH * 0.8], [0.03, shadeH]]
+  const mouth = 0.21
+  const neck = 0.034
+  const shade = useMemo<[number, number][]>(() => Array.from({ length: 14 }, (_, index) => {
+    const t = index / 13 // 0 = 갓 입구, 1 = 꼭대기
+    return [neck + (mouth - neck) * Math.pow(1 - t, 1.45), t * shadeH]
+  }), [shadeH])
+  const baseProfile: [number, number][] = [[0, 0], [0.17, 0], [0.172, 0.006], [0.168, 0.014], [0.12, 0.018], [0.04, 0.026], [0.02, 0.03]]
+  const top = h - 0.03
   return (
     <group>
-      <mesh position={[0, 0.01, baseZ]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.17, 0.17, 0.02, 32]} />
-        {std(CHROME, 0.3, 0.6)}
+      <Lathe profile={baseProfile} color="#bfc2c6" roughness={0.28} metalness={0.75} position={[0, 0, baseZ]} />
+      <mesh position={[0, 0.038, baseZ]} castShadow>
+        <cylinderGeometry args={[0.022, 0.03, 0.03, 20]} />
+        {std('#aeb1b6', 0.3, 0.8)}
       </mesh>
-      <Rod from={[0, 0.02, baseZ]} to={[0, shadeBottom, baseZ]} r={0.011} color={CHROME} metal />
-      <Lathe profile={shade} color="#f4f0d2" roughness={0.8} emissive="#fff3b0" position={[0, shadeBottom, baseZ]} />
-      <Rod from={[0, shadeBottom + shadeH, baseZ]} to={[0, h - 0.04, baseZ]} r={0.003} color="#8d8d90" metal />
-      <mesh position={[0, h - 0.03, baseZ]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.025, 0.025, 0.012, 18]} />
-        {std(CHROME, 0.3, 0.7)}
+      <Rod from={[0, 0.04, baseZ]} to={[0, shadeBottom + 0.01, baseZ]} r={0.0115} color="#c9ccd0" metal />
+      {/* 갓: 크림색 종 모양, 입구 가장자리 얇은 테 */}
+      <Lathe profile={shade} color="#f1ecc8" roughness={0.75} emissive="#fff0a8" position={[0, shadeBottom, baseZ]} />
+      <mesh position={[0, shadeBottom + 0.001, baseZ]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[mouth, 0.0035, 8, 48]} />
+        {std('#d9d6bd', 0.5, 0.2)}
       </mesh>
-      <Rod from={[0, h - 0.03, baseZ]} to={[0, h - 0.1, baseZ - 0.12]} r={0.004} color="#8d8d90" metal />
+      <mesh position={[0, shadeBottom + 0.004, baseZ]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[mouth * 0.97, 36]} />
+        <meshBasicMaterial color="#fffbd6" />
+      </mesh>
+      <mesh position={[0, shadeBottom + shadeH * 0.3, baseZ]}>
+        <sphereGeometry args={[0.04, 16, 12]} />
+        <meshStandardMaterial color="#fff7c4" emissive="#fff1a0" emissiveIntensity={1.1} transparent opacity={0.85} />
+      </mesh>
+      {/* 갓 위: 가는 막대 → 도르래 바퀴 → 뒤로 젖힌 팔과 균형추, 갓으로 내려오는 줄 */}
+      <Rod from={[0, shadeBottom + shadeH, baseZ]} to={[0, top - 0.01, baseZ]} r={0.0035} color="#9a9da2" metal />
+      <mesh position={[0, top, baseZ]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        <cylinderGeometry args={[0.026, 0.026, 0.01, 24]} />
+        {std('#c3c5c9', 0.3, 0.75)}
+      </mesh>
+      <mesh position={[0, top, baseZ]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.009, 0.009, 0.022, 12]} />
+        {std('#8d8f94', 0.35, 0.8)}
+      </mesh>
+      <Rod from={[0, top, baseZ]} to={[0, top - 0.09, baseZ - 0.16]} r={0.0042} color="#aeb1b6" metal />
+      <mesh position={[0, top - 0.1, baseZ - 0.175]} castShadow>
+        <sphereGeometry args={[0.018, 14, 10]} />
+        {std('#b7babf', 0.3, 0.8)}
+      </mesh>
+      <Rod from={[0.026, top, baseZ]} to={[0.012, shadeBottom + shadeH * 0.95, baseZ + 0.02]} r={0.0016} color="#d8d8d2" />
     </group>
   )
 }
