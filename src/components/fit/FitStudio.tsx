@@ -929,7 +929,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {!inDetail && tab === 'custom' && (
                 <section className="relative border-b border-border-subtle px-5 py-4">
-                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-60">
+                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-50">
                   <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
                   <div className="space-y-3">
                     <div>
@@ -952,7 +952,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     <Icon name="add" className="text-[18px]" /> 놓기
                   </button>
                   </div>
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/35">
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/50">
                     <span className="text-[20px] font-bold tracking-tight text-text-primary" style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.28)' }}>
                       Coming Soon…
                     </span>

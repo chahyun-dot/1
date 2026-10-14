@@ -120,14 +120,22 @@ export const studioItems = (productColor: string): Item[] => {
   furniture = move(furniture, KEY(DRAWER_ID), { x: 250.5, z: 2888 })
   furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 150.5, z: 2888 })
   furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3726 })
-  // 행거 묶음: 침대 발치와 60cm 띄워 옷 걸리는 면(+x)이 오른쪽 벽의 문을 보게 하고, 둥근 러그를 그 아래에 깐다.
+  // 행거 묶음(데모 원래 배치처럼): 침대 발치에서 60mm 띄우고 옷 걸리는 면(+x)이 침대 반대쪽을 보게 두며, 둥근 러그는 그 아래(데모 원래 상대 위치)에 깐다.
+  const bed = furniture.find(KEY(BED_ID))!
   const hanger = all.find(KEY('YSBhD9T1E65915F80104295'))!
-  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: 2868 + (item.x - hanger.x), z: 3500 + (item.z - hanger.z) }))
-  furniture = move(furniture, KEY(ROUND_RUG_ID), { x: 2900, z: 3500 })
-  // 테이블 묶음: 소파(오른쪽 벽에 붙이고 위 코어렉과 60cm 띄움) 가운데 앞에 오도록 테이블·의자는 z 113mm, 러그는 350mm 아래로, 소파와 60cm 띄우려고 모두 110mm 왼쪽으로.
-  furniture = move(furniture, (item) => keyOf(item) === TABLE_ID || keyOf(item) === DINING_CHAIR_ID, (item) => ({ x: item.x - 110, z: item.z + 113 }))
-  furniture = move(furniture, KEY(BIG_RUG_ID), (item) => ({ x: item.x - 110, z: item.z + 350 }))
+  const hangerX = bed.x + bed.d / 2 + 60 + hanger.d / 2
+  const hangerZ = bed.z + 175
+  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: hangerX + (item.x - hanger.x), z: hangerZ + (item.z - hanger.z) }))
+  furniture = move(furniture, KEY(ROUND_RUG_ID), { x: hangerX + 423, z: hangerZ - 150 })
+  // 테이블 묶음(데모 원래 배치처럼): 소파 앞에 테이블을 80mm 띄워 바짝 붙이고, 다이닝 체어는 테이블 왼쪽 위(28° 기울임), 사각 러그는 테이블 아래(데모 원래 상대 위치)에 둔다.
   furniture = move(furniture, (item) => keyOf(item) === SOFA_ID || keyOf(item) === 'XjOO_Xy13478D0D91CD493D', (item) => ({ x: item.x + 117, z: item.z + 350 }))
+  const sofa = furniture.find(KEY(SOFA_ID))!
+  const table = furniture.find(KEY(TABLE_ID))!
+  const tableX = sofa.x - sofa.d / 2 - 80 - table.w / 2
+  const tableZ = sofa.z
+  furniture = move(furniture, KEY(TABLE_ID), { x: tableX, z: tableZ })
+  furniture = move(furniture, KEY(DINING_CHAIR_ID), { x: tableX - 406, z: tableZ - 581 })
+  furniture = move(furniture, KEY(BIG_RUG_ID), { x: tableX - 194, z: tableZ - 237 })
   // 그 밖: 제네바 스피커는 책상 앞에서 선반 옆 빈 벽으로, 코어렉은 앞(방 쪽)을 보게, 심플리 수납장은 오른쪽 벽에 붙인다.
   furniture = move(furniture, KEY('XRxqWHD79D04BB434D74AF9'), { x: 3019 })
   furniture = move(furniture, KEY('YHx4J5H2C427AA8FBFD482A'), { rot: 0 })
