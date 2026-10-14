@@ -251,8 +251,8 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   // 내 상판 아래에 들어가 있는 가구(책상 아래 서랍장)와 의자처럼 밀어 넣는 가구는 막는 것으로 보지 않는다.
   const blocking = covering.filter((other) => other !== under && !mayOverlap(item, other) && !(item.underClearance !== undefined && other.h <= item.underClearance))
   // 앞쪽 여유를 잴 때 의자(빼고 앉는 가구)와 문 열림 자리(문이 닫혀 있으면 지나다니는 바닥)는 장애물로 보지 않는다. 겹침 판정은 따로 한다.
-  // 소파 앞의 테이블은 일부러 바짝 두는 것이라 장애물로 보지 않는다.
-  const obstacles: Obstacle[] = others.filter((other) => other !== under && !isChair(other) && !(item.model === 'fksofa' && isSurface(other))).map((other) => ({ name: other.name, rect: footprint(other) }))
+  // 소파 앞의 테이블, 행거 맞은편 벽에 붙은 수납장은 일부러 가까이 두는 것이라 장애물로 보지 않는다.
+  const obstacles: Obstacle[] = others.filter((other) => other !== under && !isChair(other) && !(item.model === 'fksofa' && isSurface(other)) && !(item.model === 'wallhanger' && other.model === 'chromecabinet')).map((other) => ({ name: other.name, rect: footprint(other) }))
   const checks: Check[] = []
 
   const outside = Math.max(-rect.minX, -rect.minZ, rect.maxX - room.w, rect.maxZ - room.d)
@@ -317,7 +317,8 @@ export const backToWall = (item: Item, room: Room): Item => {
     { rot: 1, distance: rect.minX },
     { rot: 3, distance: room.w - rect.maxX },
   ]
-  const { rot } = candidates.reduce((best, c) => (c.distance < best.distance ? c : best))
+  // 두 벽에 똑같이 가까우면(모서리) 지금 향하고 있는 벽을 먼저 고른다.
+  const { rot } = candidates.reduce((best, c) => (c.distance < best.distance || (c.distance === best.distance && c.rot === item.rot) ? c : best))
   const turned = { ...item, rot }
   // 뒷면(깊이 d)이 벽에 닿으니 어느 방향이든 벽에서 가운데까지는 d 의 절반이다.
   const half = item.d / 2

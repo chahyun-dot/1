@@ -39,6 +39,9 @@ const VERDICT: Record<Level, { label: string; icon: string; box: string; text: s
 
 const CHECK_ICON: Record<Level, string> = { ok: 'text-status-success', warn: 'text-amber-500', bad: 'text-status-bad' }
 
+// 방 치수는 1~10000mm 까지 입력할 수 있다.
+const ROOM_MAX = 10000
+
 const ROOM_FIELDS: { key: keyof RoomDims; label: string }[] = [
   { key: 'w', label: '가로 (문 ↔ 창)' },
   { key: 'd', label: '세로 (책상 벽 ↔ 맞은편)' },
@@ -66,14 +69,16 @@ function StageButton({ icon, label, onClick, active = false, disabled = false }:
   )
 }
 
-function NumberField({ label, value, min, max, onCommit, pill = false }: { label: string; value: number; min: number; max: number; onCommit: (value: number) => void; pill?: boolean }) {
+function NumberField({ label, value, min, max, onCommit, pill = false, step = 10 }: { label: string; value: number; min: number; max: number; onCommit: (value: number) => void; pill?: boolean; step?: number }) {
   const [draft, setDraft] = useState<string | null>(null)
+  // 값이 밖에서 바뀌면(초기화 등) 입력 중이던 글자를 버린다.
+  useEffect(() => setDraft(null), [value])
   const parsed = draft === null ? value : Number(draft)
   const invalid = draft !== null && !(parsed >= min && parsed <= max)
   const input = (
     <input
       type="number"
-      step={10}
+      step={step}
       min={min}
       max={max}
       value={draft ?? value}
@@ -280,6 +285,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   }
 
   const reset = () => {
+    // 초기화는 가구 배치와 방 치수(4.5×4.5m)를 처음으로 되돌린다. 창문 개수는 그대로 둔다.
+    setDims(STUDIO_DIMS)
+    setPresetId(STUDIO_PRESET.id)
     setItems(studioItems(colorOf(colorId).hex))
     setSelectedId('product')
     setOpenIds([])
@@ -787,26 +795,18 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 <Section>
                   <div className="grid grid-cols-2 gap-2">
                     {ROOM_FIELDS.map((field) => (
-                      <label key={field.key} className="text-[12px] text-text-secondary">
-                        {field.label}
-                        <div className="relative mt-1">
-                          <input
-                            type="number"
-                            step={10}
-                            min={500}
-                            value={dims[field.key]}
-                            onChange={(event) => {
-                              const value = Number(event.target.value)
-                              if (value > 0) {
-                                setPresetId(null)
-                                setDims({ ...dims, [field.key]: value })
-                              }
-                            }}
-                            className="h-9 w-full rounded-lg border border-border-default bg-surface-base pl-2.5 pr-9 text-[14px] text-text-primary outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-                          />
-                          <span className="pointer-events-none absolute right-2.5 top-2 text-[12px] text-text-muted">mm</span>
-                        </div>
-                      </label>
+                      <NumberField
+                        key={field.key}
+                        label={field.label}
+                        value={dims[field.key]}
+                        min={1}
+                        max={ROOM_MAX}
+                        step={1}
+                        onCommit={(value) => {
+                          setPresetId(null)
+                          setDims({ ...dims, [field.key]: value })
+                        }}
+                      />
                     ))}
                   </div>
                 </Section>

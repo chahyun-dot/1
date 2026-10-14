@@ -116,15 +116,16 @@ export const studioItems = (productColor: string): Item[] => {
   // 블라인드는 창에 맞춰 1300mm 부터 걸게 한다.
   furniture = move(furniture, KEY('E1632324621148B0'), { elevation: WINDOW_SILL, h: BLIND_HEIGHT })
   // 침대 묶음: 침대 머리와 3단 수납형 서랍을 왼쪽 벽에 붙이고(서랍은 침대 머리 옆), 그 위 조명과 머리 위 액자는 같이.
-  furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3702 })
-  furniture = move(furniture, KEY(DRAWER_ID), { x: 250.5, z: 2888 })
-  furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 150.5, z: 2888 })
-  furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3726 })
+  furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3937.5 })
+  furniture = move(furniture, KEY(DRAWER_ID), { x: 250.5, z: 3123.5 })
+  furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 150.5, z: 3123.5 })
+  furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3961.5 })
   // 행거 묶음(데모 원래 배치처럼): 침대 발치에서 60mm 띄우고 옷 걸리는 면(+x)이 침대 반대쪽을 보게 두며, 둥근 러그는 그 아래(데모 원래 상대 위치)에 깐다.
   const bed = furniture.find(KEY(BED_ID))!
   const hanger = all.find(KEY('YSBhD9T1E65915F80104295'))!
   const hangerX = bed.x + bed.d / 2 + 60 + hanger.d / 2
-  const hangerZ = bed.z + 175
+  // 침대와 같이 앞쪽 벽(거울이 있는 벽)에 붙인다(행거 가로 800mm 의 절반만큼 벽에서 떨어진 가운데).
+  const hangerZ = bed.z + bed.w / 2 - hanger.w / 2
   furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: hangerX + (item.x - hanger.x), z: hangerZ + (item.z - hanger.z) }))
   furniture = move(furniture, KEY(ROUND_RUG_ID), { x: hangerX + 423, z: hangerZ - 150 })
   // 테이블 묶음(데모 원래 배치처럼): 소파 앞에 테이블을 80mm 띄워 바짝 붙이고, 다이닝 체어는 테이블 왼쪽 위(28° 기울임), 사각 러그는 테이블 아래(데모 원래 상대 위치)에 둔다.
@@ -140,6 +141,9 @@ export const studioItems = (productColor: string): Item[] => {
   furniture = move(furniture, KEY('XRxqWHD79D04BB434D74AF9'), { x: 3019 })
   furniture = move(furniture, KEY('YHx4J5H2C427AA8FBFD482A'), { rot: 0 })
   furniture = move(furniture, KEY('ZCREWuP85D472F7745C4005'), (item) => ({ x: item.x + 66 }))
+  // 심플리 수납장을 하나 더 옆(왼쪽)에 둔다. 거울 아래라 거울과 높이가 겹치지 않는다.
+  const simplie = furniture.find(KEY('ZCREWuP85D472F7745C4005'))!
+  furniture = [...furniture, { ...simplie, id: 'ZCREWuP85D472F7745C4005#2', x: simplie.x - simplie.w - 20 }]
 
   const product: Item = {
     id: 'product',
