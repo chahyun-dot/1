@@ -4,7 +4,8 @@ import ClusterScene, { gapOf, type PairGap } from '@/components/fit/ClusterScene
 import DetailScene from '@/components/fit/DetailScene'
 import type { FitSummary } from '@/components/fit/FitModal'
 import Scene, { type View } from '@/components/fit/Scene'
-import { COLORS, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
+import { COLORS, PRODUCT, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
+import { GALLERY, galleryUrl } from '@/data/ohou'
 import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, HANGER_KEYS, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
 import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
@@ -55,6 +56,8 @@ const CATEGORY_COLOR: Record<FurnitureCategory | '직접 입력', string> = { �
 const CUSTOM_KINDS = ['침대', '테이블·식탁·책상', '소파', '서랍·수납장', '선반', '의자', '진열장·책장', '거울']
 const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
 const WINDOW_ID = 'E976B33E1388415C'
+
+const CABINET_IMAGE = galleryUrl(GALLERY[1], 200)
 
 const PRETENDARD = "'Pretendard Variable', Pretendard, Inter, -apple-system, 'Noto Sans KR', sans-serif"
 
@@ -234,6 +237,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const toastTimer = useRef<number | undefined>(undefined)
 
   const product = items.find((item) => item.kind === 'product') ?? null
+  const productId = product?.id ?? 'product'
   const desk = items.find((item) => item.model === 'motiondesk') ?? null
   const selected = items.find((item) => item.id === selectedId) ?? null
   const cluster = detail ? (CLUSTERS.find((c) => c.id === detail) ?? null) : null
@@ -320,8 +324,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     if (memberId) setSelectedId(memberId)
   }
 
-  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box', elevation?: number) => {
-    const item: Item = { id, name, kind: 'furniture', model, elevation, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size }
+  const addBox = (id: string, name: string, size: { w: number; d: number; h: number }, color: string, image?: string, model: Item['model'] = 'box', elevation?: number, extra: Partial<Item> = {}) => {
+    const item: Item = { id, name, kind: 'furniture', model, elevation, rot: 0, x: room.w / 2, z: room.d / 2, color, image, ...size, ...extra }
     const spot = findFreeSpot(item, room, items)
     const placed = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
     setItems((prev) => [...prev, placed])
@@ -335,6 +339,13 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     const n = Math.max(0, ...items.filter((item) => keyOf(item) === furniture.id).map((item) => Number(item.id.split('#')[1] ?? 1))) + 1
     const name = spec?.model === 'bedset' ? `${furniture.name}${BED_SET_SUFFIX}` : furniture.name
     addBox(`${furniture.id}#${n}`, name, { w: furniture.size.w, d: furniture.size.d, h: furniture.size.h }, CATEGORY_COLOR[categoryOf(furniture)], furniture.image, spec?.model, spec?.elevation)
+  }
+
+  // 전체 가구 목록의 피하 서랍장 4.1단: 처음 배치에 있는 서랍장과 같은 제품(서랍장 전용 판정·서랍 열기·바퀴)을 하나 더 놓는다.
+  const addCabinet = () => {
+    const n = Math.max(0, ...items.filter((item) => keyOf(item) === 'product').map((item) => Number(item.id.split('#')[1] ?? 1))) + 1
+    const id = items.some((item) => item.id === 'product') ? `product#${n}` : 'product'
+    addBox(id, PRODUCT.shortName, { w: PRODUCT.size.w, d: PRODUCT.size.d, h: PRODUCT.bodyH + WHEEL_DEFAULT }, colorOf(colorId).hex, CABINET_IMAGE, 'cabinet', undefined, { kind: 'product', caster: WHEEL_DEFAULT })
   }
 
   const addCustom = () => {
@@ -367,11 +378,11 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   }
 
   // 서랍장: 바퀴 유무·높이에 따라 제품 높이가 바뀐다. 위치는 그대로 둔다.
-  const setCaster = (caster: number) => updateItem('product', (item) => ({ ...item, caster, h: item.h - (item.caster ?? 0) + caster }))
-  const moveProduct = (x: number, z: number) => updateItem('product', (item) => clampTo(item, x, z))
+  const setCaster = (caster: number) => updateItem(productId, (item) => ({ ...item, caster, h: item.h - (item.caster ?? 0) + caster }))
+  const moveProduct = (x: number, z: number) => updateItem(productId, (item) => clampTo(item, x, z))
   const placeProduct = (place: (deskItem: Item, item: Item) => { x: number; z: number; rot: Rot }) => {
     if (!desk) return
-    updateItem('product', (item) => {
+    updateItem(productId, (item) => {
       const next = { ...item, ...place(desk, item) }
       return clampTo(next, next.x, next.z)
     })
@@ -389,7 +400,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     setItems((prev) =>
       prev.map((item) => {
         if (item.id === nextDesk.id) return nextDesk
-        if (keep && item.kind === 'product') {
+        if (keep && item.id === productId) {
           const next = { ...item, ...placeUnderDesk(nextDesk, item, keep.side, keep.leg, keep.back) }
           return clampTo(next, next.x, next.z)
         }
@@ -471,6 +482,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     const q = query.trim().toLowerCase()
     return DEMO_FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
   }, [query, category])
+  const showCabinet = (category === '전체' || category === '가구') && (query.trim() === '' || `${PRODUCT.shortName} ${PRODUCT.brand}`.toLowerCase().includes(query.trim().toLowerCase()))
+  const cabinetCount = items.filter((item) => keyOf(item) === 'product').length
   const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
 
   const options = target && target.kind !== 'product' ? COLOR_OPTIONS[keyOf(target)] : undefined
@@ -600,7 +613,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </div>
               )}
               {!mount ? null : inDetail && cluster!.id === 'desk' && desk && product ? (
-                <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen('product')} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
+                <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen(productId)} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : inDetail ? (
                 <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onMoveMember={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : (
@@ -625,7 +638,11 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     const found = clicked ? clusterOf(clicked) : null
                     if (found) openDetail(found.id, id)
                   }}
-                  canOpenDetail={(item) => clusterOf(item) !== null}
+                  canOpenDetail={(item) => {
+                    const found = clusterOf(item)
+                    // 책상 상세는 서랍장이 있어야 열 수 있다(서랍장을 모두 뺀 뒤에는 닫는다).
+                    return found !== null && (found.id !== 'desk' || product !== null)
+                  }}
                 />
               )}
 
@@ -661,7 +678,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     {cluster!.id === 'desk' && (
                       <>
                         <span className="text-border-default">|</span>
-                        <StageButton icon="open_in_full" label={isOpen('product') ? '서랍 닫기' : '서랍 열어보기'} active={isOpen('product')} onClick={() => toggleOpen('product')} />
+                        <StageButton icon="open_in_full" label={isOpen(productId) ? '서랍 닫기' : '서랍 열어보기'} active={isOpen(productId)} onClick={() => toggleOpen(productId)} />
                         <span className="text-border-default">|</span>
                         <StageButton icon="align_horizontal_left" label="아래 왼쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'left'))} />
                         <StageButton icon="align_horizontal_right" label="아래 오른쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'right'))} />
@@ -939,7 +956,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!inDetail && tab === 'all' && (
                 <section className="px-5 py-4">
                   <div className="mb-3 flex rounded-lg bg-surface-subtle p-0.5">
-                    {([['placed', `배치된 가구 목록 ${listedCount}`], ['catalog', `전체 가구 목록 ${DEMO_FURNITURE.length}`]] as const).map(([id, label]) => (
+                    {([['placed', `배치된 가구 목록 ${listedCount}`], ['catalog', `전체 가구 목록 ${DEMO_FURNITURE.length + 1}`]] as const).map(([id, label]) => (
                       <button key={id} type="button" aria-pressed={sub === id} onClick={() => setSub(id)} className={`flex-1 cursor-pointer rounded-md py-1.5 text-[12px] ${sub === id ? 'bg-surface-base font-semibold text-on-primary-container shadow-xs' : 'text-text-secondary'}`}>
                         {label}
                       </button>
@@ -972,7 +989,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                                     <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
                                   </span>
                                 </button>
-                                {item.kind !== 'product' && (
+                                {(
                                   <>
                                     <CountControls name={item.name} count={group.length} min={1} onMinus={() => remove(last.id)} onPlus={() => duplicate(item)} />
                                     <RemoveAll name={item.name} onClick={() => group.forEach((member) => remove(member.id))} />
@@ -1025,10 +1042,24 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                           </button>
                         ))}
                       </div>
-                      {visibleCatalog.length === 0 ? (
+                      {visibleCatalog.length === 0 && !showCabinet ? (
                         <p className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</p>
                       ) : (
                         <ul className="mt-3 grid grid-cols-2 gap-2.5">
+                          {showCabinet && (
+                            <li>
+                              <button type="button" onClick={addCabinet} className="group flex h-full w-full cursor-pointer flex-col overflow-hidden rounded-lg border border-border-default bg-surface-base text-left hover:border-primary-container">
+                                <span className="relative block aspect-square bg-surface-subtle">
+                                  <img src={CABINET_IMAGE} alt="" loading="lazy" className="h-full w-full object-contain" />
+                                  {cabinetCount > 0 && <span aria-label="배치됨" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary-container" />}
+                                </span>
+                                <span className="flex flex-1 flex-col gap-0.5 p-2">
+                                  <span className="line-clamp-2 text-[12px] font-bold leading-4">{PRODUCT.shortName}</span>
+                                  <span className="text-[11px] text-text-muted">{sizeText({ w: PRODUCT.size.w, d: PRODUCT.size.d, h: PRODUCT.bodyH + WHEEL_DEFAULT })}</span>
+                                </span>
+                              </button>
+                            </li>
+                          )}
                           {visibleCatalog.map((furniture) => {
                             const bundledInto = BUNDLE_OF[furniture.id]
                             const placedCount = items.filter((item) => keyOf(item) === (bundledInto ?? furniture.id)).length
