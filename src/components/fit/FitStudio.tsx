@@ -519,9 +519,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               </div>
               {target?.kind === 'product' && <p className="mt-3 text-[11px] leading-relaxed text-text-muted">서랍 완전 개폐에 앞쪽 {cm(DRAWER_PULL)}가 필요해요. 바닥의 파란 영역이 서랍이 열리는 자리예요.</p>}
             </>
-          ) : (
-            <p className="text-[13px] text-text-muted">가구를 누르면 진단이 나와요. 서랍장이 공간에 없으면 초기화를 눌러 주세요.</p>
-          )}
+          ) : null}
             </>
   )
 
@@ -541,11 +539,10 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
             )}
           </span>
           <span className="flex min-w-0 items-center gap-1">
-            {target && <span className="truncate text-[11px] text-text-muted">{target.name}</span>}
             <Icon name="expand_more" className={`shrink-0 text-[20px] text-text-secondary transition-transform ${diagOpen ? 'rotate-180' : ''}`} />
           </span>
         </button>
-        {diagOpen && <div className="max-h-[42vh] overflow-y-auto px-5 pb-4">{diagnosis}</div>}
+        {diagOpen && fit && <div className="max-h-[42vh] overflow-y-auto px-5 pb-4">{diagnosis}</div>}
       </div>
     ) : null
 
@@ -834,7 +831,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {inDetail && detailTab === 'members' && (
                 <Section>
-                  <p className="text-[13px] leading-relaxed text-text-secondary">묶음 안 가구의 색상과 크기를 바꿀 수 있어요. 누르면 아래 진단이 그 가구 기준으로 바뀌어요.</p>
                   {cluster!.id === 'desk' && desk && (
                     <div className="mt-3 rounded-xl border border-border-default px-3 py-3">
                       <div className="flex items-center justify-between gap-2">
@@ -959,7 +955,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
                   {sub === 'placed' && (
                     <>
-                      <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 3D 영역에서 선택돼요.</p>
                       <input type="search" value={placedQuery} onChange={(event) => setPlacedQuery(event.target.value)} placeholder="이름·브랜드 검색" className="h-9 w-full rounded-full border border-border-default bg-surface-base px-4 text-[13px] outline-none focus:border-primary-container" />
                       <div className="mb-3 mt-2 flex flex-wrap gap-1.5">
                         {(['전체', '가구', '소품', '벽·천장'] as const).map((id) => (
@@ -1029,7 +1024,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
                   {sub === 'catalog' && (
                     <>
-                      <p className="mb-3 text-[12px] text-text-secondary">등록된 상품 종류 {DEMO_FURNITURE.length}개예요. 누르면 놓여요.</p>
                       <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="이름·브랜드 검색" className="h-9 w-full rounded-full border border-border-default bg-surface-base px-4 text-[13px] outline-none focus:border-primary-container" />
                       <div className="mt-2 flex flex-wrap gap-1.5">
                         {(['전체', '가구', '소품', '벽·천장'] as const).map((id) => (
@@ -1038,7 +1032,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                           </button>
                         ))}
                       </div>
-                      {category === '벽·천장' && <p className="mt-2 text-[11px] text-text-muted">벽에 걸거나 천장·창문·문에 붙는 것이에요. 걸리는 높이에 걸려요.</p>}
                       {visibleCatalog.length === 0 ? (
                         <p className="py-10 text-center text-[13px] text-text-muted">조건에 맞는 가구가 없어요</p>
                       ) : (
