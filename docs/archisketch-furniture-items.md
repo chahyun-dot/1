@@ -72,15 +72,6 @@
     },
     {
       "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
-      "componentId": "Yq8D3hC589DB8DF6B7D4EC5", "previewImage": "https://resources.archisketch.com/product/Yq8D3hC589DB8DF6B7D4EC5/25-09-2023_01-45-48/preview/Yq8D3hC589DB8DF6B7D4EC5_1.png",
-      "name": "Tolomeo Mega Floor Lamp", "color": null, "brand": "아르떼미데",
-      "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},
-      "quantity": 1, "seriesName": "", "optionValue": "",
-      "dimensionInch": {"width": 16, "height": 93, "depth": 44, "unit": "in"}, "dimensionMm": {"width": 420, "height": 2380, "depth": 1130, "unit": "mm"},
-      "mainCode": "", "subCode": "", "orderCode": "", "handleType": null, "totalPrice": null, "componentCategory": null, "customFields": null, "lineType": "PRODUCT", "bom": null
-    },
-    {
-      "floorId": "abe020ef-9e51-4a24-b964-7cedea41cb74", "floorName": "Floor 1", "roomId": "c615e32c-212d-4041-8dd0-07b384b95103", "roomType": "furniture", "group": null, "ancestorGroupId": null,
       "componentId": "Yew1htX9938663D6F624933", "previewImage": "https://resources.archisketch.com/product/Yew1htX9938663D6F624933/25-04-2023_07-44-55/preview/Yew1htX9938663D6F624933_1.png",
       "name": "UFO KID LAMP", "color": null, "brand": "Archisketch",
       "factoryPrice": {"value": 0.0, "unit": "KRW"}, "retailPrice": {"value": 0.0, "unit": "KRW"}, "installationPrice": {"value": 0.0, "unit": "KRW"},

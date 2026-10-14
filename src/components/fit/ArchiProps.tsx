@@ -1269,64 +1269,6 @@ function WindowFrame({ item }: Props) {
   )
 }
 
-// Tolomeo Mega Floor Lamp: 솔질한 알루미늄 원판 받침에서 곧은 기둥이 올라가 종 모양 크림색 갓 아래 가운데에 닿고,
-// 갓은 아래가 환하게 빛나며, 맨 위에 도르래 바퀴와 뒤로 젖힌 가는 팔·균형추, 갓으로 내려오는 가는 줄이 있다.
-export function TolomeoLamp({ item }: Props) {
-  const d = item.d / M
-  const h = item.h / M
-  const baseZ = -d / 2 + 0.17
-  const shadeH = h * 0.22
-  const shadeBottom = h * 0.66
-  const mouth = 0.21
-  const neck = 0.034
-  const shade = useMemo<[number, number][]>(() => Array.from({ length: 14 }, (_, index) => {
-    const t = index / 13 // 0 = 갓 입구, 1 = 꼭대기
-    return [neck + (mouth - neck) * Math.pow(1 - t, 1.45), t * shadeH]
-  }), [shadeH])
-  const baseProfile: [number, number][] = [[0, 0], [0.17, 0], [0.172, 0.006], [0.168, 0.014], [0.12, 0.018], [0.04, 0.026], [0.02, 0.03]]
-  const top = h - 0.03
-  return (
-    <group>
-      <Lathe profile={baseProfile} color="#bfc2c6" roughness={0.28} metalness={0.75} position={[0, 0, baseZ]} />
-      <mesh position={[0, 0.038, baseZ]} castShadow>
-        <cylinderGeometry args={[0.022, 0.03, 0.03, 20]} />
-        {std('#aeb1b6', 0.3, 0.8)}
-      </mesh>
-      <Rod from={[0, 0.04, baseZ]} to={[0, shadeBottom + 0.01, baseZ]} r={0.0115} color="#c9ccd0" metal />
-      {/* 갓: 크림색 종 모양, 입구 가장자리 얇은 테 */}
-      <Lathe profile={shade} color="#f1ecc8" roughness={0.75} emissive="#fff0a8" position={[0, shadeBottom, baseZ]} />
-      <mesh position={[0, shadeBottom + 0.001, baseZ]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[mouth, 0.0035, 8, 48]} />
-        {std('#d9d6bd', 0.5, 0.2)}
-      </mesh>
-      <mesh position={[0, shadeBottom + 0.004, baseZ]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[mouth * 0.97, 36]} />
-        <meshBasicMaterial color="#fffbd6" />
-      </mesh>
-      <mesh position={[0, shadeBottom + shadeH * 0.3, baseZ]}>
-        <sphereGeometry args={[0.04, 16, 12]} />
-        <meshStandardMaterial color="#fff7c4" emissive="#fff1a0" emissiveIntensity={1.1} transparent opacity={0.85} />
-      </mesh>
-      {/* 갓 위: 가는 막대 → 도르래 바퀴 → 뒤로 젖힌 팔과 균형추, 갓으로 내려오는 줄 */}
-      <Rod from={[0, shadeBottom + shadeH, baseZ]} to={[0, top - 0.01, baseZ]} r={0.0035} color="#9a9da2" metal />
-      <mesh position={[0, top, baseZ]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.026, 0.026, 0.01, 24]} />
-        {std('#c3c5c9', 0.3, 0.75)}
-      </mesh>
-      <mesh position={[0, top, baseZ]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.009, 0.009, 0.022, 12]} />
-        {std('#8d8f94', 0.35, 0.8)}
-      </mesh>
-      <Rod from={[0, top, baseZ]} to={[0, top - 0.09, baseZ - 0.16]} r={0.0042} color="#aeb1b6" metal />
-      <mesh position={[0, top - 0.1, baseZ - 0.175]} castShadow>
-        <sphereGeometry args={[0.018, 14, 10]} />
-        {std('#b7babf', 0.3, 0.8)}
-      </mesh>
-      <Rod from={[0.026, top, baseZ]} to={[0.012, shadeBottom + shadeH * 0.95, baseZ + 0.02]} r={0.0016} color="#d8d8d2" />
-    </group>
-  )
-}
-
 // 싱글 모니터암: 책상 모서리에 물리는 흰 클램프, 짧은 기둥, 위로 비스듬히 뻗은 팔, 끝의 VESA 판(모니터 고정판). 뒤(-z)가 클램프다.
 function MonitorArm({ item }: Props) {
   const w = item.w / M

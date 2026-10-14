@@ -213,7 +213,7 @@ const isChair = (item: Item) => item.model === 'meshchair' || item.model === 'di
 const isSurface = (item: Item) => item.model === 'motiondesk' || item.model === 'desk' || item.model === 'table' || item.model === 'roundtable'
 
 // 의자는 책상·테이블 아래나 그 위에 얹은 물건(상판 높이 이상) 밑으로 밀어 넣을 수 있다. 같은 걸이 물건(셔츠 등)끼리 살짝 겹치는 것도 막지 않는다.
-// 톨로메오 램프는 팔이 책상 위로 뻗어서 책상과 그 위 물건 위를 지난다. 블라인드는 벽에 붙은 얇은 물건이라 100mm 이하로 살짝 걸친 것은 막는 것으로 보지 않는다.
+// 블라인드는 벽에 붙은 얇은 물건이라 100mm 이하로 살짝 걸친 것은 막는 것으로 보지 않는다.
 const touchesBlind = (a: Item, b: Item) => {
   if (a.model !== 'blind' && b.model !== 'blind') return false
   const ra = footprint(a)
@@ -224,8 +224,6 @@ const touchesBlind = (a: Item, b: Item) => {
 const mayOverlap = (a: Item, b: Item) =>
   (isChair(a) && (isSurface(b) || (b.elevation ?? 0) >= 600)) ||
   (isChair(b) && (isSurface(a) || (a.elevation ?? 0) >= 600)) ||
-  (a.model === 'tolomeo' && (isSurface(b) || (b.elevation ?? 0) >= 500)) ||
-  (b.model === 'tolomeo' && (isSurface(a) || (a.elevation ?? 0) >= 500)) ||
   touchesBlind(a, b) ||
   (a.model === b.model && (a.elevation ?? 0) > 0 && (b.elevation ?? 0) > 0)
 
@@ -270,7 +268,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   const front = frontDir(item.rot)
   // 앞쪽 여유(사람이 서는 자리)는 바닥에 놓인 큰 가구만 따진다. 선반·책상 위 물건, 벽에 건 것, 의자는 제외한다.
   // 침대 발치는 지나다니는 자리로 따지지 않는다(침대 옆을 따로 본다).
-  const standing = (item.elevation ?? 0) === 0 && !isChair(item) && item.model !== 'tolomeo' && item.model !== 'bedset' && item.model !== 'bed' && item.model !== 'bedframe'
+  const standing = (item.elevation ?? 0) === 0 && !isChair(item) && item.model !== 'bedset' && item.model !== 'bed' && item.model !== 'bedframe'
   const gaps: Gap[] = (['+x', '-x', '+z', '-z'] as Dir[]).map((dir) => {
     const gap = gapInDir(rect, dir, room, obstacles)
     const side = dir === front ? '앞' : dir === OPPOSITE[front] ? '뒤' : '옆'

@@ -30,7 +30,6 @@ const ROWS: Row[] = [
   ['ZHCng6-9DA238A1CE5340E1', 2409, 190, 0, 800, 380, 1741, 0],  // H1740 5단 철제선반장(2단 도어)
   ['XnPfj-S5D34B27A4E7B4B99', 75, 567, 90, 600, 150, 500, 1058],  // 스트링 포켓 (월넛/블랙)
   ['X8kL5fT81A10556FC5447E5', 10, 3624, 90, 500, 20, 400, 1158],  // Illusion 01 IE - Writer Choi
-  ['Yq8D3hC589DB8DF6B7D4EC5', 381, 519, 34, 361, 972, 2050, 0],  // Tolomeo Mega Floor Lamp
   ['Yew1htX9938663D6F624933', 4108, 2440, -90, 270, 183, 270, 1475],  // UFO KID LAMP
   ['YqRULWb0F39B81582104692', 376, 1043, 90, 312, 226, 222, 630],  // [Sample] Pro 13-inch
   ['XRxqWHD79D04BB434D74AF9', 989, 309, 0, 300, 286, 840, 0],  // [샘플] Geneva Model L (Black)

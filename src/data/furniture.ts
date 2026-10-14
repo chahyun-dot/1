@@ -35,7 +35,6 @@ const KO_NAME: Record<string, string> = {
   Xs_Qb6C3D61BBB72B9B4159: '뷰티레스트 스위트 슈퍼싱글 침대 (블랙)',
   Ydpb3l75AC40FF808E14852: '빌레트 블루 침구 세트 (슈퍼싱글)',
   X8kL5fT81A10556FC5447E5: '일루전 - 최윤정 작가 (피사 애시 그레이)',
-  Yq8D3hC589DB8DF6B7D4EC5: '톨로메오 메가 플로어 램프',
   Yew1htX9938663D6F624933: 'UFO 키즈 램프',
   YqRULWb0F39B81582104692: '[샘플] 프로 13인치 노트북',
   XRxqWHD79D04BB434D74AF9: '[샘플] 제네바 스피커 (블랙)',
@@ -148,7 +147,6 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   ZCREWuP85D472F7745C4005: { model: 'chromecabinet' }, // SIMPLIE 수납장 BC264
   YHx4J5H2C427AA8FBFD482A: { model: 'corerack' }, // 코어렉(CORE RACK)
   YV_XVxTA1102E846ACA437E: { model: 'aralia' }, // Aralia Large
-  Yq8D3hC589DB8DF6B7D4EC5: { model: 'tolomeo' }, // Tolomeo Mega Floor Lamp
   YSCLdDz3A9D4CDED05E451C: { model: 'drawerunit' }, // W400 3단 서랍
   ZGXmJUk293C2AE613ED4B4B: { model: 'walltv', elevation: 900 }, // 삼성 QLED 벽걸이 TV
   'XnPfj-S5D34B27A4E7B4B99': { model: 'stringpocket', elevation: 1000 }, // 스트링 포켓 (월넛/블랙)

@@ -183,7 +183,7 @@ export const studioItems = (productColor: string): Item[] => {
     rot: 0,
     color: productColor,
   }
-  // 오른쪽 다리 쪽은 톨로메오 램프가 있어서, 램프와 창가 커튼 라인을 피해 왼쪽 다리 쪽(뒤에서 120mm 띄움)에 넣는다.
+  // 서랍장은 창가 커튼 라인을 피해 왼쪽 다리 쪽(뒤에서 120mm 띄움)에 넣는다.
   const movedDesk = furniture.find(KEY(DESK_ID))!
   return [...furniture, { ...product, ...placeUnderDesk(movedDesk, product, 'left', 30, 120) }]
 }
