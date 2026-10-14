@@ -200,7 +200,6 @@ function DraggableItem({
         <Html position={[0, item.h / M + 0.18, 0]} center style={{ pointerEvents: 'none' }}>
           <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">
             {onClick ? <span className="text-primary-container">상품 자세히 보기</span> : item.name}
-            {item.image && <img src={item.image} alt="" className="mx-auto mt-1 h-14 w-14 rounded bg-white object-contain" />}
           </span>
         </Html>
       )}
