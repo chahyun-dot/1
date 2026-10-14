@@ -40,6 +40,7 @@ const DEMO_EXCLUDED = new Set([
   'YgDgtY8090165E920A148CE', // Audiorama 4000
   'Xr78id08D1C38D7AD0D4D47', // LED 면조명
   'Xr1ry-I72F798A8F6CB4CAD', // ODDRUN
+  'YV_XVxTA1102E846ACA437E', // Aralia Large
 ])
 export const DEMO_FURNITURE = FURNITURE.filter((f) => !DEMO_EXCLUDED.has(f.id))
 

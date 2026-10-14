@@ -133,6 +133,18 @@ export default function FitDemo() {
     addBox(`custom-${counter.current}`, name, { w: draft.w, d: draft.d, h: draft.h }, CATEGORY_COLOR['직접 입력'])
   }
 
+  // 목록의 + 버튼: 같은 가구를 하나 더 놓는다(빈 자리를 찾아서).
+  const duplicate = (source: Item) => {
+    const key = source.id.split('#')[0]
+    const n = Math.max(0, ...items.filter((item) => item.id.split('#')[0] === key).map((item) => Number(item.id.split('#')[1] ?? 1))) + 1
+    const item: Item = { ...source, id: `${key}#${n}`, x: room.w / 2, z: room.d / 2 }
+    const spot = findFreeSpot(item, room, items)
+    const placed: Item = { ...item, ...(spot ?? clampToRoom(item, room.w / 2, room.d / 2, room)) }
+    setItems((prev) => [...prev, placed])
+    setSelectedId(placed.id)
+    say(spot ? `${source.name}을(를) 하나 더 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
+  }
+
   const remove = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id))
     if (selectedId === id) setSelectedId(null)
@@ -311,7 +323,7 @@ export default function FitDemo() {
 
           {tab === 'placed' && (
             <section className="px-5 py-4">
-              <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, ×개수). 누르면 크기와 여유를 볼 수 있어요.</p>
+              <p className="mb-3 text-[12px] text-text-secondary">3D 영역에 놓인 가구를 상품 종류별로 모았어요(같은 상품은 한 줄, +/−로 개수 조절). 누르면 크기와 여유를 볼 수 있어요.</p>
               <ul className="space-y-1.5">
                 {groups.map((group) => {
                   const item = group.find((member) => member.id === selectedId) ?? group[0]
@@ -324,14 +336,23 @@ export default function FitDemo() {
                             {item.image ? <img src={item.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: item.color }} />}
                           </span>
                           <span className="min-w-0">
-                            <span className="block truncate text-[13px] font-semibold">{item.name}{group.length > 1 && <span className="ml-1 font-bold text-on-primary-container">×{group.length}</span>}</span>
+                            <span className="block truncate text-[13px] font-semibold">{item.name}</span>
                             <span className="block text-[11px] text-text-muted">{sizeText(item)}</span>
                           </span>
                         </button>
                         {item.kind !== 'product' && (
-                          <button type="button" aria-label={`${item.name} 빼기`} onClick={() => remove(last.id)} className="cursor-pointer rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-                            <Icon name="close" className="text-[18px]" />
-                          </button>
+                          <div className="flex items-center gap-0.5">
+                            <button type="button" aria-label={`${item.name} 하나 줄이기`} disabled={group.length < 2} onClick={() => remove(last.id)} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+                              <Icon name="remove" className="text-[16px]" />
+                            </button>
+                            <span className="w-5 text-center text-[12px] font-semibold tabular-nums">{group.length}</span>
+                            <button type="button" aria-label={`${item.name} 하나 늘리기`} onClick={() => duplicate(item)} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle">
+                              <Icon name="add" className="text-[16px]" />
+                            </button>
+                            <button type="button" aria-label={`${item.name} 모두 빼기`} onClick={() => group.forEach((member) => remove(member.id))} className="ml-0.5 cursor-pointer rounded-full p-1.5 text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+                              <Icon name="close" className="text-[18px]" />
+                            </button>
+                          </div>
                         )}
                       </div>
                     </li>
