@@ -205,9 +205,10 @@ const FLAT_MAX = 30
 const levelOverlap = (a: Item, b: Item) =>
   (a.elevation ?? 0) < (b.elevation ?? 0) + b.h && (b.elevation ?? 0) < (a.elevation ?? 0) + a.h && !rests(a, b) && !rests(b, a)
 
-// 다른 가구 위에 대부분 얹힌 물건(침대 위 이불, 소파 위 쿠션)은 그 가구를 막는 것으로 보지 않는다.
+// 다른 가구 위에 대부분 얹힌 물건(소파 위 쿠션, 행거 받침 위 신발과 걸린 옷)은 그 가구를 막는 것으로 보지 않는다.
+// 바닥에서 40mm 넘게 떠 있어야 얹힌 것으로 본다(바닥에 놓인 가구끼리 겹침은 그대로 막는다).
 const rests = (top: Item, base: Item) => {
-  if ((top.elevation ?? 0) <= (base.elevation ?? 0) + 50) return false
+  if ((top.elevation ?? 0) < (base.elevation ?? 0) + 40) return false
   const a = footprint(top)
   const b = footprint(base)
   const overlapW = Math.min(a.maxX, b.maxX) - Math.max(a.minX, b.minX)
