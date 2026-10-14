@@ -21,6 +21,9 @@ const ESTIMATED_SIZE: Record<string, { w: number; d: number; h: number }> = {
 
 // 영어 이름을 한국어로 보여 주기 위한 표(원본 데이터는 그대로 둔다). 표에 없는 것은 원래 이름을 쓴다.
 const KO_NAME: Record<string, string> = {
+  ZLDAeRK53BFEDFD0CF2475A: '아르덴 미러',
+  XjOO_Xy13478D0D91CD493D: '리넨 쿠션',
+  E1632324621148B0: '맞춤 우드 블라인드',
   ZGXmJUk293C2AE613ED4B4B: '[샘플] 삼성 QLED 풀 모션 슬림핏 벽걸이형',
   '83470177e6504b21bad9d2d15b6d5fba': '데스커 의자 (블랙 프레임, 메쉬)',
   ZCREWuP85D472F7745C4005: '심플리 수납장 (블랙)',
@@ -61,8 +64,8 @@ const KO_NAME: Record<string, string> = {
   Y3Jvd_BD5EF2B210F564BF1: '북 데코',
   'Ymz-AKVBAE7A1C5651944C3': '스틸 수납 박스',
   Ym4zsLYED3C0331F08148F5: '사무용품 책상 소품',
-  '7564995DC96E40A3': '블랙 화병',
-  YdE3dZD86B1AD39B3C1443A: '블루 화병',
+  '7564995DC96E40A3': '작은 화병',
+  YdE3dZD86B1AD39B3C1443A: '큰 화병',
   Xw0ZynH039E7EE04F954257: '칼데라 인센스 홀더',
   XtdxyE4131F59D7EE0040B4: '4 센츠 X 미니 룸 스프레이',
   'YV_XVxW9536C02931594E10': '딥티크',
@@ -74,9 +77,12 @@ const KO_NAME: Record<string, string> = {
   E976B33E1388415C: '젤드웬 창문',
 }
 
+// 이름만 보이게: [샘플] 같은 머리말과 (블랙)·(S) 같은 괄호 안 설명(색·옵션)은 뺀다.
+const plainName = (name: string) => name.replace(/\[[^\]]*\]\s*/g, '').replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim()
+
 export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
   id: item.componentId,
-  name: KO_NAME[item.componentId] ?? item.name,
+  name: plainName(KO_NAME[item.componentId] ?? item.name),
   brand: item.brand,
   quantity: item.quantity,
   price: item.retailPrice.value,

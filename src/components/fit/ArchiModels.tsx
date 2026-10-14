@@ -107,9 +107,9 @@ export function SteelShelf({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
   const cabinetH = Math.min(0.74, h * 0.43)
-  const body = '#5b5c60'
-  const door = '#56575b'
   const dark = '#46474b'
+  const body = dark
+  const door = dark
   const rod = '#1c1c1e'
   const shelves = [h - 0.006, h * 0.794, h * 0.583]
   const postsTop = h - 0.012

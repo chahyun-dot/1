@@ -1218,10 +1218,6 @@ function WindowFrame({ item }: Props) {
       <Slab size={[w, frame, d]} position={[0, frame / 2, 0]} color={black} roughness={0.5} />
       <Slab size={[0.04, h - frame * 2, d * 0.7]} position={[0, h / 2, 0]} color={black} roughness={0.5} />
       <Slab size={[w - frame * 2, 0.03, d * 0.5]} position={[0, h / 2, 0]} color={black} roughness={0.5} />
-      <mesh position={[0, h / 2, 0]}>
-        <planeGeometry args={[w - frame * 2, h - frame * 2]} />
-        <meshStandardMaterial color="#cfe3f0" roughness={0.1} transparent opacity={0.25} side={THREE.DoubleSide} />
-      </mesh>
     </group>
   )
 }

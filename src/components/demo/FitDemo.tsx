@@ -42,7 +42,6 @@ const WINDOW_ID = 'E976B33E1388415C'
 const initialItems = (): Item[] => plannerItems()
 
 const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
-const won = (value: number) => `${value.toLocaleString()}원`
 
 function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
   return (
@@ -61,8 +60,8 @@ function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { 
 // 카드 오른쪽 위 모서리에 작게 붙는 "모두 빼기" 버튼.
 function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   return (
-    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-      <Icon name="close" className="text-[10px]" />
+    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-2.5 w-2.5 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+      <Icon name="close" className="text-[6px]" />
     </button>
   )
 }
@@ -281,26 +280,7 @@ export default function FitDemo() {
                 </div>
               </div>
 
-              <dl className="mt-3 grid grid-cols-4 gap-2 text-center">
-                {[
-                  ['가로', cm(selected.w)],
-                  ['세로(깊이)', cm(selected.d)],
-                  ['높이', cm(selected.h)],
-                  ['바닥 면적', `${((selected.w * selected.d) / 1_000_000).toFixed(2)}㎡`],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg bg-surface-alt px-1 py-2">
-                    <dt className="text-[10px] text-text-muted">{label}</dt>
-                    <dd className="text-[13px] font-bold">{value}</dd>
-                  </div>
-                ))}
-              </dl>
-
-              <div className={`-mx-2 mt-3 flex gap-2 rounded-xl px-3 py-2.5 ${LEVEL_STYLE[fit.verdict].box}`}>
-                <Icon name={LEVEL_STYLE[fit.verdict].icon} filled className={`text-[18px] ${LEVEL_STYLE[fit.verdict].text}`} />
-                <span className={`text-[14px] font-bold ${LEVEL_STYLE[fit.verdict].text}`}>{LEVEL_STYLE[fit.verdict].label}</span>
-              </div>
-
-              <h3 className="mb-1.5 mt-4 text-[13px] font-bold">여유 사이즈</h3>
+              <h3 className="mb-1.5 mt-3 text-[13px] font-bold">여유 사이즈</h3>
               <ul className="grid grid-cols-2 gap-2">
                 {[...fit.gaps]
                   .sort((a, b) => ['앞', '뒤', '옆'].indexOf(a.side) - ['앞', '뒤', '옆'].indexOf(b.side))
@@ -318,11 +298,6 @@ export default function FitDemo() {
               <h3 className="mb-1.5 mt-4 text-[13px] font-bold">공간 적합도 진단</h3>
               <CheckList checks={fit.checks} />
 
-              {selected.kind !== 'product' && (
-                <button type="button" onClick={() => remove(selected.id)} className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg border border-border-default py-2 text-[13px] font-medium text-status-bad hover:bg-status-bad-bg">
-                  <Icon name="delete" className="text-[16px]" /> 3D 영역에서 빼기
-                </button>
-              )}
             </section>
           ) : (
             <section className="border-b border-border-subtle px-5 py-6 text-[13px] text-text-secondary">3D 영역의 가구를 누르거나, 아래 목록에서 골라 보세요. 크기와 여유 사이즈가 여기에 나와요.</section>
@@ -449,13 +424,12 @@ export default function FitDemo() {
                         >
                           <span className="relative block aspect-square bg-surface-subtle">
                             <img src={furniture.image} alt="" loading="lazy" className="h-full w-full object-contain" />
-                            {placedCount > 0 && <span className="absolute right-1.5 top-1.5 rounded-full bg-primary-container px-1.5 py-0.5 text-[10px] font-bold text-white">{placedCount}개 배치됨</span>}
+                            {placedCount > 0 && <span aria-label="배치됨" className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-primary-container" />}
                           </span>
                           <span className="flex flex-1 flex-col gap-0.5 p-2">
                             <span className="line-clamp-2 text-[12px] font-bold leading-4">{furniture.name}</span>
                             {bundledInto && <span className="text-[11px] font-semibold text-primary-container">침대에 포함돼요(침대 위에 덮임)</span>}
                             <span className="text-[11px] text-text-muted">{missing ? '치수 정보 없음' : sizeText({ w: furniture.size.w, d: furniture.size.d, h: furniture.size.h })}</span>
-                            <span className="text-[11px] text-text-secondary">{furniture.price > 0 ? won(furniture.price) : '가격 정보 없음'}</span>
                             {(missing || bundledInto) && <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : '침대와 함께 놓기'}</span>}
                           </span>
                         </button>
