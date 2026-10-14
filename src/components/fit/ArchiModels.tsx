@@ -48,20 +48,30 @@ export function BlackBed({ item }: Props) {
   const h = item.h / M
   const frameH = 0.3
   const mattressH = 0.22
-  const board = 0.045
+  const board = 0.05
   const black = '#2d2d2f'
   const mattressLength = (d - board) * 0.9
+  const plinth = 0.07
   return (
     <group>
-      <RoundedBox args={[w, frameH, d]} radius={0.01} smoothness={3} position={[0, frameH / 2, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color={black} roughness={0.7} />
-      </RoundedBox>
-      <mesh position={[0, h / 2, -d / 2 + board / 2]} castShadow receiveShadow>
-        <boxGeometry args={[w, h, board]} />
-        <meshStandardMaterial color={black} roughness={0.7} />
+      {/* 프레임: 바닥에서 살짝 들어간 받침 위에 둥근 모서리 몸체, 위에 얇은 테두리 */}
+      <mesh position={[0, plinth / 2, 0.01]} receiveShadow>
+        <boxGeometry args={[w * 0.94, plinth, d * 0.95]} />
+        <meshStandardMaterial color="#17171a" roughness={0.8} />
       </mesh>
-      <RoundedBox args={[w * 0.88, mattressH, mattressLength]} radius={0.06} smoothness={4} position={[0, frameH + mattressH / 2 - 0.01, -d / 2 + board + 0.02 + mattressLength / 2]} castShadow receiveShadow>
-        <meshStandardMaterial color="#f2f2f0" roughness={0.95} />
+      <RoundedBox args={[w, frameH - plinth, d]} radius={0.014} smoothness={4} position={[0, plinth + (frameH - plinth) / 2, 0]} castShadow receiveShadow>
+        <meshStandardMaterial color={black} roughness={0.62} />
+      </RoundedBox>
+      {/* 헤드보드: 매트리스보다 훨씬 높고 모서리가 살짝 둥근 판, 앞면에 얇은 패널 */}
+      <RoundedBox args={[w, h - plinth, board]} radius={0.012} smoothness={4} position={[0, plinth + (h - plinth) / 2, -d / 2 + board / 2]} castShadow receiveShadow>
+        <meshStandardMaterial color={black} roughness={0.62} />
+      </RoundedBox>
+      <RoundedBox args={[w * 0.9, h * 0.62, 0.012]} radius={0.006} smoothness={3} position={[0, frameH + (h * 0.62) / 2 + 0.05, -d / 2 + board + 0.004]} receiveShadow>
+        <meshStandardMaterial color="#38383b" roughness={0.75} />
+      </RoundedBox>
+      {/* 매트리스: 두툼하고 모서리가 크게 둥근 흰 매트리스 */}
+      <RoundedBox args={[w * 0.9, mattressH, mattressLength]} radius={0.085} smoothness={6} position={[0, frameH + mattressH / 2 - 0.01, -d / 2 + board + 0.02 + mattressLength / 2]} castShadow receiveShadow>
+        <meshStandardMaterial color="#f4f4f2" roughness={0.95} />
       </RoundedBox>
     </group>
   )
@@ -101,7 +111,18 @@ export function BedWithBedding({ item }: Props) {
       {layer([0, duvetTop - drop / 2, foot + 0.06 - 0.006], [duvetW * 0.985, drop, 0.016], blue, 0.006, [0.07, 0, 0])}
       {layer([0, duvetTop + 0.012, duvetZ - duvetL / 2 + 0.07], [duvetW * 0.99, 0.03, 0.12], fold, 0.012)}
       {layer([0, mattressTop + 0.15, head + 0.07], [w * 0.62, 0.3, 0.1], '#4b4b4f', 0.04, [-0.1, 0, 0])}
-      {[-1, 1].map((side) => <group key={side}>{layer([side * w * 0.235, mattressTop + 0.07, head + 0.34], [w * 0.4, 0.13, 0.58], pillow, 0.05, [-0.12, 0, 0])}</group>)}
+      {[-1, 1].map((side) => (
+        <mesh key={side} position={[side * w * 0.235, mattressTop + 0.065, head + 0.34]} rotation={[-0.12, 0, 0]} scale={[w * 0.2, 0.075, 0.3]} castShadow receiveShadow>
+          <sphereGeometry args={[1, 32, 20]} />
+          <meshStandardMaterial color={pillow} roughness={0.95} />
+        </mesh>
+      ))}
+      {[0.28, 0.5, 0.72].map((t) => (
+        <mesh key={t} position={[0, duvetTop + 0.002, duvetZ - duvetL / 2 + duvetL * t]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.006, 0.006, duvetW * 0.9, 8]} />
+          <meshStandardMaterial color={fold} roughness={1} />
+        </mesh>
+      ))}
     </group>
   )
 }

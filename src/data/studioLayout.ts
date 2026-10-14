@@ -1,5 +1,5 @@
 import { PRODUCT, WHEEL_DEFAULT } from '@/data/catalog'
-import { GALLERY } from '@/data/ohou'
+import { GALLERY, galleryUrl } from '@/data/ohou'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { placeUnderDesk } from '@/lib/desk'
 import { footprint } from '@/lib/fit'
@@ -176,7 +176,8 @@ export const studioItems = (productColor: string): Item[] => {
     d: PRODUCT.size.d,
     h: PRODUCT.bodyH + WHEEL_DEFAULT,
     caster: WHEEL_DEFAULT,
-    image: GALLERY[0],
+    // 흰 배경에 서랍장만 나온 상품 이미지(두 번째 사진).
+    image: galleryUrl(GALLERY[1], 200),
     x: 0,
     z: 0,
     rot: 0,

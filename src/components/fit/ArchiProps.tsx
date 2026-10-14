@@ -171,29 +171,41 @@ function Poster({ item }: Props) {
   )
 }
 
-// UFO KID LAMP: 벽에 붙는 검은 돔(UFO 모양)과 가운데에서 앞으로 나온 소켓, 투명 전구.
+// UFO KID LAMP: 벽에 붙는 검은 원반 받침, 가운데가 오목하게 들어간 낮은 돔, 앞으로 나온 놋쇠 소켓(홈 세 줄)과 은색 구 전구.
 function KidLamp({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
-  const dome = Math.min(0.07, d * 0.4)
+  const r = Math.min(w, h) / 2
+  const dome = useMemo(() => {
+    const profile = [[r, 0], [r * 0.995, 0.012], [r * 0.93, 0.026], [r * 0.75, 0.04], [r * 0.5, 0.047], [r * 0.3, 0.042], [r * 0.16, 0.034], [0.03, 0.03]].map(([rr, y]) => new THREE.Vector2(rr, y))
+    return new THREE.LatheGeometry(profile, 48)
+  }, [r])
+  const front = -d / 2 + 0.032 // 돔 가운데 오목한 자리
   return (
     <group position={[0, h / 2, 0]}>
-      <mesh position={[0, 0, -d / 2]} rotation={[Math.PI / 2, 0, 0]} scale={[1, dome / (w / 2), 1]} castShadow>
-        <sphereGeometry args={[w / 2, 36, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        {std('#1d1d20', 0.3, 0.4)}
+      <group position={[0, 0, -d / 2]} rotation={[Math.PI / 2, 0, 0]}>
+        <mesh geometry={dome} castShadow receiveShadow>
+          <meshStandardMaterial color="#202023" roughness={0.28} metalness={0.5} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+      <mesh position={[0, 0, front + 0.012]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <cylinderGeometry args={[0.022, 0.026, 0.026, 24]} />
+        {std('#1b1b1e', 0.4, 0.5)}
       </mesh>
-      <mesh position={[0, 0, -d / 2 + dome + 0.02]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.028, 0.034, 0.05, 20]} />
-        {std('#2a2a2d', 0.35, 0.6)}
+      {[0.03, 0.044, 0.058].map((z, index) => (
+        <mesh key={z} position={[0, 0, front + z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[0.02 - index * 0.001, 0.02 - index * 0.001, 0.009, 24]} />
+          {std('#c2b27a', 0.35, 0.8)}
+        </mesh>
+      ))}
+      <mesh position={[0, 0, front + 0.103]} castShadow>
+        <sphereGeometry args={[0.042, 28, 20]} />
+        {std('#c9cfd3', 0.18, 0.75)}
       </mesh>
-      <mesh position={[0, 0, -d / 2 + dome + 0.085]}>
-        <sphereGeometry args={[0.048, 24, 18]} />
-        {glass('#e8eef2', 0.5)}
-      </mesh>
-      <mesh position={[0, 0, -d / 2 + dome + 0.085]}>
-        <sphereGeometry args={[0.012, 12, 10]} />
-        <meshStandardMaterial color="#fff2c4" emissive="#fff2c4" emissiveIntensity={0.8} />
+      <mesh position={[0, 0, front + 0.114]}>
+        <sphereGeometry args={[0.011, 12, 10]} />
+        <meshStandardMaterial color="#fff2c4" emissive="#fff2c4" emissiveIntensity={0.6} />
       </mesh>
     </group>
   )
@@ -718,32 +730,49 @@ function Audiorama({ item }: Props) {
   )
 }
 
-// Beat Table Light: 검은 받침과 가는 몸대, 앞으로 기울어진 원뿔 갓(안쪽 금색).
+// Beat Table Light: 둥근 검은 받침(놋쇠 단추)과 가는 몸대, 목이 가늘다가 아래로 나팔처럼 벌어지는 검은 갓(안쪽 금색 망치 무늬)과 그 안의 전구.
 function BeatLight({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
-  const shadeH = 0.22
-  const topR = 0.03
-  const botR = Math.min(item.w, item.d) / M * 0.45
+  const shadeH = Math.min(0.26, h * 0.46)
+  const neck = 0.014
+  const mouth = Math.min(item.w, item.d) / M * 0.46
+  const stemZ = -d * 0.2
+  const profile = useMemo<[number, number][]>(() => Array.from({ length: 16 }, (_, index) => {
+    const t = index / 15 // 0 = 갓 입구(아래), 1 = 목(위)
+    return [neck + (mouth - neck) * Math.pow(1 - t, 2.3), t * shadeH]
+  }), [mouth, shadeH])
+  const outer = useMemo(() => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(r, y)), 40), [profile])
+  const inner = useMemo(() => new THREE.LatheGeometry(profile.map(([r, y]) => new THREE.Vector2(Math.max(0.004, r - 0.003), y)), 40), [profile])
   return (
     <group>
-      <mesh position={[0, 0.01, -d * 0.2]} castShadow>
-        <cylinderGeometry args={[0.09, 0.09, 0.02, 32]} />
-        {std('#1b1b1d', 0.4, 0.4)}
+      <mesh position={[0, 0.008, stemZ]} castShadow receiveShadow>
+        <cylinderGeometry args={[0.085, 0.092, 0.016, 40]} />
+        {std('#222225', 0.55, 0.3)}
       </mesh>
-      <Rod from={[0, 0.02, -d * 0.2]} to={[0, h - shadeH * 0.8, -d * 0.2]} r={0.007} color="#17171a" />
-      <group position={[0, h - shadeH * 0.5, -d * 0.2 + 0.07]} rotation={[0.4, 0, 0]}>
-        <mesh castShadow>
-          <cylinderGeometry args={[topR, botR, shadeH, 32, 1, true]} />
-          <meshStandardMaterial color="#1b1b1d" roughness={0.4} metalness={0.3} side={THREE.FrontSide} />
+      <mesh position={[0, 0.02, stemZ + 0.045]} castShadow>
+        <cylinderGeometry args={[0.011, 0.011, 0.018, 20]} />
+        {std('#c8a24c', 0.35, 0.8)}
+      </mesh>
+      <mesh position={[0, 0.026, stemZ]}>
+        <sphereGeometry args={[0.014, 16, 12]} />
+        {std('#1c1c1f', 0.4, 0.3)}
+      </mesh>
+      <Rod from={[0, 0.026, stemZ]} to={[0, h - shadeH * 0.7, stemZ]} r={0.0065} color="#18181b" />
+      <group position={[0, h - shadeH * 0.78, stemZ + 0.03]} rotation={[0.45, 0, 0]}>
+        <mesh geometry={outer} castShadow>
+          <meshStandardMaterial color="#26282b" roughness={0.45} metalness={0.25} side={THREE.FrontSide} />
         </mesh>
-        <mesh>
-          <cylinderGeometry args={[topR * 0.96, botR * 0.96, shadeH * 0.99, 32, 1, true]} />
-          <meshStandardMaterial color="#d9a441" roughness={0.3} metalness={0.7} side={THREE.BackSide} emissive="#ffcf66" emissiveIntensity={0.35} />
+        <mesh geometry={inner}>
+          <meshStandardMaterial color="#d6a23c" roughness={0.35} metalness={0.7} emissive="#c98a1c" emissiveIntensity={0.3} side={THREE.BackSide} />
         </mesh>
-        <mesh position={[0, -shadeH * 0.2, 0]}>
-          <sphereGeometry args={[0.025, 14, 12]} />
-          <meshStandardMaterial color="#fff1b8" emissive="#fff1b8" emissiveIntensity={0.9} />
+        <mesh position={[0, shadeH + 0.012, 0]} castShadow>
+          <cylinderGeometry args={[0.009, 0.013, 0.026, 14]} />
+          {std('#26282b', 0.45, 0.25)}
+        </mesh>
+        <mesh position={[0, shadeH * 0.2, 0]}>
+          <sphereGeometry args={[0.03, 20, 16]} />
+          <meshStandardMaterial color="#fff4c9" emissive="#ffe9a0" emissiveIntensity={1} />
         </mesh>
       </group>
     </group>
@@ -1097,15 +1126,49 @@ function Cushion({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
+  const base = item.tint ?? '#f1f1ee'
+  // 베개처럼 가장자리는 얇게 모이고 가운데가 볼록한 두 면. 모서리는 뾰족하게 당겨지고 가장자리에는 잔주름이 진다.
+  const faces = useMemo(() => {
+    const nx = 40
+    const ny = 26
+    const build = (side: 1 | -1) => {
+      const positions: number[] = []
+      const index: number[] = []
+      for (let j = 0; j <= ny; j += 1) {
+        for (let i = 0; i <= nx; i += 1) {
+          const u = (i / nx) * 2 - 1
+          const v = (j / ny) * 2 - 1
+          const edge = Math.pow(Math.max(0, 1 - Math.pow(Math.abs(u), 3.2)), 0.55) * Math.pow(Math.max(0, 1 - Math.pow(Math.abs(v), 3.2)), 0.55)
+          const crinkle = (1 - edge) * 0.012 * Math.sin(u * 19 + v * 7) * Math.cos(v * 15)
+          const pull = 1 - 0.035 * Math.pow(Math.abs(u * v), 1.5) // 모서리가 살짝 안쪽으로
+          positions.push((u * w * pull) / 2, h / 2 + (v * h * pull) / 2, side * ((d / 2) * edge + crinkle))
+        }
+      }
+      for (let j = 0; j < ny; j += 1) {
+        for (let i = 0; i < nx; i += 1) {
+          const a = j * (nx + 1) + i
+          const b = a + 1
+          const c = a + nx + 1
+          const e = c + 1
+          if (side === 1) index.push(a, b, c, b, e, c)
+          else index.push(a, c, b, b, c, e)
+        }
+      }
+      const geometry = new THREE.BufferGeometry()
+      geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
+      geometry.setIndex(index)
+      geometry.computeVertexNormals()
+      return geometry
+    }
+    return [build(1), build(-1)]
+  }, [w, d, h])
   return (
     <group>
-      <RoundedBox args={[w, h, d]} radius={Math.min(d * 0.3, 0.05)} smoothness={6} position={[0, h / 2, 0]} castShadow receiveShadow>
-        {std(item.tint ?? '#f1f1ee', 0.98)}
-      </RoundedBox>
-      <mesh position={[0, h / 2, 0]} scale={[w / 2 * 0.98, h / 2 * 0.98, d / 2 * 1.04]}>
-        <sphereGeometry args={[1, 28, 18]} />
-        {std(item.tint ? lighten(item.tint, 0.04) : '#f4f4f1', 0.98)}
-      </mesh>
+      {faces.map((geometry, index) => (
+        <mesh key={index} geometry={geometry} castShadow receiveShadow>
+          <meshStandardMaterial color={index === 0 ? base : lighten(base, 0.02)} roughness={0.98} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
     </group>
   )
 }
