@@ -1069,9 +1069,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                                   </span>
                                   <span className="flex flex-1 flex-col gap-0.5 p-2">
                                     <span className="line-clamp-2 text-[12px] font-bold leading-4">{furniture.name}</span>
-                                    {bundledInto && <span className="text-[11px] font-semibold text-primary-container">침대에 포함돼요(침대 위에 덮임)</span>}
+                                    {bundledInto && <span className="text-[11px] font-semibold text-primary-container">{bundledInto === 'YSBhD9T1E65915F80104295' ? '철제행거에 포함돼요(행거에 걸림)' : '침대에 포함돼요(침대 위에 덮임)'}</span>}
                                     <span className="text-[11px] text-text-muted">{missing ? '치수 정보 없음' : sizeText({ w: furniture.size.w, d: furniture.size.d, h: furniture.size.h })}</span>
-                                    {(missing || bundledInto) && <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : '침대와 함께 놓기'}</span>}
+                                    {(missing || bundledInto) && <span className={`mt-1 text-[11px] font-semibold ${missing ? 'text-status-warn' : 'text-primary-container'}`}>{missing ? '치수 입력하기' : bundledInto === 'YSBhD9T1E65915F80104295' ? '철제행거와 함께 놓기' : '침대와 함께 놓기'}</span>}
                                   </span>
                                 </button>
                               </li>

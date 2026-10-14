@@ -167,7 +167,7 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   YgjU_Ah72C5B21C5B7F4F47: { model: 'ovaltray' }, // Oval round tray silver beads transparent
   XV5vpP7A568816FF2C2432F: { model: 'bird' }, // Eames House Bird (Black)
   XW_VtxtA8DF6CDA88104092: { model: 'poster', elevation: 1000 }, // Ideal living(Black Aluminum)
-  YSBhD9T1E65915F80104295: { model: 'wallhanger' }, // (벽고정)W800 철제행거
+  YSBhD9T1E65915F80104295: { model: 'hangerset' }, // (벽고정)W800 철제행거 + 걸린 셔츠·옷·신발(한 덩어리)
   YV8EVEF2D36EE1DB1D44CAB: { model: 'shirt' }, // Dress Shirt
   'XX-zmmq45F1867DE7EE462B': { model: 'folded' }, // Clothes 2
   ZFFQHal586565A1F38B473C: { model: 'shoes' }, // shoes 01
@@ -202,9 +202,12 @@ export const MODEL_BY_FURNITURE: Record<string, { model: ItemModel; elevation?: 
   YjCJHDA8B714D95FB9D45DD: { model: 'monitorarm', elevation: 720 }, // 싱글 모니터암(책상 위 높이 720mm 에 얹음, 치수는 추정)
 }
 
-// 한 덩어리로 놓이는 가구. 키 가구를 고르면 값 가구의 크기·이미지·3D 모델로 놓인다(침구는 침대 위에 덮인 채 침대와 하나).
+// 한 덩어리로 놓이는 가구. 키 가구를 고르면 값 가구의 크기·이미지·3D 모델로 놓인다(침구는 침대 위에 덮인 채 침대와 하나, 셔츠·옷·신발은 철제행거에 걸린 채 행거와 하나).
 export const BUNDLE_OF: Record<string, string> = {
   Ydpb3l75AC40FF808E14852: 'Xs_Qb6C3D61BBB72B9B4159', // Villette Blue 침구 → D2178B 침대
+  YV8EVEF2D36EE1DB1D44CAB: 'YSBhD9T1E65915F80104295', // Dress Shirt → 철제행거
+  'XX-zmmq45F1867DE7EE462B': 'YSBhD9T1E65915F80104295', // Clothes 2 → 철제행거
+  ZFFQHal586565A1F38B473C: 'YSBhD9T1E65915F80104295', // shoes 01 → 철제행거
 }
 
 // 침대와 합쳐진 침구를 가리키는 가구 id.
