@@ -160,7 +160,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
                     : `${shortName(gap.b.name)}이(가) ${shortName(gap.a.name)}에서 ${mm(gap.dist)} 떨어져 있어요`
                   : gap.dist < 0
                   ? gap.b.model.includes('chair')
-                    ? `${shortName(gap.b.name)}가 ${shortName(gap.a.name)} 아래로 ${mm(-gap.dist)} 들어가 있어요`
+                    ? `${shortName(gap.a.name)} ↔ ${shortName(gap.b.name)} ${mm(-gap.dist)}`
                     : `${shortName(gap.b.name)}와 ${mm(-gap.dist)} 겹침`
                   : `${shortName(gap.a.name)} ↔ ${shortName(gap.b.name)} ${mm(gap.dist)}`
               }
