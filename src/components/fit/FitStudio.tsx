@@ -37,6 +37,8 @@ const VERDICT: Record<Level, { label: string; icon: string; box: string; text: s
   bad: { label: '현재 배치에서는 사용 공간이 부족해요', icon: 'cancel', box: 'bg-status-bad-bg', text: 'text-status-bad' },
 }
 
+const VERDICT_SHORT: Record<Level, string> = { ok: '배치 가능', warn: '확인 필요', bad: '공간 부족' }
+
 const CHECK_ICON: Record<Level, string> = { ok: 'text-status-success', warn: 'text-amber-500', bad: 'text-status-bad' }
 
 // 방 치수는 1~10000mm 까지 입력할 수 있다.
@@ -226,6 +228,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const counter = useRef(0)
   const asideRef = useRef<HTMLElement>(null)
   const [scrolled, setScrolled] = useState(false)
+  const [diagOpen, setDiagOpen] = useState(false)
   const toastTimer = useRef<number | undefined>(undefined)
 
   const product = items.find((item) => item.kind === 'product') ?? null
@@ -465,10 +468,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
   const diagnosis = (
     <>
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="shrink-0 whitespace-nowrap text-[15px] font-bold text-text-primary">공간 적합도 진단</h3>
-            <span className="ml-2 min-w-0 truncate text-[11px] text-text-muted">{target ? target.name : '실측 규격 기준'}</span>
-          </div>
           {fit && verdict ? (
             <>
               <div className={`-mx-3 flex gap-2 rounded-xl px-3 py-3 ${verdict.box}`}>
@@ -516,6 +515,30 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
           )}
             </>
   )
+
+  // 탭 위에 놓이는 아코디언. 접어 두면 판정 한 줄만 보이고, 스크롤해도 탭과 함께 위에 붙어 따라온다.
+  const diagnosisPanel =
+    tab !== 'custom' || inDetail ? (
+      <div className="border-b border-border-subtle bg-surface-base">
+        <button type="button" onClick={() => setDiagOpen(!diagOpen)} aria-expanded={diagOpen} className="flex w-full cursor-pointer items-center justify-between gap-2 px-5 py-3 text-left">
+          <span className="flex min-w-0 items-center gap-2">
+            <span className="shrink-0 whitespace-nowrap text-[14px] font-bold text-text-primary">공간 적합도 진단</span>
+            {fit && verdict ? (
+              <span className={`flex shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-[11px] font-semibold ${verdict.box} ${verdict.text}`}>
+                <Icon name={verdict.icon} filled size={12} /> {VERDICT_SHORT[fit.verdict]}
+              </span>
+            ) : (
+              <span className="truncate text-[11px] text-text-muted">가구를 선택해 주세요</span>
+            )}
+          </span>
+          <span className="flex min-w-0 items-center gap-1">
+            {target && <span className="truncate text-[11px] text-text-muted">{target.name}</span>}
+            <Icon name="expand_more" className={`shrink-0 text-[20px] text-text-secondary transition-transform ${diagOpen ? 'rotate-180' : ''}`} />
+          </span>
+        </button>
+        {diagOpen && <div className="max-h-[42vh] overflow-y-auto px-5 pb-4">{diagnosis}</div>}
+      </div>
+    ) : null
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] lg:p-8" onMouseDown={(event) => event.target === event.currentTarget && close()}>
@@ -730,7 +753,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </section>
               )}
 
-              <div role="tablist" aria-label="설정" className="sticky top-0 z-10 flex border-b border-border-default bg-surface-base">
+              <div className="sticky top-0 z-20 bg-surface-base">
+              {diagnosisPanel}
+              <div role="tablist" aria-label="설정" className="flex border-b border-border-default bg-surface-base">
                 {inDetail
                   ? (cluster!.id === 'desk'
                       ? ([{ id: 'members', label: '가구 정보' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }] as { id: DetailTab; label: string }[])
@@ -745,6 +770,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                         {item.label}
                       </button>
                     ))}
+              </div>
               </div>
 
               {inDetail && cluster!.id === 'desk' && desk && product && detailTab === 'cabinet' && (
@@ -1059,8 +1085,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </section>
               )}
 
-              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. */}
-              {tab !== 'custom' || inDetail ? <section className="px-5 py-5">{diagnosis}</section> : null}
               {!inDetail && tab === 'all' && scrolled && (
                 <div className="pointer-events-none sticky bottom-3 z-10 -mt-8 flex h-8 shrink-0 justify-end pr-4">
                   <button type="button" aria-label="맨 위로 올라가기" title="맨 위로" onClick={() => asideRef.current?.scrollTo({ top: 0, behavior: 'smooth' })} className="pointer-events-auto flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border border-border-default bg-surface-base/95 text-text-secondary shadow-md hover:border-primary-container hover:text-primary-container">
