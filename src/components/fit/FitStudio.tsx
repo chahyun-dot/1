@@ -524,8 +524,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   )
 
   // 탭 위에 놓이는 아코디언. 접어 두면 판정 한 줄만 보이고, 스크롤해도 탭과 함께 위에 붙어 따라온다.
-  const diagnosisPanel =
-    tab !== 'custom' || inDetail ? (
+  const diagnosisPanel = (
       <div className="border-b border-border-subtle bg-surface-base">
         <button type="button" onClick={() => setDiagOpen(!diagOpen)} aria-expanded={diagOpen} className="flex w-full cursor-pointer items-center justify-between gap-2 px-5 py-3 text-left">
           <span className="flex min-w-0 items-center gap-2">
@@ -544,7 +543,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
         </button>
         {diagOpen && fit && <div className="max-h-[42vh] overflow-y-auto px-5 pb-4">{diagnosis}</div>}
       </div>
-    ) : null
+  )
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] lg:p-8" onMouseDown={(event) => event.target === event.currentTarget && close()}>
