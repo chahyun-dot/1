@@ -6,7 +6,7 @@ import type { FitSummary } from '@/components/fit/FitModal'
 import Scene, { type View } from '@/components/fit/Scene'
 import { COLORS, PRODUCT, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
 import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
-import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
+import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, HANGER_KEYS, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
 import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
 import { placeAround, type AroundSide } from '@/lib/cluster'
 import { DRAWER_PULL, backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
@@ -53,6 +53,8 @@ const CATEGORY_COLOR: Record<FurnitureCategory | '직접 입력', string> = { �
 const CUSTOM_KINDS = ['침대', '테이블·식탁·책상', '소파', '서랍·수납장', '선반', '의자', '진열장·책장', '거울']
 const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
 const WINDOW_ID = 'E976B33E1388415C'
+
+const PRETENDARD = "'Pretendard Variable', Pretendard, Inter, -apple-system, 'Noto Sans KR', sans-serif"
 
 const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
 
@@ -181,6 +183,15 @@ function InfoTip({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+// 크기를 바꿀 수 있는 카드 오른쪽 끝에 두는 작은 초기화 버튼.
+function ResetButton({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
+  return (
+    <button type="button" aria-label={`${label} 처음 크기로 초기화`} disabled={disabled} onClick={onClick} className="flex shrink-0 cursor-pointer items-center gap-0.5 rounded-full border border-border-default px-1.5 py-px text-[10px] font-medium text-text-secondary hover:border-primary-container hover:text-primary-container disabled:cursor-default disabled:opacity-30 disabled:hover:border-border-default disabled:hover:text-text-secondary">
+      <Icon name="refresh" size={11} /> 초기화
+    </button>
+  )
+}
+
 function Section({ children }: { children: ReactNode }) {
   return <section className="border-b border-border-subtle px-5 py-5">{children}</section>
 }
@@ -192,6 +203,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [windowCount, setWindowCount] = useState(MAX_WINDOWS)
   const room = useMemo(() => studioRoom(dims, windowCount), [dims, windowCount])
   const [items, setItems] = useState<Item[]>(() => studioItems(colorOf(colorFromPage ?? 'white').hex))
+  // 크기 초기화 버튼이 돌아갈 처음 크기.
+  const initialItems = useMemo(() => studioItems(colorOf('white').hex), [])
   const [selectedId, setSelectedId] = useState<string | null>('product')
   const [view, setView] = useState<View>('persp')
   // 서랍이 열린 가구 id (서랍장 제품과 3단 수납형 서랍을 따로 열고 닫는다).
@@ -388,6 +401,24 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   }
 
   const setSize = (id: string, patch: Partial<Pick<Item, 'w' | 'd' | 'h'>>) => updateItem(id, (item) => clampTo({ ...item, ...patch }, item.x, item.z))
+  const initialOf = (id: string) => initialItems.find((item) => item.id === id)
+  const sizeChanged = (item: Item) => {
+    const first = initialOf(item.id)
+    return !!first && (first.w !== item.w || first.d !== item.d || first.h !== item.h)
+  }
+  const resetSize = (id: string) => {
+    const first = initialOf(id)
+    if (first) setSize(id, { w: first.w, d: first.d, h: first.h })
+  }
+  // 책상은 크기를 바꾸면 서랍장이 따라가므로 updateDesk 로 되돌린다.
+  const deskSizeChanged = (item: Item) => {
+    const first = initialOf(item.id)
+    return !!first && (first.w !== item.w || first.d !== item.d || first.h !== item.h || first.underClearance !== item.underClearance || first.legGap !== item.legGap)
+  }
+  const installChanged = (item: Item) => {
+    const first = initialOf(item.id)
+    return !!first && (first.underClearance !== item.underClearance || first.legGap !== item.legGap)
+  }
 
   const close = () => {
     const productFit = product ? evaluate(product, room, items) : null
@@ -428,6 +459,60 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
   const options = target && target.kind !== 'product' ? COLOR_OPTIONS[keyOf(target)] : undefined
 
+  const diagnosis = (
+    <>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="shrink-0 whitespace-nowrap text-[15px] font-bold text-text-primary">공간 적합도 진단</h3>
+            <span className="ml-2 min-w-0 truncate text-[11px] text-text-muted">{target ? target.name : '실측 규격 기준'}</span>
+          </div>
+          {fit && verdict ? (
+            <>
+              <div className={`-mx-3 flex gap-2 rounded-xl px-3 py-3 ${verdict.box}`}>
+                <Icon name={verdict.icon} filled className={`mt-px text-[18px] ${verdict.text}`} />
+                <span className={`text-[15px] font-bold leading-snug ${verdict.text}`}>{verdict.label}</span>
+              </div>
+              <ul className="mt-3 space-y-2.5">
+                {fit.checks.map((check, index) => (
+                  <li key={index} className="flex gap-2">
+                    <Icon name={check.level === 'ok' ? 'check_circle' : check.level === 'warn' ? 'error' : 'cancel'} filled className={`mt-0.5 text-[18px] ${CHECK_ICON[check.level]}`} />
+                    <div>
+                      <p className="text-[13px] font-semibold text-text-primary">{check.title}</p>
+                      <p className="text-[12px] leading-relaxed text-text-secondary">{check.detail}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-4 overflow-hidden rounded-xl bg-surface-alt">
+                <button type="button" onClick={() => setGapsOpen(!gapsOpen)} aria-expanded={gapsOpen} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-[13px] font-semibold text-text-primary">
+                  <span>주변 간격 (앞 · 뒤 · 옆)</span>
+                  <span className="flex items-center gap-1.5">
+                    {!gapsOpen && frontGap && <span className={`text-[12px] font-semibold ${CHECK_ICON[frontGap.level]}`}>앞 {cm(frontGap.distance)}</span>}
+                    <Icon name="expand_more" className={`text-[20px] text-text-secondary transition-transform ${gapsOpen ? 'rotate-180' : ''}`} />
+                  </span>
+                </button>
+                {gapsOpen && (
+                  <ul className="divide-y divide-border-subtle px-3">
+                    {[...fit.gaps]
+                      .sort((a, b) => ['앞', '뒤', '옆'].indexOf(a.side) - ['앞', '뒤', '옆'].indexOf(b.side))
+                      .map((gap) => (
+                        <li key={gap.dir} className="flex items-center justify-between py-2 text-[13px]">
+                          <span className="text-text-secondary">
+                            <span className="font-semibold text-text-primary">{gap.side}</span> · {gap.target}까지
+                          </span>
+                          <span className={`font-semibold ${gap.side === '앞' ? CHECK_ICON[gap.level] : 'text-text-primary'}`}>{gap.distance < 5 ? '붙어 있음' : cm(gap.distance)}</span>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+              {target?.kind === 'product' && <p className="mt-3 text-[11px] leading-relaxed text-text-muted">서랍 완전 개폐에 앞쪽 {cm(DRAWER_PULL)}가 필요해요. 바닥의 파란 영역이 서랍이 열리는 자리예요.</p>}
+            </>
+          ) : (
+            <p className="text-[13px] text-text-muted">가구를 누르면 진단이 나와요. 서랍장이 공간에 없으면 초기화를 눌러 주세요.</p>
+          )}
+            </>
+  )
+
   return (
     <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px] lg:p-8" onMouseDown={(event) => event.target === event.currentTarget && close()}>
       <div role="dialog" aria-modal="true" aria-labelledby="fit-title" className="flex h-[min(880px,94vh)] w-full max-w-[1320px] flex-col overflow-hidden rounded-2xl bg-surface-base shadow-2xl">
@@ -444,7 +529,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <Icon name="info" className="text-[20px]" />
                 </button>
                 <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-[300px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  가구 드래그로 옮기기 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
+                  <ol className="list-decimal space-y-0.5 pl-4">
+                    <li>가구 드래그로 옮기기</li>
+                    <li>빈 곳 드래그로 시점 돌리기</li>
+                    <li>휠로 확대</li>
+                    <li>모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.</li>
+                  </ol>
                 </span>
               </span>
             </div>
@@ -530,6 +620,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               >
                 <Icon name={expanded ? 'close_fullscreen' : 'open_in_full'} className="text-[18px]" />
               </button>
+
+              {inDetail && (
+                <section aria-label="공간 적합도 진단" style={{ zIndex: 16777300 }} className="absolute left-4 top-4 max-h-[calc(100%-6.5rem)] w-[300px] overflow-y-auto rounded-xl border border-border-default bg-surface-base/95 px-4 py-4 shadow-lg backdrop-blur-md">
+                  {diagnosis}
+                </section>
+              )}
 
               {!inDetail && target && (
                 <div className="pointer-events-none absolute bottom-16 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-inverse-surface/90 px-3 py-1 text-[12px] font-medium text-inverse-on-surface shadow-md">
@@ -709,9 +805,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <p className="text-[13px] leading-relaxed text-text-secondary">묶음 안 가구의 색상과 크기를 바꿀 수 있어요. 누르면 아래 진단이 그 가구 기준으로 바뀌어요.</p>
                   {cluster!.id === 'desk' && desk && (
                     <div className="mt-3 rounded-xl border border-border-default px-3 py-3">
-                      <h4 className="text-[13px] font-bold text-text-primary">
-                        설치 공간 치수 <span className="ml-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">중요</span>
-                      </h4>
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-[13px] font-bold text-text-primary">
+                          설치 공간 치수 <span className="ml-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">중요</span>
+                        </h4>
+                        <ResetButton label="설치 공간 치수" disabled={!installChanged(desk)} onClick={() => { const first = initialOf(desk.id); if (first) updateDesk({ underClearance: first.underClearance, legGap: first.legGap }) }} />
+                      </div>
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         <NumberField label="상판 아래 높이" value={undersideOf(desk)} min={300} max={desk.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
                         <NumberField label="다리 안쪽 폭" value={legInner(desk) * 2} min={300} max={maxLegGap(desk.w)} onCommit={(legGap) => updateDesk({ legGap })} />
@@ -720,21 +819,25 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   )}
                   <ul className="mt-3 space-y-3">
                     {members
-                      .filter((member) => member.kind !== 'rug' || cluster!.id !== 'desk')
+                      .filter((member) => (member.kind !== 'rug' || cluster!.id !== 'desk') && !HANGER_KEYS.slice(1).includes(keyOf(member)))
                       .map((member) => {
                         const memberOptions = member.kind === 'product' ? undefined : COLOR_OPTIONS[keyOf(member)]
                         const resizable = member.kind !== 'product' && member.model !== 'motiondesk'
                         return (
                           <li key={member.id} className={`rounded-xl border px-3 py-3 ${target?.id === member.id ? 'border-primary-container bg-brand-sky-light' : 'border-border-default'}`}>
-                            <button type="button" onClick={() => setSelectedId(member.id)} className="flex w-full cursor-pointer items-center gap-2.5 text-left">
-                              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
-                                {member.image ? <img src={member.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: member.color }} />}
-                              </span>
-                              <span className="min-w-0">
-                                <span className="block truncate text-[13px] font-semibold">{member.name}</span>
-                                <span className="block text-[11px] text-text-muted">{sizeText(member)}</span>
-                              </span>
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button type="button" onClick={() => setSelectedId(member.id)} className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left">
+                                <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-surface-subtle">
+                                  {member.image ? <img src={member.image} alt="" className="h-full w-full object-contain" /> : <span className="h-3.5 w-3.5 rounded-full border border-black/10" style={{ background: member.color }} />}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block truncate text-[13px] font-semibold">{member.name}</span>
+                                  <span className="block text-[11px] text-text-muted">{sizeText(member)}</span>
+                                </span>
+                              </button>
+                              {resizable && <ResetButton label={member.name} disabled={!sizeChanged(member)} onClick={() => resetSize(member.id)} />}
+                              {member.model === 'motiondesk' && <ResetButton label={member.name} disabled={!deskSizeChanged(member)} onClick={() => { const first = initialOf(member.id); if (first) updateDesk({ w: first.w, d: first.d, h: first.h, underClearance: first.underClearance, legGap: first.legGap }) }} />}
+                            </div>
                             {member.kind === 'product' && (
                               <ColorChips
                                 options={PRODUCT_COLOR_OPTIONS}
@@ -929,7 +1032,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {!inDetail && tab === 'custom' && (
                 <section className="relative border-b border-border-subtle px-5 py-4">
-                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-50">
+                  <div aria-hidden="true" inert className="pointer-events-none select-none">
                   <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
                   <div className="space-y-3">
                     <div>
@@ -952,68 +1055,15 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     <Icon name="add" className="text-[18px]" /> 놓기
                   </button>
                   </div>
-                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/50">
-                    <span className="text-[20px] font-bold tracking-tight text-text-primary" style={{ textShadow: '0 1px 4px rgba(0, 0, 0, 0.28)' }}>
-                      Coming Soon…
-                    </span>
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-black/60">
+                    <span className="text-[26px] font-semibold tracking-tight text-white/70" style={{ fontFamily: PRETENDARD }}>11.16 COMING SOON</span>
+                    <span className="text-[40px] font-extrabold leading-none tracking-tight text-white" style={{ fontFamily: PRETENDARD }}>오늘의집</span>
                   </div>
                 </section>
               )}
 
-              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. */}
-              {(inDetail || tab !== 'custom') && (
-              <section className="px-5 py-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-[15px] font-bold text-text-primary">공간 적합도 진단</h3>
-                  <span className="text-[11px] text-text-muted">{target ? target.name : '실측 규격 기준'}</span>
-                </div>
-                {fit && verdict ? (
-                  <>
-                    <div className={`-mx-3 flex gap-2 rounded-xl px-3 py-3 ${verdict.box}`}>
-                      <Icon name={verdict.icon} filled className={`mt-px text-[18px] ${verdict.text}`} />
-                      <span className={`text-[15px] font-bold leading-snug ${verdict.text}`}>{verdict.label}</span>
-                    </div>
-                    <ul className="mt-3 space-y-2.5">
-                      {fit.checks.map((check, index) => (
-                        <li key={index} className="flex gap-2">
-                          <Icon name={check.level === 'ok' ? 'check_circle' : check.level === 'warn' ? 'error' : 'cancel'} filled className={`mt-0.5 text-[18px] ${CHECK_ICON[check.level]}`} />
-                          <div>
-                            <p className="text-[13px] font-semibold text-text-primary">{check.title}</p>
-                            <p className="text-[12px] leading-relaxed text-text-secondary">{check.detail}</p>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                    <div className="mt-4 overflow-hidden rounded-xl bg-surface-alt">
-                      <button type="button" onClick={() => setGapsOpen(!gapsOpen)} aria-expanded={gapsOpen} className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left text-[13px] font-semibold text-text-primary">
-                        <span>주변 간격 (앞 · 뒤 · 옆)</span>
-                        <span className="flex items-center gap-1.5">
-                          {!gapsOpen && frontGap && <span className={`text-[12px] font-semibold ${CHECK_ICON[frontGap.level]}`}>앞 {cm(frontGap.distance)}</span>}
-                          <Icon name="expand_more" className={`text-[20px] text-text-secondary transition-transform ${gapsOpen ? 'rotate-180' : ''}`} />
-                        </span>
-                      </button>
-                      {gapsOpen && (
-                        <ul className="divide-y divide-border-subtle px-3">
-                          {[...fit.gaps]
-                            .sort((a, b) => ['앞', '뒤', '옆'].indexOf(a.side) - ['앞', '뒤', '옆'].indexOf(b.side))
-                            .map((gap) => (
-                              <li key={gap.dir} className="flex items-center justify-between py-2 text-[13px]">
-                                <span className="text-text-secondary">
-                                  <span className="font-semibold text-text-primary">{gap.side}</span> · {gap.target}까지
-                                </span>
-                                <span className={`font-semibold ${gap.side === '앞' ? CHECK_ICON[gap.level] : 'text-text-primary'}`}>{gap.distance < 5 ? '붙어 있음' : cm(gap.distance)}</span>
-                              </li>
-                            ))}
-                        </ul>
-                      )}
-                    </div>
-                    {target?.kind === 'product' && <p className="mt-3 text-[11px] leading-relaxed text-text-muted">서랍 완전 개폐에 앞쪽 {cm(DRAWER_PULL)}가 필요해요. 바닥의 파란 영역이 서랍이 열리는 자리예요.</p>}
-                  </>
-                ) : (
-                  <p className="text-[13px] text-text-muted">가구를 누르면 진단이 나와요. 서랍장이 공간에 없으면 초기화를 눌러 주세요.</p>
-                )}
-              </section>
-              )}
+              {/* 직접 입력 탭은 아직 준비 중이라 진단도 보이지 않는다. 상세 보기에서는 3D 영역에 보인다. */}
+              {!inDetail && tab !== 'custom' && <section className="px-5 py-5">{diagnosis}</section>}
             </aside>
           )}
         </div>

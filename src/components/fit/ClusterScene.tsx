@@ -134,7 +134,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
             onDrag={setDragging}
           >
             <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
-            {showDims && member.kind !== 'rug' && (
+            {showDims && member.kind !== 'rug' && !['shirt', 'folded', 'shoes'].includes(member.model) && (
               <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
                 <span className="whitespace-nowrap rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">
                   {member.name} · W{member.w} × D{member.d} × H{member.h}

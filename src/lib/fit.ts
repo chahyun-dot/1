@@ -251,8 +251,9 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   // 내 상판 아래에 들어가 있는 가구(책상 아래 서랍장)와 의자처럼 밀어 넣는 가구는 막는 것으로 보지 않는다.
   const blocking = covering.filter((other) => other !== under && !mayOverlap(item, other) && !(item.underClearance !== undefined && other.h <= item.underClearance))
   // 앞쪽 여유를 잴 때 의자(빼고 앉는 가구)와 문 열림 자리(문이 닫혀 있으면 지나다니는 바닥)는 장애물로 보지 않는다. 겹침 판정은 따로 한다.
+  // 눈높이 위(1200mm 이상)에 거는 얇은 물건(깊이 200mm 이하, 벽 램프 등)은 지나다니는 데 방해가 안 되어 장애물로 보지 않는다.
   // 소파 앞의 테이블, 행거 맞은편 벽에 붙은 수납장은 일부러 가까이 두는 것이라 장애물로 보지 않는다.
-  const obstacles: Obstacle[] = others.filter((other) => other !== under && !isChair(other) && !(item.model === 'fksofa' && isSurface(other)) && !(item.model === 'wallhanger' && other.model === 'chromecabinet')).map((other) => ({ name: other.name, rect: footprint(other) }))
+  const obstacles: Obstacle[] = others.filter((other) => other !== under && !isChair(other) && !((other.elevation ?? 0) >= 1200 && other.d <= 200) && !(item.model === 'fksofa' && isSurface(other)) && !(item.model === 'wallhanger' && other.model === 'chromecabinet')).map((other) => ({ name: other.name, rect: footprint(other) }))
   const checks: Check[] = []
 
   const outside = Math.max(-rect.minX, -rect.minZ, rect.maxX - room.w, rect.maxZ - room.d)

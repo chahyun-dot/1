@@ -31,23 +31,35 @@ export const MAX_WINDOWS = 4
 
 // 창 아래 높이를 990 → 1300mm 로 올려(창 높이 1216 → 906mm) 침대 머리·책상·3단 서랍·모니터암처럼 낮은 가구가 벽에 붙어도 창 커튼 라인에 걸리지 않게 한다. 블라인드도 1300mm 부터 2290mm 까지로 맞춘다.
 const WINDOW_SILL = 1300
-const BLIND_HEIGHT = 2290 - WINDOW_SILL
+// 블라인드는 창 위(2290mm)에서 창턱보다 100mm 더 내려온다.
+const BLIND_BOTTOM = WINDOW_SILL - 100
+const BLIND_HEIGHT = 2290 - BLIND_BOTTOM
+// 모든 창은 폭을 같게 맞춘다(자리는 그대로, 가운데 기준).
+const WINDOW_LENGTH = 908
+
+const sameLength = (opening: Opening, length = WINDOW_LENGTH): Opening => {
+  const mid = (opening.from + opening.to) / 2
+  return { ...opening, from: Math.round(mid - length / 2), to: Math.round(mid + length / 2) }
+}
 
 // 방 치수를 바꾸면 플래너 좌표의 문·창이 맞지 않아서, 오른쪽 벽 둘·앞쪽 벽 둘의 자리에 새로 낸다.
-const windowSlots = ({ w, d }: RoomDims): Opening[] =>
-  ([
+const windowSlots = ({ w, d }: RoomDims): Opening[] => {
+  // 벽 길이가 달라도 창은 모두 같은 폭(방이 작으면 가장 짧은 벽의 1/4)으로 맞춘다.
+  const length = Math.min(WINDOW_LENGTH, Math.round(Math.min(w, d) * 0.25))
+  return ([
     { side: '+x', from: d * 0.17, to: d * 0.42, bottom: WINDOW_SILL, top: 2206 },
     { side: '+x', from: d * 0.58, to: d * 0.83, bottom: WINDOW_SILL, top: 2206 },
     { side: '+z', from: w * 0.1, to: w * 0.35, bottom: WINDOW_SILL, top: 2206 },
     { side: '+z', from: w * 0.67, to: w * 0.92, bottom: WINDOW_SILL, top: 2206 },
-  ] as Opening[]).map((slot) => ({ ...slot, from: Math.round(slot.from), to: Math.round(slot.to) }))
+  ] as Opening[]).map((slot) => sameLength(slot, length))
+}
 
 const sameDims = (a: RoomDims, b: RoomDims) => a.w === b.w && a.d === b.d && a.h === b.h && a.doorWidth === b.doorWidth
 
 export const studioRoom = (dims: RoomDims, windowCount: number): Room => {
   if (sameDims(dims, STUDIO_DIMS)) {
     const { door, windows } = PLANNER_ROOM.openings!
-    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map((win) => ({ ...grownOpening(win), bottom: WINDOW_SILL })) } }
+    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map((win) => ({ ...sameLength(grownOpening(win)), bottom: WINDOW_SILL })) } }
   }
   const doorFrom = Math.max(0, dims.d - 150 - dims.doorWidth)
   return {
@@ -68,6 +80,11 @@ export const DESK_ID = 'YSZphlN2272C00BB9264030'
 export const DESK_CHAIR_ID = '83470177e6504b21bad9d2d15b6d5fba'
 export const BIG_RUG_ID = 'YvLiCvk04866276686B40C7'
 export const ROUND_RUG_ID = 'X5S4t1X5DE143AD22764FF9'
+export const BEAT_LIGHT_ID = 'ZZHrOv2AC2EF05FF43243FB'
+export const CUSHION_ID = 'XjOO_Xy13478D0D91CD493D'
+export const HANGER_ID = 'YSBhD9T1E65915F80104295'
+// 행거 + 걸린 셔츠·옷·신발. 앞의 것이 행거이고 나머지는 행거에 딸린 물건이다.
+export const HANGER_KEYS = [HANGER_ID, 'YV8EVEF2D36EE1DB1D44CAB', 'XX-zmmq45F1867DE7EE462B', 'ZFFQHal586565A1F38B473C']
 
 // 3D 에서만 뺀다(데모와 상품 종류 목록에는 그대로 있다).
 const HIDDEN_IN_STUDIO = new Set(['YSJfCSW3C8249DE736F456A', 'YneAflHA33DBE2534ED4DC7'])
@@ -97,7 +114,7 @@ export const studioItems = (productColor: string): Item[] => {
   const KEY = (k: string) => (item: Item) => keyOf(item) === k
   const move = (list: Item[], match: (item: Item) => boolean, patch: Partial<Item> | ((item: Item) => Partial<Item>)) =>
     list.map((item) => (match(item) ? { ...item, ...(typeof patch === 'function' ? patch(item) : patch) } : item))
-  const hangerKeys = new Set(['YSBhD9T1E65915F80104295', 'YV8EVEF2D36EE1DB1D44CAB', 'XX-zmmq45F1867DE7EE462B', 'ZFFQHal586565A1F38B473C'])
+  
 
   // 책상 위 물건(노트북, 키보드 등)은 책상이 높아진 만큼 올린다.
   const onDesk = (item: Item) => (item.elevation ?? 0) >= 500 && item.x > area.minX && item.x < area.maxX && item.z > area.minZ && item.z < area.maxZ
@@ -114,7 +131,7 @@ export const studioItems = (productColor: string): Item[] => {
   // 왼쪽 벽 창 둘의 간격은 앞쪽 벽 창 둘의 간격(184mm)과 같다(방을 넓히며 벌어진 두 번째 창과 그 블라인드를 원래 자리로).
   furniture = move(furniture, (item) => keyOf(item) === 'E1632324621148B0' && item.x < 100 && item.z > 2150, (item) => ({ z: item.z - GROW }))
   // 블라인드는 창에 맞춰 1300mm 부터 걸게 한다.
-  furniture = move(furniture, KEY('E1632324621148B0'), { elevation: WINDOW_SILL, h: BLIND_HEIGHT })
+  furniture = move(furniture, KEY('E1632324621148B0'), { elevation: BLIND_BOTTOM, h: BLIND_HEIGHT })
   // 침대 묶음: 침대 머리와 3단 수납형 서랍을 왼쪽 벽에 붙이고(서랍은 침대 머리 옆), 그 위 조명과 머리 위 액자는 같이.
   furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3937.5 })
   furniture = move(furniture, KEY(DRAWER_ID), { x: 250.5, z: 3123.5 })
@@ -126,7 +143,7 @@ export const studioItems = (productColor: string): Item[] => {
   const hangerX = bed.x + bed.d / 2 + 60 + hanger.d / 2
   // 침대와 같이 앞쪽 벽(거울이 있는 벽)에 붙인다(행거 가로 800mm 의 절반만큼 벽에서 떨어진 가운데).
   const hangerZ = bed.z + bed.w / 2 - hanger.w / 2
-  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: hangerX + (item.x - hanger.x), z: hangerZ + (item.z - hanger.z) }))
+  furniture = move(furniture, (item) => HANGER_KEYS.includes(keyOf(item)), (item) => ({ x: hangerX + (item.x - hanger.x), z: hangerZ + (item.z - hanger.z) }))
   furniture = move(furniture, KEY(ROUND_RUG_ID), { x: hangerX + 423, z: hangerZ - 150 })
   // 테이블 묶음(데모 원래 배치처럼): 소파 앞에 테이블을 80mm 띄워 바짝 붙이고, 다이닝 체어는 테이블 왼쪽 위(28° 기울임), 사각 러그는 테이블 아래(데모 원래 상대 위치)에 둔다.
   furniture = move(furniture, (item) => keyOf(item) === SOFA_ID || keyOf(item) === 'XjOO_Xy13478D0D91CD493D', (item) => ({ x: item.x + 117, z: item.z + 350 }))
@@ -141,6 +158,10 @@ export const studioItems = (productColor: string): Item[] => {
   furniture = move(furniture, KEY('XRxqWHD79D04BB434D74AF9'), { x: 3019 })
   furniture = move(furniture, KEY('YHx4J5H2C427AA8FBFD482A'), { rot: 0 })
   furniture = move(furniture, KEY('ZCREWuP85D472F7745C4005'), (item) => ({ x: item.x + 66 }))
+  // UFO 키즈 램프는 아르덴 미러(앞쪽 벽) 왼쪽 옆 벽에 건다(미러와 같은 높이 띠, 같은 방향, 60mm 띄움).
+  const mirror = furniture.find(KEY('ZLDAeRK53BFEDFD0CF2475A'))!
+  const kidLamp = furniture.find(KEY('Yew1htX9938663D6F624933'))!
+  furniture = move(furniture, KEY('Yew1htX9938663D6F624933'), { rot: mirror.rot, yaw: undefined, x: mirror.x - mirror.w / 2 - 60 - kidLamp.w / 2, z: mirror.z + mirror.d / 2 - kidLamp.d / 2 })
   // 심플리 수납장을 하나 더 옆(왼쪽)에 둔다. 거울 아래라 거울과 높이가 겹치지 않는다.
   const simplie = furniture.find(KEY('ZCREWuP85D472F7745C4005'))!
   furniture = [...furniture, { ...simplie, id: 'ZCREWuP85D472F7745C4005#2', x: simplie.x - simplie.w - 20 }]
@@ -168,9 +189,9 @@ export const studioItems = (productColor: string): Item[] => {
 export type ClusterId = 'bed' | 'desk' | 'table'
 
 export const CLUSTERS: { id: ClusterId; title: string; keys: string[]; pairs: [string, string][] }[] = [
-  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID], pairs: [[BED_ID, DRAWER_ID]] },
+  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID, BEAT_LIGHT_ID, ...HANGER_KEYS], pairs: [[BED_ID, DRAWER_ID]] },
   { id: 'desk', title: '책상 & 의자 & 서랍장', keys: [DESK_ID, DESK_CHAIR_ID, 'product'], pairs: [] },
-  { id: 'table', title: '원형 테이블 & 의자 & 소파', keys: [TABLE_ID, DINING_CHAIR_ID, SOFA_ID, BIG_RUG_ID], pairs: [[TABLE_ID, DINING_CHAIR_ID], [TABLE_ID, SOFA_ID]] },
+  { id: 'table', title: '원형 테이블 & 의자 & 소파', keys: [TABLE_ID, DINING_CHAIR_ID, SOFA_ID, BIG_RUG_ID, CUSHION_ID], pairs: [[TABLE_ID, DINING_CHAIR_ID], [TABLE_ID, SOFA_ID]] },
 ]
 
 export const clusterOf = (item: Item) => CLUSTERS.find((cluster) => cluster.keys.includes(keyOf(item))) ?? null
