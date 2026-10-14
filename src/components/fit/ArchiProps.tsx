@@ -685,10 +685,10 @@ function SlidingCabinet({ item }: Props) {
   const h = item.h / M
   return (
     <group>
-      <Slab size={[w, h, d - 0.02]} position={[0, h / 2, -0.01]} color="#2a2a2c" />
+      <Slab size={[w, h, d - 0.02]} position={[0, h / 2, -0.01]} color={item.tint ?? '#2a2a2c'} />
       {[-1, 1].map((side) => (
         <group key={side}>
-          <Slab size={[w / 2 + 0.01, h - 0.02, 0.012]} position={[side * (w / 4 - 0.002), h / 2, d / 2 - (side < 0 ? 0.008 : 0.02)]} color="#3a3a3c" roughness={0.7} />
+          <Slab size={[w / 2 + 0.01, h - 0.02, 0.012]} position={[side * (w / 4 - 0.002), h / 2, d / 2 - (side < 0 ? 0.008 : 0.02)]} color={item.tint ? lighten(item.tint, 0.06) : '#3a3a3c'} roughness={0.7} />
           <mesh position={[side * (w / 2 - 0.035), h / 2, d / 2 + (side < 0 ? -0.001 : -0.013)]}>
             <circleGeometry args={[0.014, 20]} />
             {std('#151517', 0.8)}
@@ -1100,11 +1100,11 @@ function Cushion({ item }: Props) {
   return (
     <group>
       <RoundedBox args={[w, h, d]} radius={Math.min(d * 0.3, 0.05)} smoothness={6} position={[0, h / 2, 0]} castShadow receiveShadow>
-        {std(item.tint ?? '#c79c62', 0.98)}
+        {std(item.tint ?? '#f1f1ee', 0.98)}
       </RoundedBox>
       <mesh position={[0, h / 2, 0]} scale={[w / 2 * 0.98, h / 2 * 0.98, d / 2 * 1.04]}>
         <sphereGeometry args={[1, 28, 18]} />
-        {std(item.tint ? lighten(item.tint, 0.04) : '#cba26a', 0.98)}
+        {std(item.tint ? lighten(item.tint, 0.04) : '#f4f4f1', 0.98)}
       </mesh>
     </group>
   )

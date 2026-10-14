@@ -33,6 +33,8 @@ type SceneProps = {
   canOpenDetail?: (item: Item) => boolean
   // 첫 화면이 그려진 뒤 한 번 불린다(로딩 표시를 끄는 용도).
   onReady?: () => void
+  // true 면 가구를 눌러도 바로 상세로 가지 않고, 가구 위에 뜨는 "제품 상세 페이지 이동" 버튼으로 간다. 러그도 눌러 고를 수 있다.
+  detailButton?: boolean
 }
 
 const CLICK_SLOP = 5
@@ -117,6 +119,33 @@ function GapLines({ room, fit }: { room: Room; fit: FitResult }) {
   )
 }
 
+// 선택한 가구 위에 뜨는 이름표. detailButton 이면 이름 아래에 상세 이동 버튼이 붙는다.
+function ItemLabel({ item, onClick, detailButton }: { item: Item; onClick?: () => void; detailButton: boolean }) {
+  return (
+    <Html position={[0, item.h / M + 0.18, 0]} center style={{ pointerEvents: 'none' }}>
+      {detailButton ? (
+        <div className="flex flex-col items-center gap-1">
+          <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">{item.name}</span>
+          {onClick && (
+            <button
+              type="button"
+              onClick={onClick}
+              style={{ pointerEvents: 'auto' }}
+              className="cursor-pointer whitespace-nowrap rounded-full bg-primary-container px-3 py-1 text-[12px] font-bold text-white shadow-md hover:opacity-90"
+            >
+              제품 상세 페이지 이동
+            </button>
+          )}
+        </div>
+      ) : (
+        <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">
+          {onClick ? <span className="text-primary-container">상품 자세히 보기</span> : item.name}
+        </span>
+      )}
+    </Html>
+  )
+}
+
 function DraggableItem({
   room,
   item,
@@ -126,6 +155,7 @@ function DraggableItem({
   onMove,
   onDragChange,
   onClick,
+  detailButton,
 }: {
   room: Room
   item: Item
@@ -135,6 +165,7 @@ function DraggableItem({
   onMove: (id: string, x: number, z: number) => void
   onDragChange: (dragging: boolean) => void
   onClick?: () => void
+  detailButton: boolean
 }) {
   const offset = useRef<[number, number] | null>(null)
   const downAt = useRef<[number, number] | null>(null)
@@ -147,17 +178,18 @@ function DraggableItem({
         position={[x, 0, z]}
         rotation={[0, yawOf(item), 0]}
         onClick={
-          onClick
+          detailButton
             ? (event) => {
                 event.stopPropagation()
-                onClick()
+                onSelect(item.id)
               }
             : undefined
         }
-        onPointerOver={onClick ? () => (document.body.style.cursor = 'pointer') : undefined}
-        onPointerOut={onClick ? () => (document.body.style.cursor = '') : undefined}
+        onPointerOver={detailButton ? () => (document.body.style.cursor = 'pointer') : undefined}
+        onPointerOut={detailButton ? () => (document.body.style.cursor = '') : undefined}
       >
         <ItemModel item={item} />
+        {detailButton && selected && <ItemLabel item={item} onClick={onClick} detailButton />}
       </group>
     )
   }
@@ -194,7 +226,7 @@ function DraggableItem({
     const start = downAt.current
     downAt.current = null
     const moved = start ? Math.hypot(event.nativeEvent.clientX - start[0], event.nativeEvent.clientY - start[1]) : Infinity
-    if (moved < CLICK_SLOP) onClick?.()
+    if (moved < CLICK_SLOP && !detailButton) onClick?.()
   }
 
   return (
@@ -213,18 +245,12 @@ function DraggableItem({
       }}
     >
       <ItemModel item={item} drawersOpen={drawersOpen} />
-      {selected && (
-        <Html position={[0, item.h / M + 0.18, 0]} center style={{ pointerEvents: 'none' }}>
-          <span className="whitespace-nowrap rounded-md bg-inverse-surface/90 px-2 py-1 text-[11px] font-medium text-inverse-on-surface shadow">
-            {onClick ? <span className="text-primary-container">상품 자세히 보기</span> : item.name}
-          </span>
-        </Html>
-      )}
+      {selected && <ItemLabel item={item} onClick={onClick} detailButton={detailButton} />}
     </group>
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady, detailButton = false }: SceneProps) {
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => () => {
@@ -266,6 +292,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
           onMove={onMove}
           onDragChange={setDragging}
           onClick={canOpenDetail(item) ? () => onOpenDetail(item.id) : undefined}
+          detailButton={detailButton}
         />
       ))}
 

@@ -3,7 +3,7 @@ import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { placeUnderDesk } from '@/lib/desk'
 import { footprint } from '@/lib/fit'
 import { DOOR_HEIGHT } from '@/lib/room'
-import type { Item, Opening, Room, Rot } from '@/lib/types'
+import type { Item, Opening, Room } from '@/lib/types'
 
 // "내 공간에 맞는지 확인하기" 팝업의 처음 화면. 데모(#/demo)와 같은 플래너 방·가구에 책상 아래 마켓비 피하 서랍장만 더했다.
 export type RoomDims = { w: number; d: number; h: number; doorWidth: number }
@@ -21,7 +21,9 @@ export const STUDIO_DIMS: RoomDims = { w: PLANNER_ROOM.w + GROW, d: PLANNER_ROOM
 export const STUDIO_PRESET = { id: 'planner', label: '플래너 배치 · 책상 아래 (4.5×4.5m)' }
 
 const grownOpening = (opening: Opening): Opening => {
-  const along = opening.side === '-x' || opening.side === '+x' ? shiftZ : shiftX
+  // 왼쪽 벽 창은 그대로 둔다(두 창 사이 184mm 가 앞쪽 벽 창 간격과 같게).
+  if (opening.side === '-x') return opening
+  const along = opening.side === '+x' ? shiftZ : shiftX
   return { ...opening, from: along(opening.from), to: along(opening.to) }
 }
 
@@ -97,20 +99,24 @@ export const studioItems = (productColor: string): Item[] => {
   const onDesk = (item: Item) => (item.elevation ?? 0) >= 500 && item.x > area.minX && item.x < area.maxX && item.z > area.minZ && item.z < area.maxZ
   let furniture = all.map((item) => (item === oldDesk ? desk : onDesk(item) ? { ...item, elevation: (item.elevation ?? 0) + raise } : item))
 
-  // 책상 묶음: 왼쪽 벽 창 커튼 라인을 벗어나도록 책상과 그 위·아래 물건, 의자를 115mm(모니터암·TV 는 175mm) 오른쪽으로. 의자는 서랍장(왼쪽 다리 쪽) 앞을 비우려고 170mm 위로.
+  // 책상 묶음: 왼쪽 벽 창 커튼 라인(200mm)을 벗어나도록 책상과 그 위 물건, 의자를 115mm(모니터암·TV 는 175mm) 오른쪽으로. 의자는 서랍장(왼쪽 다리 쪽) 앞을 비우려고 170mm 위로.
   furniture = move(furniture, (item) => keyOf(item) === DESK_ID || keyOf(item) === DESK_CHAIR_ID || onDesk(item), (item) => ({ x: item.x + 115 }))
   furniture = move(furniture, KEY(DESK_CHAIR_ID), (item) => ({ z: item.z - 170 }))
   furniture = move(furniture, (item) => keyOf(item) === 'YjCJHDA8B714D95FB9D45DD' || keyOf(item) === 'ZGXmJUk293C2AE613ED4B4B', (item) => ({ x: item.x + 60 }))
-  // 침대 묶음: 침대는 왼쪽 벽 창(위)과 앞쪽 벽 창(아래) 커튼 라인 사이로 끼워 넣고, 3단 서랍과 그 위 조명, 머리 위 액자는 같이 움직인다.
-  furniture = move(furniture, KEY(BED_ID), (item) => ({ x: item.x + 104, z: item.z - 170 }))
-  furniture = move(furniture, (item) => keyOf(item) === DRAWER_ID || keyOf(item) === 'ZZHrOv2AC2EF05FF43243FB', (item) => ({ x: item.x + 152, z: item.z - 170 }))
-  furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), (item) => ({ z: item.z - 170 }))
-  // 행거 묶음: 침대 발치와 걸린 옷까지 60cm 띄우고 침대 쪽을 보게 180° 돌린다(걸린 옷·신발도 같이). 앞쪽 벽 거울과 겹치지 않게 30mm 위로.
+  // 왼쪽 벽 창 둘의 간격은 앞쪽 벽 창 둘의 간격(184mm)과 같다(방을 넓히며 벌어진 두 번째 창과 그 블라인드를 원래 자리로).
+  furniture = move(furniture, (item) => keyOf(item) === 'E1632324621148B0' && item.x < 100 && item.z > 2150, (item) => ({ z: item.z - GROW }))
+  // 침대 묶음: 침대 머리를 왼쪽 벽에 붙이고(창 커튼 라인은 z 3100 까지라 그 아래로), 3단 서랍은 침대 머리 옆(커튼 라인 때문에 벽에서 200mm), 그 위 조명과 머리 위 액자는 같이.
+  furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3702 })
+  furniture = move(furniture, KEY(DRAWER_ID), { x: 451, z: 2888 })
+  furniture = move(furniture, KEY('ZZHrOv2AC2EF05FF43243FB'), { x: 350, z: 2888 })
+  furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3726 })
+  // 행거 묶음: 침대 발치와 60cm 띄워 옷 걸리는 면(+x)이 오른쪽 벽의 문을 보게 하고, 둥근 러그를 그 아래에 깐다.
   const hanger = all.find(KEY('YSBhD9T1E65915F80104295'))!
-  const hangerX = 2898 + 160 + 150
-  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: hangerX + (hanger.x - item.x), z: item.z - 30, rot: ((item.rot + 2) % 4) as Rot }))
-  // 테이블 묶음: 소파(오른쪽 벽에 붙이고 위 코어렉과 60cm 띄움)와 60cm 띄우도록 테이블·의자·러그를 110mm 왼쪽으로.
-  furniture = move(furniture, (item) => [TABLE_ID, DINING_CHAIR_ID, BIG_RUG_ID].includes(keyOf(item)), (item) => ({ x: item.x - 110 }))
+  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: 2858 + (item.x - hanger.x), z: 3500 + (item.z - hanger.z) }))
+  furniture = move(furniture, KEY(ROUND_RUG_ID), { x: 2900, z: 3500 })
+  // 테이블 묶음: 소파(오른쪽 벽에 붙이고 위 코어렉과 60cm 띄움) 가운데 앞에 오도록 테이블·의자는 z 113mm, 러그는 350mm 아래로, 소파와 60cm 띄우려고 모두 110mm 왼쪽으로.
+  furniture = move(furniture, (item) => keyOf(item) === TABLE_ID || keyOf(item) === DINING_CHAIR_ID, (item) => ({ x: item.x - 110, z: item.z + 113 }))
+  furniture = move(furniture, KEY(BIG_RUG_ID), (item) => ({ x: item.x - 110, z: item.z + 350 }))
   furniture = move(furniture, (item) => keyOf(item) === SOFA_ID || keyOf(item) === 'XjOO_Xy13478D0D91CD493D', (item) => ({ x: item.x + 117, z: item.z + 350 }))
   // 그 밖: 제네바 스피커는 책상 앞에서 선반 옆 빈 벽으로, 코어렉은 앞(방 쪽)을 보게, 심플리 수납장은 오른쪽 벽에 붙인다.
   furniture = move(furniture, KEY('XRxqWHD79D04BB434D74AF9'), { x: 3019 })
@@ -140,7 +146,7 @@ export const studioItems = (productColor: string): Item[] => {
 export type ClusterId = 'bed' | 'desk' | 'table'
 
 export const CLUSTERS: { id: ClusterId; title: string; keys: string[]; pairs: [string, string][] }[] = [
-  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID, ROUND_RUG_ID], pairs: [[BED_ID, DRAWER_ID]] },
+  { id: 'bed', title: '침대 & 3단 서랍 수납장', keys: [BED_ID, DRAWER_ID], pairs: [[BED_ID, DRAWER_ID]] },
   { id: 'desk', title: '책상 & 의자 & 서랍장', keys: [DESK_ID, DESK_CHAIR_ID, 'product'], pairs: [] },
   { id: 'table', title: '원형 테이블 & 의자 & 소파', keys: [TABLE_ID, DINING_CHAIR_ID, SOFA_ID, BIG_RUG_ID], pairs: [[TABLE_ID, DINING_CHAIR_ID], [TABLE_ID, SOFA_ID]] },
 ]

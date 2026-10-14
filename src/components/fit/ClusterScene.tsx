@@ -92,8 +92,14 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, draw
               key={`${gap.a.id}-${gap.b.id}`}
               from={[wx(gap.from[0]), 0.05, wz(gap.from[1])]}
               to={[wx(gap.to[0]), 0.05, wz(gap.to[1])]}
-              label={gap.dist < 0 ? `${gap.b.name}와 ${mm(-gap.dist)} 겹침` : `${gap.a.name} ↔ ${gap.b.name} ${mm(gap.dist)}`}
-              color={LEVEL_COLOR[levelOf(gap.dist)]}
+              label={
+                gap.dist < 0
+                  ? gap.b.model.includes('chair')
+                    ? `${gap.b.name}가 ${gap.a.name} 아래로 ${mm(-gap.dist)} 들어가 있어요`
+                    : `${gap.b.name}와 ${mm(-gap.dist)} 겹침`
+                  : `${gap.a.name} ↔ ${gap.b.name} ${mm(gap.dist)}`
+              }
+              color={LEVEL_COLOR[gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
             />
           ))}
       </group>

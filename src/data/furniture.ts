@@ -21,6 +21,7 @@ const ESTIMATED_SIZE: Record<string, { w: number; d: number; h: number }> = {
 
 // 영어 이름을 한국어로 보여 주기 위한 표(원본 데이터는 그대로 둔다). 표에 없는 것은 원래 이름을 쓴다.
 const KO_NAME: Record<string, string> = {
+  YSCLdDz3A9D4CDED05E451C: '3단 수납형 서랍',
   ZLDAeRK53BFEDFD0CF2475A: '아르덴 미러',
   XjOO_Xy13478D0D91CD493D: '리넨 쿠션',
   E1632324621148B0: '맞춤 우드 블라인드',
@@ -28,7 +29,6 @@ const KO_NAME: Record<string, string> = {
   '83470177e6504b21bad9d2d15b6d5fba': '데스커 의자 (블랙 프레임, 메쉬)',
   ZCREWuP85D472F7745C4005: '심플리 수납장 (블랙)',
   YSZphlN2272C00BB9264030: '모션데스크 프리미엄',
-  YSCLdDz3A9D4CDED05E451C: '3단 서랍 상단 수납형 (잠금장치)',
   YSBhD9T1E65915F80104295: '철제행거 (벽고정)',
   'ZHCng6-9DA238A1CE5340E1': '5단 철제선반장 (2단 도어)',
   YSEBSV826EADFB11D0F4FDD: '원형테이블',
@@ -257,11 +257,22 @@ export const COLOR_OPTIONS: Record<string, ColorOption[]> = {
 // 아래 8종은 오늘의집에서 색 옵션을 확인한 것이 아니라 제가 어울릴 만한 색을 골라 둔 것이다(실제 판매 색과 다를 수 있다).
 const NEUTRAL = (name: string, hex: string, isDefault = false): ColorOption => ({ name, hex, ...(isDefault ? { isDefault } : {}) })
 
-COLOR_OPTIONS.Xs_Qb6C3D61BBB72B9B4159 = [NEUTRAL('네이비', '#3c4f78', true), NEUTRAL('화이트', '#eeeeea'), NEUTRAL('아이보리', '#e7dfcf'), NEUTRAL('그레이', '#9a9da3'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('핑크', '#e6b9c0')]
+COLOR_OPTIONS.Xs_Qb6C3D61BBB72B9B4159 = [NEUTRAL('화이트', '#eeeeea', true), NEUTRAL('네이비', '#3c4f78'), NEUTRAL('아이보리', '#e7dfcf'), NEUTRAL('그레이', '#9a9da3'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('핑크', '#e6b9c0')]
 COLOR_OPTIONS['ZHCng6-9DA238A1CE5340E1'] = [NEUTRAL('차콜', '#46474b', true), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#9a9ca0')]
 COLOR_OPTIONS.YBp1W4_021584BC9C234BDF = [NEUTRAL('블랙', '#1f1f21', true), NEUTRAL('브라운', '#6b4a33'), NEUTRAL('카멜', '#b5834f'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('아이보리', '#e6e0d2'), NEUTRAL('네이비', '#2b3a55')]
 COLOR_OPTIONS['Ymz-AKVBAE7A1C5651944C3'] = [NEUTRAL('블랙', '#1b1b1d', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('카키', '#6a6f58'), NEUTRAL('네이비', '#2b3a55')]
 COLOR_OPTIONS.YSCLdDz3A9D4CDED05E451C = [NEUTRAL('차콜', '#2c2c2e', true), NEUTRAL('블랙', '#17171a'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('네이비', '#2b3a55')]
-COLOR_OPTIONS.XjOO_Xy13478D0D91CD493D = [NEUTRAL('카멜', '#c79c62', true), NEUTRAL('아이보리', '#e8e0cf'), NEUTRAL('그레이', '#9a9ca0'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('테라코타', '#b8624a'), NEUTRAL('올리브', '#7d8160'), NEUTRAL('핑크', '#e0aea8'), NEUTRAL('네이비', '#33415c')]
+COLOR_OPTIONS.XjOO_Xy13478D0D91CD493D = [NEUTRAL('화이트', '#f1f1ee', true), NEUTRAL('카멜', '#c79c62'), NEUTRAL('아이보리', '#e8e0cf'), NEUTRAL('그레이', '#9a9ca0'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('테라코타', '#b8624a'), NEUTRAL('올리브', '#7d8160'), NEUTRAL('핑크', '#e0aea8'), NEUTRAL('네이비', '#33415c')]
 COLOR_OPTIONS.YSBhD9T1E65915F80104295 = [NEUTRAL('블랙', '#2a2a2c', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('카키', '#6a6f58'), NEUTRAL('네이비', '#2b3a55')]
 COLOR_OPTIONS.XNpyDGd4339E9DBCEE941AC = [NEUTRAL('월넛', '#8a5a35', true), NEUTRAL('오크', '#c9a56e'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('네이비', '#2b3a55')]
+
+// 책상은 상판(hex)과 다리(hex2) 색이다. 슬라이딩 도어 캐비닛은 몸체, 코어렉은 선반판 색이다(둘 다 제가 어울릴 만한 색을 고른 것).
+COLOR_OPTIONS.YSZphlN2272C00BB9264030 = [
+  { name: '블랙', hex: '#3a3b3a', hex2: '#1b1b1c', isDefault: true },
+  { name: '화이트', hex: '#f1f1ee', hex2: '#eceae6' },
+  { name: '오크', hex: '#cdb897', hex2: '#1b1b1c' },
+  { name: '월넛', hex: '#6b4a33', hex2: '#1b1b1c' },
+  { name: '그레이', hex: '#9a9ca0', hex2: '#4a4b50' },
+]
+COLOR_OPTIONS['X-bB_LP883ADBC85E374EBB'] = [NEUTRAL('블랙 스테인드 애시', '#2a2a2c', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('내추럴 애시', '#c9a77c'), NEUTRAL('월넛', '#6b4a33'), NEUTRAL('그레이', '#8d8f93')]
+COLOR_OPTIONS.YHx4J5H2C427AA8FBFD482A = [NEUTRAL('블랙', '#3f4043', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#9a9da3'), NEUTRAL('월넛', '#6b4a33'), NEUTRAL('네이비', '#2b3a55')]

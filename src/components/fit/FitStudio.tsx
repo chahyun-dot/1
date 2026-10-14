@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import Icon from '@/components/Icon'
-import ClusterScene, { gapOf, moveToGap, type PairGap } from '@/components/fit/ClusterScene'
+import ClusterScene, { gapOf, type PairGap } from '@/components/fit/ClusterScene'
 import DetailScene from '@/components/fit/DetailScene'
 import type { FitSummary } from '@/components/fit/FitModal'
 import Scene, { type View } from '@/components/fit/Scene'
@@ -23,7 +23,7 @@ type Props = {
 }
 
 type Tab = 'space' | 'all' | 'custom'
-type DetailTab = 'desk' | 'cabinet' | 'gaps' | 'members'
+type DetailTab = 'cabinet' | 'members'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'space', label: '내 공간 치수' },
@@ -180,8 +180,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [detail, setDetail] = useState<ClusterId | null>(null)
   const [ready, setReady] = useState(false)
   const [mount, setMount] = useState(false)
-  const [detailTab, setDetailTab] = useState<DetailTab>('desk')
-  const [deskSizeOpen, setDeskSizeOpen] = useState(true)
+  const [detailTab, setDetailTab] = useState<DetailTab>('members')
   const [autoRotate, setAutoRotate] = useState(true)
   const [showDims, setShowDims] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
@@ -268,7 +267,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
   const openDetail = (id: ClusterId, memberId?: string) => {
     setDetail(id)
-    setDetailTab(id === 'desk' ? 'desk' : 'gaps')
+    setDetailTab('members')
     if (memberId) setSelectedId(memberId)
   }
 
@@ -361,11 +360,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
   const setSize = (id: string, patch: Partial<Pick<Item, 'w' | 'd' | 'h'>>) => updateItem(id, (item) => clampTo({ ...item, ...patch }, item.x, item.z))
 
-  const setGap = (gap: PairGap, dist: number) => {
-    const next = moveToGap(gap, dist)
-    updateItem(gap.b.id, (item) => clampTo(item, next.x, next.z))
-  }
-
   const close = () => {
     const productFit = product ? evaluate(product, room, items) : null
     if (productFit) onDone?.({ verdict: productFit.verdict, title: productFit.checks[0]?.title ?? VERDICT[productFit.verdict].label, space: spaceLabel })
@@ -421,12 +415,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <Icon name="info" className="text-[20px]" />
                 </button>
                 <span role="tooltip" className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-[300px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  가구 드래그로 옮기기 · 책상, 침대, 소파 등을 누르면 자세히 볼 수 있어요 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
+                  가구 드래그로 옮기기 · 가구를 누르면 뜨는 "제품 상세 페이지 이동" 버튼으로 자세히 볼 수 있어요 · 빈 곳 드래그로 시점 돌리기 · 휠로 확대 · 모바일 앱에서는 카메라 AR로 실제 크기를 볼 수 있어요.
                 </span>
               </span>
             </div>
             <p className="text-[13px] font-medium text-primary-container">
-              {inDetail ? (cluster!.id === 'desk' ? '책상 치수와 서랍장 위치를 조정하고, 설치 조건을 확인해 보세요.' : '가구 사이 간격을 조정하고, 어떻게 놓이는지 확인해 보세요.') : '방을 둘러보고, 가구를 배치해 보세요.'}
+              {inDetail ? (cluster!.id === 'desk' ? '책상 치수와 서랍장 위치를 조정하고, 설치 조건을 확인해 보세요.' : '가구의 색상과 크기를 바꾸고, 어떻게 놓이는지 확인해 보세요.') : '방을 둘러보고, 가구를 배치해 보세요.'}
             </p>
           </div>
           <button type="button" onClick={close} aria-label="닫기" className="rounded-full p-2 text-text-secondary hover:bg-surface-subtle">
@@ -468,6 +462,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               ) : (
                 <Scene
                   key="room"
+                  detailButton
                   distance={1.2}
                   onReady={() => setReady(true)}
                   room={room}
@@ -611,8 +606,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               <div role="tablist" aria-label="설정" className="sticky top-0 z-10 flex border-b border-border-default bg-surface-base">
                 {inDetail
                   ? (cluster!.id === 'desk'
-                      ? ([{ id: 'desk', label: '내 책상 치수' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }, { id: 'members', label: '가구 정보' }] as { id: DetailTab; label: string }[])
-                      : ([{ id: 'gaps', label: '간격 조절' }, { id: 'members', label: '가구 정보' }] as { id: DetailTab; label: string }[])
+                      ? ([{ id: 'members', label: '가구 정보' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }] as { id: DetailTab; label: string }[])
+                      : ([{ id: 'members', label: '가구 정보' }] as { id: DetailTab; label: string }[])
                     ).map((item) => (
                       <button key={item.id} type="button" role="tab" aria-selected={detailTab === item.id} onClick={() => setDetailTab(item.id)} className={`flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-[13px] transition-colors ${detailTab === item.id ? 'border-primary-container font-bold text-on-primary-container' : 'border-transparent font-medium text-text-secondary hover:text-text-primary'}`}>
                         {item.label}
@@ -624,54 +619,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                       </button>
                     ))}
               </div>
-
-              {inDetail && cluster!.id === 'desk' && desk && product && detailTab === 'desk' && (
-                <Section>
-                  <p className="text-[13px] leading-relaxed text-text-secondary">책상 아래 공간을 기준으로 서랍장 배치를 확인해요.</p>
-                  <div className="mt-4 border-t border-border-subtle pt-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-[17px] font-bold text-text-primary">설치 공간 치수</h4>
-                      <span className="rounded-full bg-surface-subtle px-2.5 py-1 text-[11px] font-medium text-text-secondary">중요</span>
-                    </div>
-                    <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
-                      <NumberField pill label="상판 아래 높이" value={undersideOf(desk)} min={300} max={desk.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
-                      <NumberField pill label="다리 안쪽 폭" value={legInner(desk) * 2} min={300} max={maxLegGap(desk.w)} onCommit={(legGap) => updateDesk({ legGap })} />
-                    </div>
-                  </div>
-                  <div className="mt-5 border-t border-border-subtle pt-4">
-                    <button type="button" aria-expanded={deskSizeOpen} onClick={() => setDeskSizeOpen((v) => !v)} className="flex w-full items-start justify-between text-left">
-                      <span>
-                        <span className="block text-[17px] font-bold text-text-primary">책상 전체 크기</span>
-                        <span className="mt-1 block text-[13px] text-text-secondary">가로 {desk.w} · 깊이 {desk.d} · 높이 {desk.h}mm</span>
-                      </span>
-                      <Icon name={deskSizeOpen ? 'expand_less' : 'expand_more'} className="text-[24px] text-text-secondary" />
-                    </button>
-                    {deskSizeOpen && (
-                      <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-3">
-                        <NumberField
-                          pill
-                          label="책상 가로"
-                          value={desk.w}
-                          min={600}
-                          max={room.w}
-                          onCommit={(w) => {
-                            const gap = legInner(desk) * 2 + (w - desk.w)
-                            updateDesk({ w, legGap: Math.max(300, Math.min(gap, maxLegGap(w))) })
-                          }}
-                        />
-                        <NumberField pill label="책상 깊이" value={desk.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
-                        <NumberField pill label="책상 높이" value={desk.h} min={500} max={1200} onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(desk) + h - desk.h, h - DESK_TOP) })} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-5 rounded-xl bg-surface-subtle px-4 py-3">
-                    <p className="flex items-center gap-1.5 text-[13px] font-semibold text-text-primary">
-                      <Icon name="info" className="text-[18px] text-primary-container" /> 치수 입력 안내
-                    </p>
-                    <p className="mt-1.5 text-[12px] leading-relaxed text-text-secondary">상판 아래 높이는 바닥에서 상판 밑면까지, 다리 안쪽 폭은 양쪽 다리 사이의 거리예요.</p>
-                  </div>
-                </Section>
-              )}
 
               {inDetail && cluster!.id === 'desk' && desk && product && detailTab === 'cabinet' && (
                 <Section>
@@ -723,21 +670,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </Section>
               )}
 
-              {inDetail && cluster!.id !== 'desk' && detailTab === 'gaps' && (
-                <Section>
-                  <p className="text-[13px] leading-relaxed text-text-secondary">가구 사이 거리를 입력하면 뒤쪽 가구가 그만큼 옮겨져요. 벽 밖으로는 나가지 않아요.</p>
-                  <div className="mt-3 grid grid-cols-1 gap-3">
-                    {gaps.map((gap) => {
-                      const same = gaps.filter((other) => other.b.name === gap.b.name)
-                      const suffix = same.length > 1 ? ` ${same.indexOf(gap) + 1}` : ''
-                      return <NumberField key={`${gap.a.id}-${gap.b.id}`} pill label={`${gap.a.name} ↔ ${gap.b.name}${suffix}`} value={Math.max(0, gap.dist)} min={0} max={3000} onCommit={(dist) => setGap(gap, dist)} />
-                    })}
-                  </div>
-                  <p className="mt-3 text-[11px] text-text-muted">3D에서 가구의 이름과 크기, 가구 사이 거리(mm)를 볼 수 있어요.</p>
-                </Section>
-              )}
-
-
               {inDetail && detailTab === 'members' && (
                 <Section>
                   <p className="text-[13px] leading-relaxed text-text-secondary">묶음 안 가구의 색상과 크기를 바꿀 수 있어요. 누르면 아래 진단이 그 가구 기준으로 바뀌어요.</p>
@@ -775,6 +707,33 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                                 isOn={(option) => (member.tint ? option.hex === member.tint && option.hex2 === member.tint2 : !!option.isDefault)}
                                 onPick={(option) => updateItem(member.id, (item) => ({ ...item, tint: option.isDefault ? undefined : option.hex, tint2: option.isDefault ? undefined : option.hex2 }))}
                               />
+                            )}
+                            {member.model === 'motiondesk' && cluster!.id === 'desk' && (
+                              <div className="mt-3 border-t border-border-subtle pt-3">
+                                <h4 className="text-[13px] font-bold text-text-primary">
+                                  설치 공간 치수 <span className="ml-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">중요</span>
+                                </h4>
+                                <div className="mt-2 grid grid-cols-2 gap-2">
+                                  <NumberField label="상판 아래 높이" value={undersideOf(member)} min={300} max={member.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
+                                  <NumberField label="다리 안쪽 폭" value={legInner(member) * 2} min={300} max={maxLegGap(member.w)} onCommit={(legGap) => updateDesk({ legGap })} />
+                                </div>
+                                <h4 className="mt-3 text-[13px] font-bold text-text-primary">책상 전체 크기</h4>
+                                <div className="mt-2 grid grid-cols-3 gap-2">
+                                  <NumberField
+                                    label="가로"
+                                    value={member.w}
+                                    min={600}
+                                    max={room.w}
+                                    onCommit={(w) => {
+                                      const gap = legInner(member) * 2 + (w - member.w)
+                                      updateDesk({ w, legGap: Math.max(300, Math.min(gap, maxLegGap(w))) })
+                                    }}
+                                  />
+                                  <NumberField label="깊이" value={member.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
+                                  <NumberField label="높이" value={member.h} min={500} max={1200} onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(member) + h - member.h, h - DESK_TOP) })} />
+                                </div>
+                                <p className="mt-2 text-[11px] leading-relaxed text-text-muted">상판 아래 높이는 바닥에서 상판 밑면까지, 다리 안쪽 폭은 양쪽 다리 사이의 거리예요. 치수를 바꿔도 서랍장은 다리·뒤 간격을 유지하며 따라가요.</p>
+                              </div>
                             )}
                             {resizable && (
                               <div className="mt-2 grid grid-cols-3 gap-2">

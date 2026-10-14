@@ -82,9 +82,9 @@ export function BedWithBedding({ item }: Props) {
   const duvetH = 0.13
   const duvetZ = foot - duvetL / 2 + 0.06
   const duvetTop = mattressTop + duvetH - 0.005
-  const blue = item.tint ?? '#3c4f78'
-  const pillow = item.tint ? lighten(item.tint, 0.05) : '#42557e'
-  const fold = item.tint ? lighten(item.tint, 0.1) : '#4b5f8c'
+  const blue = item.tint ?? '#eeeeea'
+  const pillow = item.tint ? lighten(item.tint, 0.05) : '#f6f6f3'
+  const fold = item.tint ? lighten(item.tint, 0.1) : '#e2e2dc'
   const drop = duvetTop - frameH
   const layer = (position: [number, number, number], size: [number, number, number], color: string, radius: number, rotation?: [number, number, number]) => (
     <RoundedBox args={size} radius={Math.min(radius, size[0] / 2.1, size[1] / 2.1, size[2] / 2.1)} smoothness={3} position={position} rotation={rotation} castShadow receiveShadow>
@@ -469,7 +469,9 @@ export function MotionDesk({ item }: Props) {
   const d = item.d / M
   const h = item.h / M
   const top = 0.03
-  const black = '#1b1b1c'
+  const black = item.tint2 ?? '#1b1b1c'
+  const topColor = item.tint ?? '#3a3b3a'
+  const edgeColor = item.tint ? lighten(item.tint, 0.2) : '#cdb897'
   // 다리 간격·상판 아래 높이를 입력한 책상(내 공간 확인 팝업)은 그 값을 따르고, 없으면 기본 다리 자리를 쓴다.
   const legX = item.legGap !== undefined ? legCenter(item) / M : w / 2 - 0.12
   const underside = item.underClearance !== undefined ? item.underClearance / M : undefined
@@ -479,16 +481,16 @@ export function MotionDesk({ item }: Props) {
       {apron > 0.004 && underside !== undefined && (
         <mesh position={[0, underside + apron / 2, 0]} castShadow>
           <boxGeometry args={[legX * 2 - 0.07, apron, d * 0.9]} />
-          <meshStandardMaterial color="#cdb897" roughness={0.7} />
+          <meshStandardMaterial color={edgeColor} roughness={0.7} />
         </mesh>
       )}
       <mesh position={[0, h - top / 2, 0]} castShadow receiveShadow>
         <boxGeometry args={[w, top, d]} />
-        <meshStandardMaterial color="#cdb897" roughness={0.7} />
+        <meshStandardMaterial color={edgeColor} roughness={0.7} />
       </mesh>
       <mesh position={[0, h - 0.008, 0]} castShadow receiveShadow>
         <boxGeometry args={[w - 0.004, 0.018, d - 0.004]} />
-        <meshStandardMaterial color="#3a3b3a" roughness={0.8} />
+        <meshStandardMaterial color={topColor} roughness={0.8} />
       </mesh>
       {[-1, 1].map((side) => {
         const x = side * legX
@@ -577,7 +579,7 @@ export function CoreRack({ item }: Props) {
       {levels.map((y) => (
         <mesh key={y} position={[0, y, 0]} castShadow receiveShadow>
           <boxGeometry args={[w - 0.02, 0.022, d * 0.9]} />
-          <meshStandardMaterial color="#3f4043" roughness={0.6} />
+          <meshStandardMaterial color={item.tint ?? '#3f4043'} roughness={0.6} />
         </mesh>
       ))}
       {[-1, 1].map((side) => (
