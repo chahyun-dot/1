@@ -4,7 +4,7 @@ import { ContactShadows, Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import ItemModel from '@/components/fit/Models'
 import { LEVEL_COLOR } from '@/components/fit/Scene'
-import { fromDeskLocal, measureAgainstDesk, toDeskLocal, type DeskMeasure } from '@/lib/desk'
+import { fromDeskLocal, measureAgainstDesk, type DeskMeasure } from '@/lib/desk'
 import { UNDER_MARGIN_MIN } from '@/lib/fit'
 import type { Item, Level } from '@/lib/types'
 
@@ -21,8 +21,9 @@ type DetailSceneProps = {
   showDims: boolean
   autoRotate: boolean
   onMove: (x: number, z: number) => void
-  // 책상 옆에 함께 보여 줄 가구(의자 등). 책상 기준 위치 그대로 그린다.
+  // 책상 옆에 함께 보여 줄 가구(의자 등). 책상 기준 위치 그대로 그리고 끌어서 옮길 수 있다.
   extras?: Item[]
+  onMoveExtra?: (id: string, x: number, z: number) => void
   onReady?: () => void
 }
 
@@ -117,14 +118,15 @@ function Dimensions({ desk, product, m }: { desk: Item; product: Item; m: DeskMe
   )
 }
 
-function DraggableProduct({ desk, product, m, drawersOpen, onMove, onDrag }: {
+// 책상 기준 좌표에서 끌어 옮길 수 있는 가구(서랍장, 의자).
+function DraggableProduct({ desk, product, drawersOpen, onMove, onDrag }: {
   desk: Item
   product: Item
-  m: DeskMeasure
   drawersOpen: boolean
   onMove: (x: number, z: number) => void
   onDrag: (dragging: boolean) => void
 }) {
+  const m = measureAgainstDesk(desk, product)
   const offset = useRef<[number, number] | null>(null)
   const hit = useRef(new THREE.Vector3())
   const cx = (m.rect.minX + m.rect.maxX) / 2
@@ -172,7 +174,7 @@ function DraggableProduct({ desk, product, m, drawersOpen, onMove, onDrag }: {
   )
 }
 
-export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [], onReady }: DetailSceneProps) {
+export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [], onMoveExtra, onReady }: DetailSceneProps) {
   const [dragging, setDragging] = useState(false)
   const m = measureAgainstDesk(desk, product)
   const span = Math.max(desk.w, desk.d, 900, extras.length ? 1900 : 0) / M
@@ -186,16 +188,10 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
 
       <group>
         <ItemModel item={{ ...desk, rot: 0 }} />
-        {extras.map((extra) => {
-          const [lx, lz] = toDeskLocal(desk, extra.x, extra.z)
-          const relRot = (((extra.rot - desk.rot) % 4) + 4) % 4
-          return (
-            <group key={extra.id} position={[lx / M, 0, lz / M]} rotation={[0, (relRot * Math.PI) / 2, 0]}>
-              <ItemModel item={extra} />
-            </group>
-          )
-        })}
-        <DraggableProduct desk={desk} product={product} m={m} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />
+        {extras.map((extra) => (
+          <DraggableProduct key={extra.id} desk={desk} product={extra} drawersOpen={false} onMove={(x, z) => onMoveExtra?.(extra.id, x, z)} onDrag={setDragging} />
+        ))}
+        <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />
         {showDims && <Dimensions desk={desk} product={product} m={m} />}
       </group>
 

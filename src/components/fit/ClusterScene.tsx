@@ -49,11 +49,11 @@ type ClusterSceneProps = {
   gaps: PairGap[]
   showDims: boolean
   autoRotate: boolean
-  drawersOpen?: boolean
+  isDrawerOpen?: (item: Item) => boolean
   onReady?: () => void
 }
 
-export default function ClusterScene({ members, gaps, showDims, autoRotate, drawersOpen = false, onReady }: ClusterSceneProps) {
+export default function ClusterScene({ members, gaps, showDims, autoRotate, isDrawerOpen, onReady }: ClusterSceneProps) {
   const rects = members.map((member) => footprint(member))
   const minX = Math.min(...rects.map((r) => r.minX))
   const maxX = Math.max(...rects.map((r) => r.maxX))
@@ -76,7 +76,7 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, draw
       <group>
         {members.map((member) => (
           <group key={member.id} position={[wx(member.x), (member.elevation ?? 0) / M, wz(member.z)]} rotation={[0, yawOf(member), 0]}>
-            <ItemModel item={member} drawersOpen={drawersOpen} />
+            <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
             {showDims && member.kind !== 'rug' && (
               <Html position={[0, member.h / M + 0.12, 0]} center style={{ pointerEvents: 'none' }}>
                 <span className="whitespace-nowrap rounded-md bg-inverse-surface/85 px-2 py-0.5 text-[11px] font-medium text-inverse-on-surface shadow">

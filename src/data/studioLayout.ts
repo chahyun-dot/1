@@ -29,13 +29,17 @@ const grownOpening = (opening: Opening): Opening => {
 
 export const MAX_WINDOWS = 4
 
+// 창 아래 높이를 990 → 1300mm 로 올려(창 높이 1216 → 906mm) 침대 머리·책상·3단 서랍·모니터암처럼 낮은 가구가 벽에 붙어도 창 커튼 라인에 걸리지 않게 한다. 블라인드도 1300mm 부터 2290mm 까지로 맞춘다.
+const WINDOW_SILL = 1300
+const BLIND_HEIGHT = 2290 - WINDOW_SILL
+
 // 방 치수를 바꾸면 플래너 좌표의 문·창이 맞지 않아서, 오른쪽 벽 둘·앞쪽 벽 둘의 자리에 새로 낸다.
 const windowSlots = ({ w, d }: RoomDims): Opening[] =>
   ([
-    { side: '+x', from: d * 0.17, to: d * 0.42, bottom: 990, top: 2206 },
-    { side: '+x', from: d * 0.58, to: d * 0.83, bottom: 990, top: 2206 },
-    { side: '+z', from: w * 0.1, to: w * 0.35, bottom: 990, top: 2206 },
-    { side: '+z', from: w * 0.67, to: w * 0.92, bottom: 990, top: 2206 },
+    { side: '+x', from: d * 0.17, to: d * 0.42, bottom: WINDOW_SILL, top: 2206 },
+    { side: '+x', from: d * 0.58, to: d * 0.83, bottom: WINDOW_SILL, top: 2206 },
+    { side: '+z', from: w * 0.1, to: w * 0.35, bottom: WINDOW_SILL, top: 2206 },
+    { side: '+z', from: w * 0.67, to: w * 0.92, bottom: WINDOW_SILL, top: 2206 },
   ] as Opening[]).map((slot) => ({ ...slot, from: Math.round(slot.from), to: Math.round(slot.to) }))
 
 const sameDims = (a: RoomDims, b: RoomDims) => a.w === b.w && a.d === b.d && a.h === b.h && a.doorWidth === b.doorWidth
@@ -43,7 +47,7 @@ const sameDims = (a: RoomDims, b: RoomDims) => a.w === b.w && a.d === b.d && a.h
 export const studioRoom = (dims: RoomDims, windowCount: number): Room => {
   if (sameDims(dims, STUDIO_DIMS)) {
     const { door, windows } = PLANNER_ROOM.openings!
-    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map(grownOpening) } }
+    return { ...PLANNER_ROOM, ...dims, openings: { door: grownOpening(door), windows: windows.slice(0, windowCount).map((win) => ({ ...grownOpening(win), bottom: WINDOW_SILL })) } }
   }
   const doorFrom = Math.max(0, dims.d - 150 - dims.doorWidth)
   return {
@@ -105,6 +109,8 @@ export const studioItems = (productColor: string): Item[] => {
   furniture = move(furniture, (item) => keyOf(item) === 'YjCJHDA8B714D95FB9D45DD' || keyOf(item) === 'ZGXmJUk293C2AE613ED4B4B', (item) => ({ x: item.x + 60 }))
   // 왼쪽 벽 창 둘의 간격은 앞쪽 벽 창 둘의 간격(184mm)과 같다(방을 넓히며 벌어진 두 번째 창과 그 블라인드를 원래 자리로).
   furniture = move(furniture, (item) => keyOf(item) === 'E1632324621148B0' && item.x < 100 && item.z > 2150, (item) => ({ z: item.z - GROW }))
+  // 블라인드는 창에 맞춰 1300mm 부터 걸게 한다.
+  furniture = move(furniture, KEY('E1632324621148B0'), { elevation: WINDOW_SILL, h: BLIND_HEIGHT })
   // 침대 묶음: 침대 머리를 왼쪽 벽에 붙이고(창 커튼 라인은 z 3100 까지라 그 아래로), 3단 서랍은 침대 머리 옆(커튼 라인 때문에 벽에서 200mm), 그 위 조명과 머리 위 액자는 같이.
   furniture = move(furniture, KEY(BED_ID), { x: 1049, z: 3702 })
   furniture = move(furniture, KEY(DRAWER_ID), { x: 451, z: 2888 })
@@ -112,7 +118,7 @@ export const studioItems = (productColor: string): Item[] => {
   furniture = move(furniture, KEY('X8kL5fT81A10556FC5447E5'), { z: 3726 })
   // 행거 묶음: 침대 발치와 60cm 띄워 옷 걸리는 면(+x)이 오른쪽 벽의 문을 보게 하고, 둥근 러그를 그 아래에 깐다.
   const hanger = all.find(KEY('YSBhD9T1E65915F80104295'))!
-  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: 2858 + (item.x - hanger.x), z: 3500 + (item.z - hanger.z) }))
+  furniture = move(furniture, (item) => hangerKeys.has(keyOf(item)), (item) => ({ x: 2868 + (item.x - hanger.x), z: 3500 + (item.z - hanger.z) }))
   furniture = move(furniture, KEY(ROUND_RUG_ID), { x: 2900, z: 3500 })
   // 테이블 묶음: 소파(오른쪽 벽에 붙이고 위 코어렉과 60cm 띄움) 가운데 앞에 오도록 테이블·의자는 z 113mm, 러그는 350mm 아래로, 소파와 60cm 띄우려고 모두 110mm 왼쪽으로.
   furniture = move(furniture, (item) => keyOf(item) === TABLE_ID || keyOf(item) === DINING_CHAIR_ID, (item) => ({ x: item.x - 110, z: item.z + 113 }))

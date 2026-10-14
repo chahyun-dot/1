@@ -41,16 +41,22 @@ export const curtainRect = (room: Room): Rect => {
   return { minX: room.w - CURTAIN_GAP, maxX: room.w, minZ: zFrom, maxZ: zTo }
 }
 
-const curtainOf = (room: Room, side: Side, from: number, to: number): Rect => {
-  if (side === '-x') return { minX: 0, maxX: CURTAIN_GAP, minZ: from, maxZ: to }
-  if (side === '+x') return { minX: room.w - CURTAIN_GAP, maxX: room.w, minZ: from, maxZ: to }
-  if (side === '-z') return { minX: from, maxX: to, minZ: 0, maxZ: CURTAIN_GAP }
-  return { minX: from, maxX: to, minZ: room.d - CURTAIN_GAP, maxZ: room.d }
+const curtainOf = (room: Room, side: Side, from: number, to: number, bottom?: number): Rect => {
+  const rect: Rect =
+    side === '-x'
+      ? { minX: 0, maxX: CURTAIN_GAP, minZ: from, maxZ: to }
+      : side === '+x'
+        ? { minX: room.w - CURTAIN_GAP, maxX: room.w, minZ: from, maxZ: to }
+        : side === '-z'
+          ? { minX: from, maxX: to, minZ: 0, maxZ: CURTAIN_GAP }
+          : { minX: from, maxX: to, minZ: room.d - CURTAIN_GAP, maxZ: room.d }
+  // 창 아래 높이(창턱) 아래에 있는 낮은 가구는 커튼 라인을 막지 않는다.
+  return bottom ? { ...rect, bottom } : rect
 }
 
 // 창마다 커튼 라인이 있다. 기본 방은 오른쪽 벽 창 하나.
 export const curtainRects = (room: Room): Rect[] =>
-  room.openings ? room.openings.windows.map((win) => curtainOf(room, win.side, win.from, win.to)) : [curtainRect(room)]
+  room.openings ? room.openings.windows.map((win) => curtainOf(room, win.side, win.from, win.to, win.bottom)) : [curtainRect(room)]
 
 export const toWorld = (room: Room, x: number, z: number): [number, number] => [
   (x - room.w / 2) / 1000,

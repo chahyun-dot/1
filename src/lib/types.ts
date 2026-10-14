@@ -47,7 +47,8 @@ export type Room = {
   openings?: { door: Opening; windows: Opening[] }
 }
 
-export type Rect = { minX: number; maxX: number; minZ: number; maxZ: number }
+// bottom 은 창 커튼 라인처럼 바닥에서 떠 있는 영역의 아래 높이(mm)다. 없으면 바닥부터다.
+export type Rect = { minX: number; maxX: number; minZ: number; maxZ: number; bottom?: number }
 
 export type Dir = '+x' | '-x' | '+z' | '-z'
 

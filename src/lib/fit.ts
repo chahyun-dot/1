@@ -189,7 +189,7 @@ export const evaluate = (item: Item, room: Room, items: Item[]): FitResult => {
     checks.push({ level: 'warn', title: `옆 ${tightSide.target}와 ${cm(tightSide.distance)}만 떨어져 있어요`, detail: caster > 0 ? '바퀴로 넣고 뺄 때 긁힐 수 있어요. 2cm 이상 띄워 주세요.' : '바퀴가 없어 끌면 바닥과 옆면이 긁힐 수 있어요. 들어서 옮기고 2cm 이상 띄워 주세요.' })
   }
 
-  if (curtainRects(room).some((curtain) => overlaps(rect, curtain))) {
+  if (curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0))) {
     checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
   }
 
@@ -260,7 +260,7 @@ export const measureFurniture = (item: Item, room: Room, items: Item[]): FitResu
   blocking.forEach((other) => checks.push({ level: 'bad', title: `${other.name}와 겹쳐요`, detail: '같은 자리에 둘 수 없어요. 끌어서 옮겨 주세요.' }))
   if (under) checks.push({ level: 'ok', title: `${under.name} 아래에 들어가요`, detail: `${under.name} 아래 높이 ${cm(under.underClearance!)}, 가구 높이 ${cm(item.h)}예요.` })
   if (!flat && overlaps(rect, doorSwingRect(room))) checks.push({ level: 'bad', title: '문 여닫는 공간을 막아요', detail: `문 폭 ${cm(room.doorWidth)}만큼 문이 열리는 자리예요.` })
-  if (item.model !== 'blind' && curtainRects(room).some((curtain) => overlaps(rect, curtain))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
+  if (item.model !== 'blind' && curtainRects(room).some((curtain) => overlaps(rect, curtain) && item.h + (item.elevation ?? 0) > (curtain.bottom ?? 0))) checks.push({ level: 'warn', title: '창가 커튼 라인에 닿아요', detail: `창에서 ${cm(CURTAIN_GAP)} 띄우면 커튼과 창을 여닫을 수 있어요.` })
 
   const front = frontDir(item.rot)
   // 앞쪽 여유(사람이 서는 자리)는 바닥에 놓인 큰 가구만 따진다. 선반·책상 위 물건, 벽에 건 것, 의자는 제외한다.
@@ -317,7 +317,8 @@ export const backToWall = (item: Item, room: Room): Item => {
   ]
   const { rot } = candidates.reduce((best, c) => (c.distance < best.distance ? c : best))
   const turned = { ...item, rot }
-  const half = (rot % 2 === 1 ? item.w : item.d) / 2
+  // 뒷면(깊이 d)이 벽에 닿으니 어느 방향이든 벽에서 가운데까지는 d 의 절반이다.
+  const half = item.d / 2
   const placed =
     rot === 0 ? { x: item.x, z: half } : rot === 2 ? { x: item.x, z: room.d - half } : rot === 1 ? { x: half, z: item.z } : { x: room.w - half, z: item.z }
   return { ...turned, ...clampToRoom(turned, placed.x, placed.z, room) }

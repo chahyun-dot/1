@@ -22,6 +22,8 @@ type SceneProps = {
   fit: FitResult | null
   view: View
   drawersOpen: boolean
+  // 서랍이 열린 가구를 따로 정할 때(기본은 drawersOpen 이 true 일 때 서랍장 제품만 연다).
+  isDrawerOpen?: (item: Item) => boolean
   // 서랍 앞 공간 표시는 서랍장 전용이라 데모처럼 다른 가구를 볼 때는 끈다.
   showFrontZone?: boolean
   // 카메라를 기본보다 멀리(1보다 크게) 두면 좁은 화면에서도 방이 덜 잘린다.
@@ -131,7 +133,7 @@ function ItemLabel({ item, onClick, detailButton }: { item: Item; onClick?: () =
               type="button"
               onClick={onClick}
               style={{ pointerEvents: 'auto' }}
-              className="cursor-pointer whitespace-nowrap rounded-full bg-primary-container px-3 py-1 text-[12px] font-bold text-white shadow-md hover:opacity-90"
+              className="cursor-pointer whitespace-nowrap rounded-full bg-primary-container px-2 py-[3px] text-[8px] font-bold text-white shadow-md hover:opacity-90"
             >
               제품 상세 페이지 이동
             </button>
@@ -250,7 +252,7 @@ function DraggableItem({
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady, detailButton = false }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, isDrawerOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady, detailButton = false }: SceneProps) {
   const [dragging, setDragging] = useState(false)
 
   useEffect(() => () => {
@@ -287,7 +289,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
           room={room}
           item={item}
           selected={item.id === selectedId}
-          drawersOpen={drawersOpen && item.kind === 'product'}
+          drawersOpen={isDrawerOpen ? isDrawerOpen(item) : drawersOpen && item.kind === 'product'}
           onSelect={onSelect}
           onMove={onMove}
           onDragChange={setDragging}

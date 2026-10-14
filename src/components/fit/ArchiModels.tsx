@@ -1,8 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
+import { useFrame } from '@react-three/fiber'
 import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { lighten } from '@/lib/color'
 import { legCenter } from '@/lib/desk'
+import { DRAWER_PULL } from '@/lib/fit'
 import type { Item } from '@/lib/types'
 
 // Archisketch 가구 이미지(public/archisketch)를 보고 코드로 모양을 만든 모델들.
@@ -649,6 +651,15 @@ export function DrawerUnit({ item, drawersOpen = false }: Props & { drawersOpen?
     { y: foot + bodyH * 0.47, height: bodyH * 0.3 },
     { y: foot + bodyH * 0.17, height: bodyH * 0.26 },
   ]
+  const drawerRefs = useRef<(THREE.Group | null)[]>([])
+  // 피하 서랍장처럼 서랍이 부드럽게 앞으로 빠진다(맨 위 칸은 조금 덜).
+  useFrame((_, delta) => {
+    drawerRefs.current.forEach((group, index) => {
+      if (!group) return
+      const target = drawersOpen ? (DRAWER_PULL / M) * (index === 0 ? 0.8 : 1) : 0
+      group.position.z = THREE.MathUtils.damp(group.position.z, target, 8, delta)
+    })
+  })
   return (
     <group>
       <mesh position={[0, foot + bodyH / 2, -0.01]} castShadow receiveShadow>
@@ -656,7 +667,11 @@ export function DrawerUnit({ item, drawersOpen = false }: Props & { drawersOpen?
         <meshStandardMaterial color={item.tint ?? '#2c2c2e'} roughness={0.65} />
       </mesh>
       {fronts.map((front, index) => (
-        <group key={index} position={[0, 0, drawersOpen ? 0.2 * (index === 0 ? 0.8 : 1) : 0]}>
+        <group key={index} ref={(el) => { drawerRefs.current[index] = el }}>
+          <mesh position={[0, front.y - front.height * 0.1, d / 2 - 0.01 - (d * 0.78) / 2]}>
+            <boxGeometry args={[w - 0.09, front.height * 0.7, d * 0.78]} />
+            <meshStandardMaterial color="#1c1c1e" roughness={0.8} side={THREE.DoubleSide} />
+          </mesh>
           <mesh position={[0, front.y, d / 2 - 0.01]} castShadow>
             <boxGeometry args={[w - 0.05, front.height, 0.016]} />
             <meshStandardMaterial color="#c9a77c" roughness={0.7} />

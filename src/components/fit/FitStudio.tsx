@@ -159,6 +159,23 @@ function ColorChips({ options, isOn, onPick }: { options: ColorOption[]; isOn: (
 
 const PRODUCT_COLOR_OPTIONS: (ColorOption & { id: ColorId })[] = COLORS.map((color) => ({ id: color.id, name: color.label.replace(/\s*[\d.]+$/, ''), hex: color.hex }))
 
+// 제목 옆 파란 i 버튼. 마우스를 올리거나 눌러 포커스하면 설명이 뜬다("내 공간에 맞는지 확인하기" 옆 i 버튼과 같은 모양).
+function InfoTip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <span className="group relative inline-flex align-middle">
+      <button type="button" aria-label={label} className="rounded-full p-0.5 text-primary-container outline-none hover:bg-brand-sky-light focus-visible:bg-brand-sky-light">
+        <Icon name="info" size={18} />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none invisible absolute left-0 top-full z-20 mt-1 w-[260px] rounded-lg bg-inverse-surface/95 px-3 py-2 text-[12px] font-normal leading-relaxed text-inverse-on-surface opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+      >
+        {children}
+      </span>
+    </span>
+  )
+}
+
 function Section({ children }: { children: ReactNode }) {
   return <section className="border-b border-border-subtle px-5 py-5">{children}</section>
 }
@@ -172,7 +189,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [items, setItems] = useState<Item[]>(() => studioItems(colorOf(colorFromPage ?? 'white').hex))
   const [selectedId, setSelectedId] = useState<string | null>('product')
   const [view, setView] = useState<View>('persp')
-  const [drawersOpen, setDrawersOpen] = useState(false)
+  // 서랍이 열린 가구 id (서랍장 제품과 3단 수납형 서랍을 따로 열고 닫는다).
+  const [openIds, setOpenIds] = useState<string[]>([])
   const [expanded, setExpanded] = useState(false)
   const [gapsOpen, setGapsOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('space')
@@ -244,6 +262,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     }
   }, [])
 
+  const isOpen = (id: string) => openIds.includes(id)
+  const toggleOpen = (id: string) => setOpenIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+
   const say = (message: string) => {
     setToast(message)
     window.clearTimeout(toastTimer.current)
@@ -261,7 +282,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const reset = () => {
     setItems(studioItems(colorOf(colorId).hex))
     setSelectedId('product')
-    setDrawersOpen(false)
+    setOpenIds([])
     say('처음 배치로 되돌렸어요')
   }
 
@@ -353,7 +374,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const arrange = (mover: Item | undefined, base: Item | undefined, side: AroundSide, gap: number, face: boolean) => {
     if (!mover || !base) return
     updateItem(mover.id, (item) => {
-      const next = { ...item, ...placeAround(base, item, side, gap, face) }
+      const next = { ...item, ...placeAround(base, item, side, gap, face), yaw: undefined }
       return clampTo(next, next.x, next.z)
     })
   }
@@ -456,9 +477,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                 </div>
               )}
               {!mount ? null : inDetail && cluster!.id === 'desk' && desk && product ? (
-                <DetailScene key="desk" desk={desk} product={product} drawersOpen={drawersOpen} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onReady={() => setReady(true)} />
+                <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen('product')} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : inDetail ? (
-                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} drawersOpen={drawersOpen} onReady={() => setReady(true)} />
+                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onReady={() => setReady(true)} />
               ) : (
                 <Scene
                   key="room"
@@ -471,7 +492,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   focus={target}
                   fit={fit}
                   view={view}
-                  drawersOpen={drawersOpen}
+                  drawersOpen={false}
+                  isDrawerOpen={(item) => isOpen(item.id)}
                   showFrontZone={target?.kind === 'product'}
                   onSelect={setSelectedId}
                   onMove={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))}
@@ -504,7 +526,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!inDetail && target && (
                 <div className="pointer-events-none absolute bottom-16 left-1/2 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-inverse-surface/90 px-3 py-1 text-[12px] font-medium text-inverse-on-surface shadow-md">
                   <span>실측 규격 W{target.w} × D{target.d} × H{target.h}mm</span>
-                  {target.kind === 'product' && frontGap && <span className="font-bold text-primary-container">| 서랍 앞 여유 {frontGap.distance.toLocaleString()}mm</span>}
                 </div>
               )}
 
@@ -517,7 +538,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     {cluster!.id === 'desk' && (
                       <>
                         <span className="text-border-default">|</span>
-                        <StageButton icon="open_in_full" label={drawersOpen ? '서랍 닫기' : '서랍 열어보기'} active={drawersOpen} onClick={() => setDrawersOpen(!drawersOpen)} />
+                        <StageButton icon="open_in_full" label={isOpen('product') ? '서랍 닫기' : '서랍 열어보기'} active={isOpen('product')} onClick={() => toggleOpen('product')} />
                         <span className="text-border-default">|</span>
                         <StageButton icon="align_horizontal_left" label="아래 왼쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'left'))} />
                         <StageButton icon="align_horizontal_right" label="아래 오른쪽" onClick={() => placeProduct((d, item) => placeUnderDesk(d, item, 'right'))} />
@@ -527,7 +548,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     {cluster!.id === 'bed' && (
                       <>
                         <span className="text-border-default">|</span>
-                        <StageButton icon="open_in_full" label={drawersOpen ? '서랍 닫기' : '서랍 열어보기'} active={drawersOpen} onClick={() => setDrawersOpen(!drawersOpen)} />
+                        <StageButton icon="open_in_full" label={drawerItem && isOpen(drawerItem.id) ? '서랍 닫기' : '서랍 열어보기'} active={!!drawerItem && isOpen(drawerItem.id)} onClick={() => drawerItem && toggleOpen(drawerItem.id)} />
                         <span className="text-border-default">|</span>
                         <StageButton icon="align_horizontal_left" label="왼쪽 옆" onClick={() => arrange(drawerItem, bedItem, 'left', 60, false)} />
                         <StageButton icon="align_horizontal_right" label="오른쪽 옆" onClick={() => arrange(drawerItem, bedItem, 'right', 60, false)} />
@@ -540,8 +561,9 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                         <StageButton icon="align_horizontal_left" label="의자 왼쪽" onClick={() => arrange(chairItem, tableItem, 'left', 60, true)} />
                         <StageButton icon="align_horizontal_right" label="의자 오른쪽" onClick={() => arrange(chairItem, tableItem, 'right', 60, true)} />
                         <StageButton icon="south" label="의자 앞" onClick={() => arrange(chairItem, tableItem, 'front', 60, true)} />
+                        <StageButton icon="north" label="의자 뒤" onClick={() => arrange(chairItem, tableItem, 'back', 60, true)} />
                         <span className="text-border-default">|</span>
-                        <StageButton icon="north" label="소파 맞은편" onClick={() => arrange(sofaItem, tableItem, 'back', 900, true)} />
+                        <StageButton icon="keyboard_double_arrow_up" label="소파 맞은편" onClick={() => arrange(sofaItem, tableItem, 'back', 900, true)} />
                       </>
                     )}
                   </>
@@ -551,8 +573,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     <span className="text-border-default">|</span>
                     <StageButton icon="vertical_align_top" label="벽에 붙이기" onClick={() => selected && updateItem(selected.id, (item) => backToWall(item, room))} disabled={!selected} />
                     <span className="text-border-default">|</span>
-                    <StageButton icon="open_in_full" label={drawersOpen ? '서랍 닫기' : '서랍 열어보기'} active={drawersOpen} onClick={() => setDrawersOpen(!drawersOpen)} />
-                    <span className="text-border-default">|</span>
+                    {selected && (selected.kind === 'product' || selected.model === 'drawerunit') && (
+                      <>
+                        <StageButton icon="open_in_full" label={isOpen(selected.id) ? '서랍 닫기' : '서랍 열어보기'} active={isOpen(selected.id)} onClick={() => toggleOpen(selected.id)} />
+                        <span className="text-border-default">|</span>
+                      </>
+                    )}
                     <StageButton icon={view === 'persp' ? 'grid_view' : 'view_in_ar'} label={view === 'persp' ? '위에서 보기' : '3D로 보기'} active={view === 'top'} onClick={() => setView(view === 'persp' ? 'top' : 'persp')} />
                     <span className="text-border-default">|</span>
                     <StageButton icon="refresh" label="초기화" onClick={reset} />
@@ -673,6 +699,17 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {inDetail && detailTab === 'members' && (
                 <Section>
                   <p className="text-[13px] leading-relaxed text-text-secondary">묶음 안 가구의 색상과 크기를 바꿀 수 있어요. 누르면 아래 진단이 그 가구 기준으로 바뀌어요.</p>
+                  {cluster!.id === 'desk' && desk && (
+                    <div className="mt-3 rounded-xl border border-border-default px-3 py-3">
+                      <h4 className="text-[13px] font-bold text-text-primary">
+                        설치 공간 치수 <span className="ml-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">중요</span>
+                      </h4>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        <NumberField label="상판 아래 높이" value={undersideOf(desk)} min={300} max={desk.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
+                        <NumberField label="다리 안쪽 폭" value={legInner(desk) * 2} min={300} max={maxLegGap(desk.w)} onCommit={(legGap) => updateDesk({ legGap })} />
+                      </div>
+                    </div>
+                  )}
                   <ul className="mt-3 space-y-3">
                     {members
                       .filter((member) => member.kind !== 'rug' || cluster!.id !== 'desk')
@@ -710,14 +747,12 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                             )}
                             {member.model === 'motiondesk' && cluster!.id === 'desk' && (
                               <div className="mt-3 border-t border-border-subtle pt-3">
-                                <h4 className="text-[13px] font-bold text-text-primary">
-                                  설치 공간 치수 <span className="ml-1 rounded-full bg-surface-subtle px-2 py-0.5 text-[11px] font-medium text-text-secondary">중요</span>
+                                <h4 className="flex items-center gap-0.5 text-[13px] font-bold text-text-primary">
+                                  책상 전체 크기
+                                  <InfoTip label="치수 입력 안내">
+                                    상판 아래 높이는 바닥에서 상판 밑면까지의 거리예요. 다리 안쪽 폭은 양쪽 다리 사이의 거리예요. 치수를 바꿔도 서랍장은 다리·뒤 간격을 유지하며 따라가요.
+                                  </InfoTip>
                                 </h4>
-                                <div className="mt-2 grid grid-cols-2 gap-2">
-                                  <NumberField label="상판 아래 높이" value={undersideOf(member)} min={300} max={member.h - DESK_TOP} onCommit={(underClearance) => updateDesk({ underClearance })} />
-                                  <NumberField label="다리 안쪽 폭" value={legInner(member) * 2} min={300} max={maxLegGap(member.w)} onCommit={(legGap) => updateDesk({ legGap })} />
-                                </div>
-                                <h4 className="mt-3 text-[13px] font-bold text-text-primary">책상 전체 크기</h4>
                                 <div className="mt-2 grid grid-cols-3 gap-2">
                                   <NumberField
                                     label="가로"
@@ -732,7 +767,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                                   <NumberField label="깊이" value={member.d} min={400} max={1200} onCommit={(d) => updateDesk({ d })} />
                                   <NumberField label="높이" value={member.h} min={500} max={1200} onCommit={(h) => updateDesk({ h, underClearance: Math.min(undersideOf(member) + h - member.h, h - DESK_TOP) })} />
                                 </div>
-                                <p className="mt-2 text-[11px] leading-relaxed text-text-muted">상판 아래 높이는 바닥에서 상판 밑면까지, 다리 안쪽 폭은 양쪽 다리 사이의 거리예요. 치수를 바꿔도 서랍장은 다리·뒤 간격을 유지하며 따라가요.</p>
                               </div>
                             )}
                             {resizable && (
@@ -751,19 +785,6 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {!inDetail && tab === 'space' && (
                 <Section>
-                  <div className="mb-3 flex flex-wrap gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPresetId(STUDIO_PRESET.id)
-                        setDims(STUDIO_DIMS)
-                        reset()
-                      }}
-                      className={`rounded-full px-3 py-1 text-[12px] font-medium transition-colors ${STUDIO_PRESET.id === presetId ? 'bg-primary-container text-surface-base' : 'bg-surface-subtle text-text-secondary hover:bg-brand-sky-light hover:text-on-primary-container'}`}
-                    >
-                      {STUDIO_PRESET.label}
-                    </button>
-                  </div>
                   <div className="grid grid-cols-2 gap-2">
                     {ROOM_FIELDS.map((field) => (
                       <label key={field.key} className="text-[12px] text-text-secondary">
@@ -907,7 +928,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               )}
 
               {!inDetail && tab === 'custom' && (
-                <section className="border-b border-border-subtle px-5 py-4">
+                <section className="relative border-b border-border-subtle px-5 py-4">
+                  <div aria-hidden="true" inert className="pointer-events-none select-none opacity-30">
                   <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
                   <div className="space-y-3">
                     <div>
@@ -929,6 +951,10 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <button type="button" onClick={addCustom} disabled={!draftValid} className="mt-4 flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-primary-container py-3 text-[14px] font-bold text-white disabled:cursor-default disabled:opacity-40">
                     <Icon name="add" className="text-[18px]" /> 놓기
                   </button>
+                  </div>
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface-base/60">
+                    <span className="rounded-full bg-surface-base px-5 py-2 text-[18px] font-bold tracking-tight text-text-secondary shadow-md">Coming Soon…</span>
+                  </div>
                 </section>
               )}
 
