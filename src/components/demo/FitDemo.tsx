@@ -4,7 +4,7 @@ import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
 import { BED_SET_SUFFIX, BUNDLE_OF, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
-import type { Check, Gap, Item, Level, Opening, Room, Rot } from '@/lib/types'
+import type { Check, Gap, Item, Level, Room, Rot } from '@/lib/types'
 
 // 데모: 현재 "내 공간에 맞는지 확인하기"와 별개로, 3D 영역에 가구를 더하고 크기·여유를 보는 개정판.
 // 오른쪽 탭 = 배치된 가구 / 상품 종류 / 직접 입력.
@@ -35,6 +35,7 @@ const LEVEL_STYLE: Record<Level, { icon: string; text: string; box: string; labe
 
 const DIR_NAME: Record<Gap['dir'], string> = { '-x': '왼쪽 벽 쪽', '+x': '오른쪽 벽 쪽', '-z': '뒷벽 쪽', '+z': '앞벽 쪽' }
 
+const CUSTOM_KINDS = ['침대', '테이블·식탁·책상', '소파', '서랍·수납장', '선반', '의자', '진열장·책장', '거울']
 const DOOR_ID = 'YPGPhJp77841A682B5A4CD2'
 const WINDOW_ID = 'E976B33E1388415C'
 
@@ -43,15 +44,15 @@ const initialItems = (): Item[] => plannerItems()
 const sizeText = (item: Pick<Item, 'w' | 'd' | 'h'>) => `W${item.w} × D${item.d} × H${item.h}mm`
 const won = (value: number) => `${value.toLocaleString()}원`
 
-function CountControls({ name, count, min, onMinus, onPlus }: { name: string; count: number; min: number; onMinus: () => void; onPlus: () => void }) {
+function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { name: string; count: number; min: number; max?: number; onMinus: () => void; onPlus: () => void }) {
   return (
     <div className="flex shrink-0 items-center gap-0.5">
-      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
-        <Icon name="remove" className="text-[16px]" />
+      <button type="button" aria-label={`${name} 하나 줄이기`} disabled={count <= min} onClick={onMinus} className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="remove" className="text-[14px]" />
       </button>
-      <span className="w-5 text-center text-[12px] font-semibold tabular-nums">{count}</span>
-      <button type="button" aria-label={`${name} 하나 늘리기`} onClick={onPlus} className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle">
-        <Icon name="add" className="text-[16px]" />
+      <span className="w-4 text-center text-[11px] font-semibold tabular-nums">{count}</span>
+      <button type="button" aria-label={`${name} 하나 늘리기`} disabled={count >= max} onClick={onPlus} className="flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border border-border-default text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-30">
+        <Icon name="add" className="text-[14px]" />
       </button>
     </div>
   )
@@ -60,8 +61,8 @@ function CountControls({ name, count, min, onMinus, onPlus }: { name: string; co
 // 카드 오른쪽 위 모서리에 작게 붙는 "모두 빼기" 버튼.
 function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   return (
-    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-      <Icon name="close" className="text-[12px]" />
+    <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-0.5 top-0.5 flex h-3.5 w-3.5 cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
+      <Icon name="close" className="text-[10px]" />
     </button>
   )
 }
@@ -108,8 +109,9 @@ function CheckList({ checks }: { checks: Check[] }) {
 
 export default function FitDemo() {
   const [items, setItems] = useState<Item[]>(initialItems)
-  const [windows, setWindows] = useState<Opening[]>(BASE_ROOM.openings!.windows)
-  const room = useMemo<Room>(() => ({ ...BASE_ROOM, openings: { ...BASE_ROOM.openings!, windows } }), [windows])
+  // 창문은 처음 4개 자리에서만 생기고 없어진다(최대 4개).
+  const [windowCount, setWindowCount] = useState(BASE_ROOM.openings!.windows.length)
+  const room = useMemo<Room>(() => ({ ...BASE_ROOM, openings: { ...BASE_ROOM.openings!, windows: BASE_ROOM.openings!.windows.slice(0, windowCount) } }), [windowCount])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<View>('persp')
   const [tab, setTab] = useState<Tab>('placed')
@@ -170,24 +172,6 @@ export default function FitDemo() {
     say(spot ? `${source.name}을(를) 하나 더 놓았어요` : '빈 자리가 없어 가운데에 겹쳐 놓았어요. 끌어서 옮겨 주세요.')
   }
 
-  // 창문은 방 구조라 벽의 빈 구간에 새로 낸다. 문·다른 창과 100mm 이상 띄운다.
-  const addWindow = () => {
-    const width = BASE_ROOM.openings!.windows[0].to - BASE_ROOM.openings!.windows[0].from
-    const gap = 100
-    for (const side of ['-x', '+z', '-z', '+x'] as const) {
-      const length = side === '-x' || side === '+x' ? room.d : room.w
-      const taken = [room.openings!.door, ...windows].filter((open) => open.side === side).sort((a, b) => a.from - b.from)
-      for (let from = gap; from + width <= length - gap; from += 50) {
-        if (taken.every((open) => from + width + gap <= open.from || from >= open.to + gap)) {
-          setWindows((prev) => [...prev, { side, from, to: from + width, bottom: 990, top: 2206 }])
-          say('창문을 하나 더 냈어요')
-          return
-        }
-      }
-    }
-    say('창문을 낼 빈 벽이 없어요')
-  }
-
   const remove = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id))
     if (selectedId === id) setSelectedId(null)
@@ -224,7 +208,7 @@ export default function FitDemo() {
   }, [items])
   const doorFurniture = FURNITURE.find((f) => f.id === DOOR_ID)
   const windowFurniture = FURNITURE.find((f) => f.id === WINDOW_ID)
-  const listedCount = groups.length + (doorFurniture ? 1 : 0) + (windowFurniture && windows.length > 0 ? 1 : 0)
+  const listedCount = groups.length + (doorFurniture ? 1 : 0) + (windowFurniture && windowCount > 0 ? 1 : 0)
   const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
 
   return (
@@ -268,7 +252,7 @@ export default function FitDemo() {
               { icon: 'rotate_right', label: '90° 회전', onClick: rotate, disabled: !selected },
               { icon: 'vertical_align_top', label: '벽에 붙이기', onClick: () => selected && updateItem(selected.id, (item) => backToWall(item, room)), disabled: !selected },
               { icon: view === 'top' ? 'view_in_ar' : 'grid_view', label: view === 'top' ? '비스듬히 보기' : '위에서 보기', onClick: () => setView(view === 'top' ? 'persp' : 'top'), disabled: false },
-              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setWindows(BASE_ROOM.openings!.windows); setSelectedId(null); say('처음 배치로 되돌렸어요') }, disabled: false },
+              { icon: 'restart_alt', label: '초기화', onClick: () => { setItems(initialItems()); setSelectedId(null); say('처음 배치로 되돌렸어요') }, disabled: false },
             ].map((button) => (
               <button
                 key={button.label}
@@ -413,10 +397,10 @@ export default function FitDemo() {
                       </span>
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-[13px] font-semibold">{windowFurniture.name}</span>
-                        <span className="block text-[11px] text-text-muted">벽에 낸 창문 · 개수를 조절해요</span>
+                        <span className="block text-[11px] text-text-muted">벽에 낸 창문 · 최대 4개</span>
                       </span>
-                      <CountControls name={windowFurniture.name} count={windows.length} min={0} onMinus={() => setWindows((prev) => prev.slice(0, -1))} onPlus={addWindow} />
-                      {windows.length > 0 && <RemoveAll name={windowFurniture.name} onClick={() => setWindows([])} />}
+                      <CountControls name={windowFurniture.name} count={windowCount} min={0} max={BASE_ROOM.openings!.windows.length} onMinus={() => setWindowCount((n) => n - 1)} onPlus={() => setWindowCount((n) => n + 1)} />
+                      {windowCount > 0 && <RemoveAll name={windowFurniture.name} onClick={() => setWindowCount(0)} />}
                     </div>
                   </li>
                 )}
@@ -487,16 +471,22 @@ export default function FitDemo() {
             <section className="px-5 py-4">
               <p className="mb-3 text-[12px] leading-relaxed text-text-secondary">등록되어 있지 않은 가구는 줄자로 잰 치수를 넣어 주세요. 입력한 크기 그대로 3D 영역에 놓여요.</p>
               <div className="space-y-3">
-                <label className="block text-[13px] text-text-secondary">
-                  가구 이름 (선택)
-                  <input
-                    type="text"
-                    value={draft.name}
-                    onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-                    placeholder="예: 우리 집 수납장"
-                    className="mt-1 h-10 w-full rounded-full border border-border-default bg-surface-base px-4 text-[15px] outline-none focus:border-primary-container focus:ring-2 focus:ring-primary-container/20"
-                  />
-                </label>
+                <div>
+                  <span className="block text-[13px] text-text-secondary">가구 종류 (선택)</span>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {CUSTOM_KINDS.map((kind) => (
+                      <button
+                        key={kind}
+                        type="button"
+                        aria-pressed={draft.name === kind}
+                        onClick={() => setDraft({ ...draft, name: draft.name === kind ? '' : kind })}
+                        className={`cursor-pointer rounded-full border px-3 py-1 text-[12px] ${draft.name === kind ? 'border-primary-container bg-brand-sky-light font-semibold text-on-primary-container' : 'border-border-default text-text-secondary'}`}
+                      >
+                        {kind}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-3">
                   <NumberInput label="가로" value={draft.w} max={room.w} onChange={(w) => setDraft({ ...draft, w })} />
                   <NumberInput label="세로(깊이)" value={draft.d} max={room.d} onChange={(d) => setDraft({ ...draft, d })} />
