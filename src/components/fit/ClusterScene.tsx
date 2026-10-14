@@ -105,6 +105,35 @@ function DraggableMember({ position, yaw, onMove, onDrag, children }: { position
   )
 }
 
+// 다른 가구 위에 얹힌 가구(서랍 위 조명, 소파 위 쿠션, 러그 위 테이블): 받치는 가구의 네 끝까지 남은 거리와 바닥에서의 높이.
+// 받치는 가구 밖으로 나가면 빨갛게 "밖으로 N mm"가 된다. 시점이 돌아가도 헷갈리지 않게 방향 말 없이 끝까지 거리만 적는다.
+function InsetDims({ a, b, wx, wz }: { a: Item; b: Item; wx: (x: number) => number; wz: (z: number) => number }) {
+  const ra = footprint(a)
+  const rb = footprint(b)
+  const y = Math.max(0.02, (b.elevation ?? 0) / M)
+  const cx = (rb.minX + rb.maxX) / 2
+  const cz = (rb.minZ + rb.maxZ) / 2
+  // 라벨이 많아 받치는 가구 이름은 줄여 쓴다.
+  const name = a.name.replace('에르바 더리 러그', '러그').replace('3단 수납형 서랍', '서랍').replace('2인 소파', '소파')
+  const side = (margin: number, from: [number, number], to: [number, number]) => (
+    <Dim
+      from={[wx(from[0]), y, wz(from[1])]}
+      to={[wx(to[0]), y, wz(to[1])]}
+      label={margin < 0 ? `${name} 밖으로 ${mm(-margin)}` : `${name} 끝까지 ${mm(margin)}`}
+      color={LEVEL_COLOR[margin < 0 ? 'bad' : 'ok']}
+    />
+  )
+  return (
+    <group>
+      {side(rb.minX - ra.minX, [ra.minX, cz], [rb.minX, cz])}
+      {side(ra.maxX - rb.maxX, [rb.maxX, cz], [ra.maxX, cz])}
+      {side(rb.minZ - ra.minZ, [cx, ra.minZ], [cx, rb.minZ])}
+      {side(ra.maxZ - rb.maxZ, [cx, rb.maxZ], [cx, ra.maxZ])}
+      {(b.elevation ?? 0) > 0 && <Dim from={[wx(cx), 0, wz(cz)]} to={[wx(cx), (b.elevation ?? 0) / M, wz(cz)]} label={`바닥에서 ${mm(b.elevation ?? 0)}`} />}
+    </group>
+  )
+}
+
 export default function ClusterScene({ members, gaps, showDims, autoRotate, isDrawerOpen, onMoveMember, onReady }: ClusterSceneProps) {
   const [dragging, setDragging] = useState(false)
   // 첫 Html(drei) 라벨이 StrictMode 이중 마운트에서 사라지는 문제가 있어, 장면이 한 번 그려진 뒤에 라벨을 붙인다.
@@ -146,24 +175,21 @@ export default function ClusterScene({ members, gaps, showDims, autoRotate, isDr
             <ItemModel item={member} drawersOpen={isDrawerOpen?.(member) ?? false} />
           </DraggableMember>
         ))}
+        {showDims && labelsOn && gaps.filter((gap) => gap.rest).map((gap) => <InsetDims key={`on-${gap.a.id}-${gap.b.id}`} a={gap.a} b={gap.b} wx={wx} wz={wz} />)}
         {showDims && labelsOn &&
-          gaps.map((gap) => (
+          gaps.filter((gap) => !gap.rest).map((gap) => (
             <Dim
               key={`${gap.a.id}-${gap.b.id}`}
               from={[wx(gap.from[0]), 0.05, wz(gap.from[1])]}
               to={[wx(gap.to[0]), 0.05, wz(gap.to[1])]}
               label={
-                gap.rest
-                  ? gap.dist < 0
-                    ? `${shortName(gap.b.name)}이(가) ${shortName(gap.a.name)} 위에 놓여 있어요`
-                    : `${shortName(gap.b.name)}이(가) ${shortName(gap.a.name)}에서 ${mm(gap.dist)} 떨어져 있어요`
-                  : gap.dist < 0
+                gap.dist < 0
                   ? gap.b.model.includes('chair')
                     ? `${shortName(gap.a.name)} ↔ ${shortName(gap.b.name)} ${mm(-gap.dist)}`
                     : `${shortName(gap.b.name)}와 ${mm(-gap.dist)} 겹침`
                   : `${shortName(gap.a.name)} ↔ ${shortName(gap.b.name)} ${mm(gap.dist)}`
               }
-              color={LEVEL_COLOR[gap.rest ? (gap.dist < 0 ? 'ok' : 'warn') : gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
+              color={LEVEL_COLOR[gap.dist < 0 && gap.b.model.includes('chair') ? 'ok' : levelOf(gap.dist)]}
             />
           ))}
       </group>
