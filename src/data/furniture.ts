@@ -257,11 +257,11 @@ export const COLOR_OPTIONS: Record<string, ColorOption[]> = {
 // 아래 8종은 오늘의집에서 색 옵션을 확인한 것이 아니라 제가 어울릴 만한 색을 골라 둔 것이다(실제 판매 색과 다를 수 있다).
 const NEUTRAL = (name: string, hex: string, isDefault = false): ColorOption => ({ name, hex, ...(isDefault ? { isDefault } : {}) })
 
-COLOR_OPTIONS.Xs_Qb6C3D61BBB72B9B4159 = [NEUTRAL('네이비', '#3c4f78', true), NEUTRAL('화이트', '#eeeeea'), NEUTRAL('아이보리', '#e7dfcf'), NEUTRAL('베이지', '#cdb89b'), NEUTRAL('그레이', '#9a9da3'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('핑크', '#e6b9c0'), NEUTRAL('그린', '#6f8f78')]
-COLOR_OPTIONS['ZHCng6-9DA238A1CE5340E1'] = [NEUTRAL('차콜', '#46474b', true), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#9a9ca0'), NEUTRAL('베이지', '#d6c8b0'), NEUTRAL('그린', '#4d6b57')]
-COLOR_OPTIONS.YBp1W4_021584BC9C234BDF = [NEUTRAL('블랙', '#1f1f21', true), NEUTRAL('브라운', '#6b4a33'), NEUTRAL('카멜', '#b5834f'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('아이보리', '#e6e0d2'), NEUTRAL('네이비', '#2b3a55'), NEUTRAL('그린', '#44594a')]
-COLOR_OPTIONS['Ymz-AKVBAE7A1C5651944C3'] = [NEUTRAL('블랙', '#1b1b1d', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('베이지', '#cdb89b'), NEUTRAL('카키', '#6a6f58'), NEUTRAL('네이비', '#2b3a55')]
-COLOR_OPTIONS.YSCLdDz3A9D4CDED05E451C = [NEUTRAL('차콜', '#2c2c2e', true), NEUTRAL('블랙', '#17171a'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('네이비', '#2b3a55'), NEUTRAL('그린', '#4d6b57')]
-COLOR_OPTIONS.XjOO_Xy13478D0D91CD493D = [NEUTRAL('카멜', '#c79c62', true), NEUTRAL('아이보리', '#e8e0cf'), NEUTRAL('베이지', '#cdb89b'), NEUTRAL('그레이', '#9a9ca0'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('테라코타', '#b8624a'), NEUTRAL('올리브', '#7d8160'), NEUTRAL('핑크', '#e0aea8'), NEUTRAL('네이비', '#33415c')]
+COLOR_OPTIONS.Xs_Qb6C3D61BBB72B9B4159 = [NEUTRAL('네이비', '#3c4f78', true), NEUTRAL('화이트', '#eeeeea'), NEUTRAL('아이보리', '#e7dfcf'), NEUTRAL('그레이', '#9a9da3'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('핑크', '#e6b9c0')]
+COLOR_OPTIONS['ZHCng6-9DA238A1CE5340E1'] = [NEUTRAL('차콜', '#46474b', true), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#9a9ca0')]
+COLOR_OPTIONS.YBp1W4_021584BC9C234BDF = [NEUTRAL('블랙', '#1f1f21', true), NEUTRAL('브라운', '#6b4a33'), NEUTRAL('카멜', '#b5834f'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('아이보리', '#e6e0d2'), NEUTRAL('네이비', '#2b3a55')]
+COLOR_OPTIONS['Ymz-AKVBAE7A1C5651944C3'] = [NEUTRAL('블랙', '#1b1b1d', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('카키', '#6a6f58'), NEUTRAL('네이비', '#2b3a55')]
+COLOR_OPTIONS.YSCLdDz3A9D4CDED05E451C = [NEUTRAL('차콜', '#2c2c2e', true), NEUTRAL('블랙', '#17171a'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('네이비', '#2b3a55')]
+COLOR_OPTIONS.XjOO_Xy13478D0D91CD493D = [NEUTRAL('카멜', '#c79c62', true), NEUTRAL('아이보리', '#e8e0cf'), NEUTRAL('그레이', '#9a9ca0'), NEUTRAL('차콜', '#4a4b50'), NEUTRAL('테라코타', '#b8624a'), NEUTRAL('올리브', '#7d8160'), NEUTRAL('핑크', '#e0aea8'), NEUTRAL('네이비', '#33415c')]
 COLOR_OPTIONS.YSBhD9T1E65915F80104295 = [NEUTRAL('블랙', '#2a2a2c', true), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('그레이', '#8d8f93'), NEUTRAL('카키', '#6a6f58'), NEUTRAL('네이비', '#2b3a55')]
-COLOR_OPTIONS.XNpyDGd4339E9DBCEE941AC = [NEUTRAL('월넛', '#8a5a35', true), NEUTRAL('오크', '#c9a56e'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('베이지', '#d6c8b0'), NEUTRAL('그린', '#4d6b57'), NEUTRAL('네이비', '#2b3a55')]
+COLOR_OPTIONS.XNpyDGd4339E9DBCEE941AC = [NEUTRAL('월넛', '#8a5a35', true), NEUTRAL('오크', '#c9a56e'), NEUTRAL('화이트', '#ecebe7'), NEUTRAL('블랙', '#1f1f21'), NEUTRAL('네이비', '#2b3a55')]
