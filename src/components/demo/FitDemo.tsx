@@ -53,7 +53,7 @@ function CountControls({ name, count, min, max = Infinity, onMinus, onPlus }: { 
 function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   return (
     <button type="button" aria-label={`${name} 모두 빼기`} onClick={onClick} className="absolute right-1 top-1 flex h-[15px] w-[15px] cursor-pointer items-center justify-center rounded-full text-text-muted hover:bg-surface-subtle hover:text-status-bad">
-      <Icon name="close" size={19} />
+      <Icon name="close" size={16} />
     </button>
   )
 }
