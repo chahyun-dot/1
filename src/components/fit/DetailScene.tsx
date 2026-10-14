@@ -130,6 +130,48 @@ function Dimensions({ desk, product, m }: { desk: Item; product: Item | null; m:
   )
 }
 
+// 서랍장이 없을 때 의자를 끌어 옮기면 따라 바뀌는 책상과의 간격(책상 앞 끝, 아래로 들어간 깊이, 다리·뒤 간격).
+function ChairDims({ desk, chair }: { desk: Item; chair: Item }) {
+  const m = measureAgainstDesk(desk, chair)
+  const halfD = desk.d / 2 / M
+  const inner = m.inner / M
+  const r = { minX: m.rect.minX / M, maxX: m.rect.maxX / M, minZ: m.rect.minZ / M, maxZ: m.rect.maxZ / M }
+  const cx = (r.minX + r.maxX) / 2
+  const y = 0.01
+  if (r.minZ >= halfD) {
+    return <Dim from={[cx, y, halfD]} to={[cx, y, r.minZ]} label={`책상 앞 끝까지 ${mm((m.rect.minZ - desk.d / 2))}`} />
+  }
+  if (!m.overlapsTop) {
+    return m.sideToDesk === null ? null : (
+      <Dim
+        from={[m.rect.minX >= desk.w / 2 ? desk.w / 2 / M : r.maxX, y, (r.minZ + r.maxZ) / 2]}
+        to={[m.rect.minX >= desk.w / 2 ? r.minX : -desk.w / 2 / M, y, (r.minZ + r.maxZ) / 2]}
+        label={`책상과 ${mm(m.sideToDesk)}`}
+        color={LEVEL_COLOR[gapLevel(m.sideToDesk)]}
+      />
+    )
+  }
+  const tuck = Math.min(m.rect.maxZ, desk.d / 2) - m.rect.minZ
+  return (
+    <>
+      <Dim from={[cx, y, r.minZ]} to={[cx, y, Math.min(r.maxZ, halfD)]} label={`책상 아래로 ${mm(tuck)} 들어감`} />
+      <Dim from={[cx, y, -halfD]} to={[cx, y, r.minZ]} label={`뒤 ${mm(m.backEdge)}`} />
+      <Dim
+        from={[-inner, 0.12, r.maxZ]}
+        to={[r.minX, 0.12, r.maxZ]}
+        label={m.leftLeg < 0 ? `왼쪽 다리에 ${mm(-m.leftLeg)} 걸림` : `왼쪽 다리까지 ${mm(m.leftLeg)}`}
+        color={LEVEL_COLOR[gapLevel(m.leftLeg)]}
+      />
+      <Dim
+        from={[r.maxX, 0.18, r.maxZ]}
+        to={[inner, 0.18, r.maxZ]}
+        label={m.rightLeg < 0 ? `오른쪽 다리에 ${mm(-m.rightLeg)} 걸림` : `오른쪽 다리까지 ${mm(m.rightLeg)}`}
+        color={LEVEL_COLOR[gapLevel(m.rightLeg)]}
+      />
+    </>
+  )
+}
+
 // 책상 기준 좌표에서 끌어 옮길 수 있는 가구(서랍장, 의자).
 function DraggableProduct({ desk, product, drawersOpen, onMove, onDrag }: {
   desk: Item
@@ -205,6 +247,7 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
         ))}
         {product && <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />}
         {showDims && <Dimensions desk={desk} product={product} m={m} />}
+        {showDims && !product && extras.map((extra) => <ChairDims key={extra.id} desk={desk} chair={extra} />)}
       </group>
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>

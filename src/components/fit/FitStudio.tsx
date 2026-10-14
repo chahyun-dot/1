@@ -724,7 +724,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {inDetail && (
                 <p className="pointer-events-none absolute right-16 top-4 rounded-lg bg-inverse-surface/75 px-3 py-1.5 text-[12px] text-white">
-                  {cluster!.id === 'desk' && product ? '드래그: 360° 돌려 보기 · 서랍장 끌기: 위치 옮기기 · 휠: 확대' : '드래그: 360° 돌려 보기 · 휠: 확대'}
+                  {cluster!.id === 'desk' ? `드래그: 360° 돌려 보기 · ${product ? '서랍장' : '의자'} 끌기: 위치 옮기기 · 휠: 확대` : '드래그: 360° 돌려 보기 · 휠: 확대'}
                 </p>
               )}
             </div>
