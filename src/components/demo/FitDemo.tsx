@@ -155,7 +155,7 @@ export default function FitDemo() {
     return DEMO_FURNITURE.filter((f) => (category === '전체' || categoryOf(f) === category) && (q === '' || `${f.name} ${f.brand ?? ''}`.toLowerCase().includes(q)))
   }, [query, category])
 
-  const listed = items.filter((item) => item.kind !== 'rug')
+  const listed = items
   const draftValid = draft.w >= 50 && draft.w <= room.w && draft.d >= 50 && draft.d <= room.d && draft.h >= 50 && draft.h <= room.h
 
   return (

@@ -30,7 +30,7 @@ export const FURNITURE: Furniture[] = raw.furnitureItems.map((item) => ({
   image: `/archisketch/${item.componentId}.png`,
 }))
 
-// 데모 배치에서 뺀 가구. 데모의 "전체 가구" 목록에서도 보이지 않게 한다(가구 목록 `#/furniture` 와 모델 미리보기는 그대로).
+// 뺀 가구. 데모의 "전체 가구" 목록, 가구 목록(`#/furniture`), 모델 미리보기에서 보이지 않게 한다.
 // 아르덴 미러는 배치에 하나가 남아 있어서 여기에 넣지 않았다.
 const DEMO_EXCLUDED = new Set([
   'XtdxyE493CC22D0979C4F07', // DSTL Diffuser + Sticks

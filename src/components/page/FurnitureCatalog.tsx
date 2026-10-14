@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { FURNITURE, FURNITURE_PROJECT, type Furniture } from '@/data/furniture'
+import { DEMO_FURNITURE as FURNITURE, FURNITURE_PROJECT, type Furniture } from '@/data/furniture'
 
 type Filter = 'all' | 'placed' | 'unplaced'
 

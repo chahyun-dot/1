@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Grid, OrbitControls } from '@react-three/drei'
 import ItemModel from '@/components/fit/Models'
-import { FURNITURE, MODEL_BY_FURNITURE } from '@/data/furniture'
+import { DEMO_FURNITURE as FURNITURE, MODEL_BY_FURNITURE } from '@/data/furniture'
 import type { Item } from '@/lib/types'
 
 // 코드로 만든 가구 3D 모델을 하나씩 돌려 보는 미리보기. 이미지(왼쪽 위)와 3D 를 나란히 비교할 수 있다.
