@@ -4,7 +4,7 @@ import { ContactShadows, Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import ItemModel from '@/components/fit/Models'
 import { LEVEL_COLOR } from '@/components/fit/Scene'
-import { fromDeskLocal, measureAgainstDesk, type DeskMeasure } from '@/lib/desk'
+import { fromDeskLocal, legInner, measureAgainstDesk, undersideOf, type DeskMeasure } from '@/lib/desk'
 import { UNDER_MARGIN_MIN } from '@/lib/fit'
 import type { Item, Level } from '@/lib/types'
 
@@ -16,7 +16,8 @@ type V3 = [number, number, number]
 
 type DetailSceneProps = {
   desk: Item
-  product: Item
+  // 책상 아래 서랍장. 서랍장을 모두 뺀 뒤에는 없다.
+  product: Item | null
   drawersOpen: boolean
   showDims: boolean
   autoRotate: boolean
@@ -51,16 +52,27 @@ export function Dim({ from, to, label, color = NEUTRAL, labelAt }: { from: V3; t
   )
 }
 
-function Dimensions({ desk, product, m }: { desk: Item; product: Item; m: DeskMeasure }) {
+function Dimensions({ desk, product, m }: { desk: Item; product: Item | null; m: DeskMeasure | null }) {
   const halfW = desk.w / 2 / M
   const halfD = desk.d / 2 / M
   const deskH = desk.h / M
-  const under = m.underside / M
+  const under = undersideOf(desk) / M
+  const inner = legInner(desk) / M
+  const lineY = 0.12
+
+  if (!product || !m) {
+    return (
+      <group>
+        <Dim from={[-halfW, 0, halfD + 0.04]} to={[-halfW, deskH, halfD + 0.04]} label={`책상 높이 ${mm(desk.h)}`} />
+        <Dim from={[-inner, 0, halfD - 0.02]} to={[-inner, under, halfD - 0.02]} label={`상판 아래 ${mm(undersideOf(desk))}`} labelAt={[-inner, under * 0.75, halfD - 0.02]} />
+        <Dim from={[-inner, under - 0.04, -halfD + 0.04]} to={[inner, under - 0.04, -halfD + 0.04]} label={`다리 안쪽 ${mm(inner * 2 * M)}`} />
+      </group>
+    )
+  }
+
   const r = { minX: m.rect.minX / M, maxX: m.rect.maxX / M, minZ: m.rect.minZ / M, maxZ: m.rect.maxZ / M }
   const cx = (r.minX + r.maxX) / 2
   const h = product.h / M
-  const inner = m.inner / M
-  const lineY = 0.12
 
   return (
     <group>
@@ -176,7 +188,7 @@ function DraggableProduct({ desk, product, drawersOpen, onMove, onDrag }: {
 
 export default function DetailScene({ desk, product, drawersOpen, showDims, autoRotate, onMove, extras = [], onMoveExtra, onReady }: DetailSceneProps) {
   const [dragging, setDragging] = useState(false)
-  const m = measureAgainstDesk(desk, product)
+  const m = product ? measureAgainstDesk(desk, product) : null
   const span = Math.max(desk.w, desk.d, 900, extras.length ? 1900 : 0) / M
 
   return (
@@ -191,7 +203,7 @@ export default function DetailScene({ desk, product, drawersOpen, showDims, auto
         {extras.map((extra) => (
           <DraggableProduct key={extra.id} desk={desk} product={extra} drawersOpen={false} onMove={(x, z) => onMoveExtra?.(extra.id, x, z)} onDrag={setDragging} />
         ))}
-        <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />
+        {product && <DraggableProduct desk={desk} product={product} drawersOpen={drawersOpen} onMove={onMove} onDrag={setDragging} />}
         {showDims && <Dimensions desk={desk} product={product} m={m} />}
       </group>
 

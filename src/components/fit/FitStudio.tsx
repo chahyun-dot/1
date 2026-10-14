@@ -242,7 +242,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const selected = items.find((item) => item.id === selectedId) ?? null
   const cluster = detail ? (CLUSTERS.find((c) => c.id === detail) ?? null) : null
   const members = useMemo(() => (cluster ? items.filter((item) => cluster.keys.includes(keyOf(item))) : []), [cluster, items])
-  const inDetail = Boolean(cluster && (cluster.id !== 'desk' || (desk && product)))
+  const inDetail = Boolean(cluster && (cluster.id !== 'desk' || desk))
   const deskChairs = useMemo(() => (cluster?.id === 'desk' ? members.filter((item) => item.model === 'meshchair') : []), [cluster, members])
   const gaps: PairGap[] = useMemo(() => {
     if (!cluster) return []
@@ -256,7 +256,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const sofaItem = members.find((item) => keyOf(item) === SOFA_ID)
 
   // 진단 대상: 고른 가구. 상세 보기에서는 묶음의 가구(책상 묶음은 서랍장)를 본다.
-  const target = inDetail ? (cluster!.id === 'desk' ? product : (members.find((item) => item.id === selectedId) ?? members.find((item) => item.kind !== 'rug') ?? members[0] ?? null)) : selected
+  const target = inDetail ? (cluster!.id === 'desk' ? (product ?? desk) : (members.find((item) => item.id === selectedId) ?? members.find((item) => item.kind !== 'rug') ?? members[0] ?? null)) : selected
   const fit: FitResult | null = useMemo(() => {
     if (!target) return null
     return target.kind === 'product' ? evaluate(target, room, items) : measureFurniture(target, room, items)
@@ -612,7 +612,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <span className="text-[13px] font-semibold text-text-secondary">3D 공간을 준비하고 있어요</span>
                 </div>
               )}
-              {!mount ? null : inDetail && cluster!.id === 'desk' && desk && product ? (
+              {!mount ? null : inDetail && cluster!.id === 'desk' && desk ? (
                 <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen(productId)} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : inDetail ? (
                 <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onMoveMember={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
@@ -638,11 +638,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     const found = clicked ? clusterOf(clicked) : null
                     if (found) openDetail(found.id, id)
                   }}
-                  canOpenDetail={(item) => {
-                    const found = clusterOf(item)
-                    // 책상 상세는 서랍장이 있어야 열 수 있다(서랍장을 모두 뺀 뒤에는 닫는다).
-                    return found !== null && (found.id !== 'desk' || product !== null)
-                  }}
+                  canOpenDetail={(item) => clusterOf(item) !== null}
                 />
               )}
 
@@ -675,7 +671,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                     <StageButton icon="360" label="360° 자동 회전" active={autoRotate} onClick={() => setAutoRotate(!autoRotate)} />
                     <span className="text-border-default">|</span>
                     <StageButton icon="straighten" label="간격 표시" active={showDims} onClick={() => setShowDims(!showDims)} />
-                    {cluster!.id === 'desk' && (
+                    {cluster!.id === 'desk' && product && (
                       <>
                         <span className="text-border-default">|</span>
                         <StageButton icon="open_in_full" label={isOpen(productId) ? '서랍 닫기' : '서랍 열어보기'} active={isOpen(productId)} onClick={() => toggleOpen(productId)} />
@@ -728,7 +724,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
 
               {inDetail && (
                 <p className="pointer-events-none absolute right-16 top-4 rounded-lg bg-inverse-surface/75 px-3 py-1.5 text-[12px] text-white">
-                  {cluster!.id === 'desk' ? '드래그: 360° 돌려 보기 · 서랍장 끌기: 위치 옮기기 · 휠: 확대' : '드래그: 360° 돌려 보기 · 휠: 확대'}
+                  {cluster!.id === 'desk' && product ? '드래그: 360° 돌려 보기 · 서랍장 끌기: 위치 옮기기 · 휠: 확대' : '드래그: 360° 돌려 보기 · 휠: 확대'}
                 </p>
               )}
             </div>
@@ -774,7 +770,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               <div role="tablist" aria-label="설정" className="flex border-b border-border-default bg-surface-base">
                 {inDetail
                   ? (cluster!.id === 'desk'
-                      ? ([{ id: 'members', label: '가구 정보' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }] as { id: DetailTab; label: string }[])
+                      ? ((product ? [{ id: 'members', label: '가구 정보' }, { id: 'cabinet', label: '서랍장 위치·바퀴' }] : [{ id: 'members', label: '가구 정보' }]) as { id: DetailTab; label: string }[])
                       : ([{ id: 'members', label: '가구 정보' }] as { id: DetailTab; label: string }[])
                     ).map((item) => (
                       <button key={item.id} type="button" role="tab" aria-selected={detailTab === item.id} onClick={() => setDetailTab(item.id)} className={`flex flex-1 items-center justify-center gap-1.5 border-b-2 px-2 py-3 text-[13px] transition-colors ${detailTab === item.id ? 'border-primary-container font-bold text-on-primary-container' : 'border-transparent font-medium text-text-secondary hover:text-text-primary'}`}>
