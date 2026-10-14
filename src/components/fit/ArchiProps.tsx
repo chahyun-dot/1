@@ -76,12 +76,12 @@ function StringPocket({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const h = item.h / M
-  const wire = '#1b1b1d'
+  const wire = item.tint2 ?? '#1b1b1d'
   const levels = [0.1, 0.5, 0.9].map((fraction) => fraction * h)
   return (
     <group>
       {levels.map((y) => (
-        <Slab key={y} size={[w - 0.04, 0.018, d]} position={[0, y, 0]} color="#7a4a2a" roughness={0.55} />
+        <Slab key={y} size={[w - 0.04, 0.018, d]} position={[0, y, 0]} color={item.tint ?? '#7a4a2a'} roughness={0.55} />
       ))}
       {[-1, 1].map((side) => {
         const x = side * (w / 2 - 0.012)

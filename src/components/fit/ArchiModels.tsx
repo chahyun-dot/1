@@ -257,7 +257,7 @@ export function ArdenMirror({ item }: Props) {
   return (
     <group>
       <RoundedBox args={[w, h, d]} radius={Math.min(0.008, d / 2.5)} smoothness={3} position={[0, h / 2, 0]} castShadow receiveShadow>
-        <meshStandardMaterial color="#17171a" roughness={0.6} />
+        <meshStandardMaterial color={item.tint ?? '#17171a'} roughness={0.6} />
       </RoundedBox>
       <RoundedPane w={w * 0.81} h={h * 0.57} r={0.09} depth={0.004} position={[0, h * 0.62, d / 2]}>
         {mirror}
@@ -509,7 +509,7 @@ export function ChromeCabinet({ item }: Props) {
   const x = w / 2 - r
   const z = d / 2 - r
   const boxBottom = h * 0.45
-  const dark = '#2a2a2c'
+  const dark = item.tint ?? '#2a2a2c'
   return (
     <group>
       {[-1, 1].flatMap((sx) =>
@@ -537,7 +537,7 @@ export function ChromeCabinet({ item }: Props) {
       ))}
       <mesh position={[0, (boxBottom + h) / 2 - 0.005, z + 0.002]} castShadow>
         <boxGeometry args={[w - 0.025, h - boxBottom - 0.04, 0.012]} />
-        <meshStandardMaterial color="#2e2e30" roughness={0.45} />
+        <meshStandardMaterial color={item.tint ?? '#2e2e30'} roughness={0.45} />
       </mesh>
       <mesh position={[0, h - 0.17, z + 0.01]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.012, 0.012, 0.004, 20]} />

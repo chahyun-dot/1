@@ -212,3 +212,44 @@ export const BUNDLE_OF: Record<string, string> = {
 // 침대와 합쳐진 침구를 가리키는 가구 id.
 export const BUNDLED_INTO_BED = new Set(Object.keys(BUNDLE_OF))
 export const BED_SET_SUFFIX = ' + 침구'
+
+// 오늘의집에서 실제로 색이 나뉘어 팔리는 것으로 확인한 가구만 색을 고를 수 있다(2026-10-14 확인).
+// 심플리 수납장 BC264 는 상품 옵션 17색 중 재고 있는 15색, 스트링 포켓은 색별 상품, 아르덴 미러는 화이트·블랙이다.
+// hex 는 이미지로 어림한 색이고 hex2 는 보조 색(스트링 포켓의 철선)이다. isDefault 가 모델의 기본 색이다.
+export type ColorOption = { name: string; hex: string; hex2?: string; isDefault?: boolean }
+
+export const COLOR_OPTIONS: Record<string, ColorOption[]> = {
+  ZCREWuP85D472F7745C4005: [
+    { name: '블랙', hex: '#2a2a2c', isDefault: true },
+    { name: '화이트', hex: '#f1f1ee' },
+    { name: '퓨어화이트', hex: '#ffffff' },
+    { name: '베이지', hex: '#cdb89b' },
+    { name: '솔리드베이지', hex: '#d8c7a8' },
+    { name: '브라운', hex: '#7a5236' },
+    { name: '옐로우', hex: '#f2c230' },
+    { name: '오렌지', hex: '#ef8a2f' },
+    { name: '레드', hex: '#cf3b32' },
+    { name: '핑크', hex: '#f0a9b8' },
+    { name: '라이트핑크', hex: '#f6cdd6' },
+    { name: '블루', hex: '#3f6fb5' },
+    { name: '오션블루', hex: '#2b6e9a' },
+    { name: '그린', hex: '#4f9a5c' },
+    { name: '스테인리스', hex: '#b9bcc2' },
+  ],
+  'XnPfj-S5D34B27A4E7B4B99': [
+    { name: '월넛/블랙', hex: '#7a4a2a', hex2: '#1b1b1d', isDefault: true },
+    { name: '화이트', hex: '#f2f2ef', hex2: '#f2f2ef' },
+    { name: '애쉬/화이트', hex: '#b9b2a6', hex2: '#f2f2ef' },
+    { name: '오크/화이트', hex: '#c7a06c', hex2: '#f2f2ef' },
+    { name: '그레이', hex: '#8b8e92', hex2: '#8b8e92' },
+    { name: '베이지', hex: '#d8c9b0', hex2: '#d8c9b0' },
+    { name: '블러쉬', hex: '#e3b7b0', hex2: '#e3b7b0' },
+    { name: '그린', hex: '#4d7a5a', hex2: '#4d7a5a' },
+    { name: '세이지', hex: '#a5b39a', hex2: '#a5b39a' },
+    { name: '블랙 스테인드 애쉬/블랙', hex: '#2f2d2b', hex2: '#1b1b1d' },
+  ],
+  ZLDAeRK53BFEDFD0CF2475A: [
+    { name: '블랙', hex: '#17171a', isDefault: true },
+    { name: '화이트', hex: '#f2f2f0' },
+  ],
+}

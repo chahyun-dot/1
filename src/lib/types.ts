@@ -28,6 +28,9 @@ export type Item = {
   elevation?: number
   // 90° 단위가 아닌 각도(도). 있으면 그림은 이 각도로 돌리고, 판정은 가장 가까운 rot 로 한다.
   yaw?: number
+  // 사용자가 고른 색(hex). 색 옵션이 있는 가구 모델만 쓰고, 없으면 모델의 기본 색이다. tint2 는 보조 색(예: 스트링 포켓의 철선).
+  tint?: string
+  tint2?: string
 }
 
 export type Side = '-x' | '+x' | '-z' | '+z'

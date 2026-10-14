@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import Icon from '@/components/Icon'
 import Scene, { type View } from '@/components/fit/Scene'
 import { PLANNER_ROOM, plannerItems } from '@/data/plannerLayout'
-import { BED_SET_SUFFIX, BUNDLE_OF, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { backToWall, clampToRoom, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
 import type { Item, Room, Rot } from '@/lib/types'
 
@@ -98,6 +98,7 @@ export default function FitDemo() {
   const toastTimer = useRef<number | undefined>(undefined)
 
   const selected = items.find((item) => item.id === selectedId) ?? null
+  const options = selected ? COLOR_OPTIONS[selected.id.split('#')[0]] : undefined
   const fit = useMemo(() => {
     if (!selected) return null
     return selected.kind === 'product' ? evaluate(selected, room, items) : measureFurniture(selected, room, items)
@@ -255,6 +256,30 @@ export default function FitDemo() {
                   <p className="mt-0.5 text-[12px] text-text-secondary">{sizeText(selected)}</p>
                 </div>
               </div>
+              {options && (
+                <div className="mt-3">
+                  <p className="text-[12px] font-bold">
+                    색상 <span className="font-medium text-text-secondary">{(options.find((option) => (selected.tint ? option.hex === selected.tint && option.hex2 === selected.tint2 : option.isDefault)) ?? options[0]).name}</span>
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
+                    {options.map((option) => {
+                      const on = selected.tint ? option.hex === selected.tint && option.hex2 === selected.tint2 : !!option.isDefault
+                      return (
+                        <button
+                          key={option.name}
+                          type="button"
+                          title={option.name}
+                          aria-label={`${option.name} 색상`}
+                          aria-pressed={on}
+                          onClick={() => updateItem(selected.id, (item) => ({ ...item, tint: option.isDefault ? undefined : option.hex, tint2: option.isDefault ? undefined : option.hex2 }))}
+                          className={`h-6 w-6 cursor-pointer rounded-full border ${on ? 'border-primary-container ring-2 ring-primary-container/40' : 'border-black/15'}`}
+                          style={{ background: option.hex2 && option.hex2 !== option.hex ? `linear-gradient(135deg, ${option.hex} 50%, ${option.hex2} 50%)` : option.hex }}
+                        />
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
 
             </section>
