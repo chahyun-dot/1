@@ -6,7 +6,7 @@ import type { FitSummary } from '@/components/fit/FitModal'
 import Scene, { type View } from '@/components/fit/Scene'
 import { COLORS, PRODUCT, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type ColorId } from '@/data/catalog'
 import { GALLERY, galleryUrl } from '@/data/ohou'
-import { BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
+import { BED_FRAME_COLORS, BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, HANGER_KEYS, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
 import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
 import { placeAround, type AroundSide } from '@/lib/cluster'
@@ -141,12 +141,12 @@ function RemoveAll({ name, onClick }: { name: string; onClick: () => void }) {
   )
 }
 
-function ColorChips({ options, isOn, onPick }: { options: ColorOption[]; isOn: (option: ColorOption) => boolean; onPick: (option: ColorOption) => void }) {
+function ColorChips({ options, isOn, onPick, title = '색상' }: { options: ColorOption[]; isOn: (option: ColorOption) => boolean; onPick: (option: ColorOption) => void; title?: string }) {
   const current = options.find(isOn) ?? options[0]
   return (
     <div className="mt-3">
       <p className="text-[12px] font-bold">
-        색상 <span className="font-medium text-text-secondary">{current.name}</span>
+        {title} <span className="font-medium text-text-secondary">{current.name}</span>
       </p>
       <div className="mt-1.5 flex flex-wrap gap-1.5">
         {options.map((option) => {
@@ -156,7 +156,7 @@ function ColorChips({ options, isOn, onPick }: { options: ColorOption[]; isOn: (
               key={option.name}
               type="button"
               title={option.name}
-              aria-label={`${option.name} 색상`}
+              aria-label={`${title} ${option.name}`}
               aria-pressed={on}
               onClick={() => onPick(option)}
               className={`h-6 w-6 cursor-pointer rounded-full border ${on ? 'border-primary-container ring-2 ring-primary-container/40' : 'border-black/15'}`}
@@ -236,18 +236,21 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [diagOpen, setDiagOpen] = useState(false)
   const toastTimer = useRef<number | undefined>(undefined)
 
-  const product = items.find((item) => item.kind === 'product') ?? null
-  const productId = product?.id ?? 'product'
+  // 책상 상세의 서랍장은 처음부터 있던 서랍장(id 'product')이다. 나중에 더한 서랍장은 책상 아래 장면에 없다.
+  const product = items.find((item) => item.id === 'product') ?? null
+  const productId = 'product'
   const desk = items.find((item) => item.model === 'motiondesk') ?? null
   const selected = items.find((item) => item.id === selectedId) ?? null
   const cluster = detail ? (CLUSTERS.find((c) => c.id === detail) ?? null) : null
-  const members = useMemo(() => (cluster ? items.filter((item) => cluster.keys.includes(keyOf(item))) : []), [cluster, items])
+  // 상세 화면은 처음부터 그 묶음에 있던 가구만 보여 준다(나중에 더한 같은 가구는 방에 따로 놓이므로 상세 장면에 없다).
+  const initialIds = useMemo(() => new Set(initialItems.map((item) => item.id)), [initialItems])
+  const members = useMemo(() => (cluster ? items.filter((item) => cluster.keys.includes(keyOf(item)) && initialIds.has(item.id)) : []), [cluster, items, initialIds])
   const inDetail = Boolean(cluster && (cluster.id !== 'desk' || desk))
   const deskChairs = useMemo(() => (cluster?.id === 'desk' ? members.filter((item) => item.model === 'meshchair') : []), [cluster, members])
   const gaps: PairGap[] = useMemo(() => {
     if (!cluster) return []
-    return cluster.pairs.flatMap(([ka, kb, kind]) => items.filter((a) => keyOf(a) === ka).flatMap((a) => items.filter((b) => keyOf(b) === kb).map((b) => ({ ...gapOf(a, b), rest: kind === 'on' || kind === 'height', heightOnly: kind === 'height' }))))
-  }, [cluster, items])
+    return cluster.pairs.flatMap(([ka, kb, kind]) => members.filter((a) => keyOf(a) === ka).flatMap((a) => members.filter((b) => keyOf(b) === kb).map((b) => ({ ...gapOf(a, b), rest: kind === 'on' || kind === 'height', heightOnly: kind === 'height' }))))
+  }, [cluster, members])
 
   const bedItem = members.find((item) => keyOf(item) === BED_ID)
   const drawerItem = members.find((item) => keyOf(item) === DRAWER_ID)
@@ -280,7 +283,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   }, [colorFromPage])
 
   useEffect(() => {
-    setItems((prev) => prev.map((item) => (item.kind === 'product' ? { ...item, color: colorOf(colorId).hex } : item)))
+    setItems((prev) => prev.map((item) => (item.id === 'product' ? { ...item, color: colorOf(colorId).hex } : item)))
   }, [colorId])
 
   useEffect(() => {
@@ -299,6 +302,17 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     window.clearTimeout(toastTimer.current)
     toastTimer.current = window.setTimeout(() => setToast(null), 3200)
   }
+
+  // 서랍장 색은 가구마다 따로 고른다. 처음 서랍장(id 'product')만 상품 페이지의 색 선택과 이어진다.
+  const pickProductColor = (item: Item, option: ColorOption) => {
+    updateItem(item.id, (current) => ({ ...current, color: option.hex }))
+    if (item.id === 'product') {
+      const id = (option as ColorOption & { id: ColorId }).id
+      setColorId(id)
+      onColor?.(id)
+    }
+  }
+  const pickFrameColor = (item: Item, option: ColorOption) => updateItem(item.id, (current) => ({ ...current, frameTint: option.isDefault ? undefined : option.hex }))
 
   const updateItem = (id: string, patch: (item: Item) => Item) => setItems((prev) => prev.map((item) => (item.id === id ? patch(item) : item)))
   const clampTo = (item: Item, x: number, z: number) => ({ ...item, ...clampToRoom(item, x, z, room) })
@@ -744,17 +758,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                       <p className="mt-0.5 text-[12px] text-text-secondary">{sizeText(target)}</p>
                     </div>
                   </div>
-                  {target.kind === 'product' && (
-                    <ColorChips
-                      options={PRODUCT_COLOR_OPTIONS}
-                      isOn={(option) => (option as ColorOption & { id: ColorId }).id === colorId}
-                      onPick={(option) => {
-                        const id = (option as ColorOption & { id: ColorId }).id
-                        setColorId(id)
-                        onColor?.(id)
-                      }}
-                    />
-                  )}
+                  {target.kind === 'product' && <ColorChips options={PRODUCT_COLOR_OPTIONS} isOn={(option) => option.hex === target.color} onPick={(option) => pickProductColor(target, option)} />}
                   {options && (
                     <ColorChips
                       options={options}
@@ -762,6 +766,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                       onPick={(option) => updateItem(target.id, (item) => ({ ...item, tint: option.isDefault ? undefined : option.hex, tint2: option.isDefault ? undefined : option.hex2 }))}
                     />
                   )}
+                  {target.model === 'bedset' && <ColorChips title="프레임 색상" options={BED_FRAME_COLORS} isOn={(option) => (target.frameTint ? option.hex === target.frameTint : !!option.isDefault)} onPick={(option) => pickFrameColor(target, option)} />}
                 </section>
               )}
 
@@ -872,17 +877,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                               {resizable && <ResetButton label={member.name} disabled={!sizeChanged(member)} onClick={() => resetSize(member.id)} />}
                               {member.model === 'motiondesk' && <ResetButton label={member.name} disabled={!deskSizeChanged(member)} onClick={() => { const first = initialOf(member.id); if (first) updateDesk({ w: first.w, d: first.d, h: first.h, underClearance: first.underClearance, legGap: first.legGap }) }} />}
                             </div>
-                            {member.kind === 'product' && (
-                              <ColorChips
-                                options={PRODUCT_COLOR_OPTIONS}
-                                isOn={(option) => (option as ColorOption & { id: ColorId }).id === colorId}
-                                onPick={(option) => {
-                                  const id = (option as ColorOption & { id: ColorId }).id
-                                  setColorId(id)
-                                  onColor?.(id)
-                                }}
-                              />
-                            )}
+                            {member.kind === 'product' && <ColorChips options={PRODUCT_COLOR_OPTIONS} isOn={(option) => option.hex === member.color} onPick={(option) => pickProductColor(member, option)} />}
+                            {member.model === 'bedset' && <ColorChips title="프레임 색상" options={BED_FRAME_COLORS} isOn={(option) => (member.frameTint ? option.hex === member.frameTint : !!option.isDefault)} onPick={(option) => pickFrameColor(member, option)} />}
                             {memberOptions && (
                               <ColorChips
                                 options={memberOptions}

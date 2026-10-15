@@ -31,6 +31,8 @@ export type Item = {
   // 사용자가 고른 색(hex). 색 옵션이 있는 가구 모델만 쓰고, 없으면 모델의 기본 색이다. tint2 는 보조 색(예: 스트링 포켓의 철선).
   tint?: string
   tint2?: string
+  // 침대 프레임(헤드보드 포함) 색(hex). 없으면 검은색이다.
+  frameTint?: string
 }
 
 export type Side = '-x' | '+x' | '-z' | '+z'

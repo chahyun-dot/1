@@ -49,7 +49,7 @@ export function BlackBed({ item }: Props) {
   const frameH = 0.3
   const mattressH = 0.22
   const board = 0.045
-  const black = '#2d2d2f'
+  const black = item.frameTint ?? '#2d2d2f'
   const mattressLength = (d - board) * 0.9
   return (
     <group>
@@ -532,15 +532,17 @@ export function ChromeCabinet({ item }: Props) {
   const z = d / 2 - r
   const boxBottom = h * 0.45
   const dark = item.tint ?? '#2a2a2c'
+  // 색을 고르면 프레임·바닥판까지 수납장 전체가 그 색이 된다(기본은 크롬 프레임에 어두운 바닥판).
+  const frame = item.tint ?? CHROME
   return (
     <group>
       {[-1, 1].flatMap((sx) =>
-        [-1, 1].map((sz) => <Rod key={`${sx}${sz}`} from={[sx * x, 0.012, sz * z]} to={[sx * x, h, sz * z]} r={r} color={CHROME} metal />),
+        [-1, 1].map((sz) => <Rod key={`${sx}${sz}`} from={[sx * x, 0.012, sz * z]} to={[sx * x, h, sz * z]} r={r} color={frame} metal />),
       )}
       {[boxBottom, h - 0.01].flatMap((y) =>
         [-1, 1].flatMap((s) => [
-          <Rod key={`fx${y}${s}`} from={[-x, y, s * z]} to={[x, y, s * z]} r={r * 0.8} color={CHROME} metal />,
-          <Rod key={`fz${y}${s}`} from={[s * x, y, -z]} to={[s * x, y, z]} r={r * 0.8} color={CHROME} metal />,
+          <Rod key={`fx${y}${s}`} from={[-x, y, s * z]} to={[x, y, s * z]} r={r * 0.8} color={frame} metal />,
+          <Rod key={`fz${y}${s}`} from={[s * x, y, -z]} to={[s * x, y, z]} r={r * 0.8} color={frame} metal />,
         ]),
       )}
       <mesh position={[0, h - 0.012, 0]} castShadow>
@@ -567,7 +569,7 @@ export function ChromeCabinet({ item }: Props) {
       </mesh>
       <mesh position={[0, 0.07, 0]} castShadow receiveShadow>
         <boxGeometry args={[w - 0.02, 0.01, d - 0.02]} />
-        <meshStandardMaterial color="#17171a" roughness={0.2} metalness={0.2} />
+        <meshStandardMaterial color={item.tint ?? '#17171a'} roughness={0.2} metalness={0.2} />
       </mesh>
     </group>
   )

@@ -562,11 +562,11 @@ function WallHanger({ item }: Props) {
       {[-1, 1].map((side) => (
         <Rod key={side} from={[side * (w / 2 - 0.012), 0, -d / 2 + 0.02]} to={[side * (w / 2 - 0.012), h, -d / 2 + 0.02]} r={0.01} color={item.tint ?? '#232325'} />
       ))}
-      <Rod from={[-w / 2 + 0.012, h - 0.04, 0]} to={[w / 2 - 0.012, h - 0.04, 0]} r={0.008} color={CHROME} metal />
-      <Rod from={[-w / 2 + 0.012, h - 0.04, -d / 2 + 0.02]} to={[-w / 2 + 0.012, h - 0.04, 0]} r={0.008} color={CHROME} metal />
-      <Rod from={[w / 2 - 0.012, h - 0.04, -d / 2 + 0.02]} to={[w / 2 - 0.012, h - 0.04, 0]} r={0.008} color={CHROME} metal />
+      <Rod from={[-w / 2 + 0.012, h - 0.04, 0]} to={[w / 2 - 0.012, h - 0.04, 0]} r={0.008} color={item.tint ?? CHROME} metal />
+      <Rod from={[-w / 2 + 0.012, h - 0.04, -d / 2 + 0.02]} to={[-w / 2 + 0.012, h - 0.04, 0]} r={0.008} color={item.tint ?? CHROME} metal />
+      <Rod from={[w / 2 - 0.012, h - 0.04, -d / 2 + 0.02]} to={[w / 2 - 0.012, h - 0.04, 0]} r={0.008} color={item.tint ?? CHROME} metal />
       {[0.03, 0.34].map((y) => (
-        <Slab key={y} size={[w - 0.02, 0.022, d]} position={[0, y, 0]} color="#cdb590" roughness={0.7} />
+        <Slab key={y} size={[w - 0.02, 0.022, d]} position={[0, y, 0]} color={item.tint ?? '#cdb590'} roughness={0.7} />
       ))}
     </group>
   )
@@ -708,11 +708,11 @@ function TweedRug({ item }: Props) {
     <group>
       <mesh position={[0, 0.0025, 0]} receiveShadow>
         <cylinderGeometry args={[r, r, 0.005, 64]} />
-        {std('#3b3b3e', 1)}
+        {std('#d9d3c4', 1)}
       </mesh>
       <mesh position={[0, 0.0055, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <ringGeometry args={[r * 0.84, r * 0.88, 64]} />
-        {std('#5a5a5e', 1)}
+        {std('#8c8678', 1)}
       </mesh>
     </group>
   )
@@ -1227,14 +1227,14 @@ function DesktopPc({ item }: Props) {
   )
 }
 
-// Erba Dhurrie Rug: 짙은 회색 바탕에 크림색 막대 무늬가 줄지은 직사각 러그.
+// Erba Dhurrie Rug: 밝은 크림색 바탕에 짙은 회색 막대 무늬가 줄지은 직사각 러그(밝은 마루에 어울리게 바탕을 밝혔다).
 function Dhurrie({ item }: Props) {
   const w = item.w / M
   const d = item.d / M
   const pattern = useDrawn(256, 360, (ctx, cw, ch) => {
-    ctx.fillStyle = '#2c2c30'
+    ctx.fillStyle = '#e4ddcc'
     ctx.fillRect(0, 0, cw, ch)
-    ctx.fillStyle = '#e8e2cf'
+    ctx.fillStyle = '#4a4a50'
     for (let row = 0; row < 9; row += 1) {
       for (let col = 0; col < 6; col += 1) {
         const x = 20 + col * 36
@@ -1251,7 +1251,7 @@ function Dhurrie({ item }: Props) {
     <group>
       <mesh position={[0, 0.004, 0]} receiveShadow>
         <boxGeometry args={[w, 0.008, d]} />
-        {std('#2c2c30', 1)}
+        {std('#e4ddcc', 1)}
       </mesh>
       <mesh position={[0, 0.0085, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[w - 0.02, d - 0.02]} />
