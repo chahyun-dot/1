@@ -4,7 +4,7 @@ import { RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { DESK_TOP, FOOT_W, LEG_W, legCenter, undersideOf } from '@/lib/desk'
 import { DRAWER_PULL } from '@/lib/fit'
-import { HangerSet, PROP_MODELS } from '@/components/fit/ArchiProps'
+import { PROP_MODELS } from '@/components/fit/ArchiProps'
 import { AraliaPlant, ArdenMirror, BedWithBedding, BlackBed, ChromeCabinet, CoreRack, DrawerUnit, FkSofa, MeshOfficeChair, MotionDesk, PegBoard, SteelShelf, WallTv, WalnutDiningChair, WoodBlind } from '@/components/fit/ArchiModels'
 import type { Item } from '@/lib/types'
 
@@ -449,8 +449,6 @@ export default function ItemModel(props: ModelProps) {
       return <BlackBed {...props} />
     case 'bedset':
       return <BedWithBedding {...props} />
-    case 'hangerset':
-      return <HangerSet {...props} />
     case 'steelshelf':
       return <SteelShelf {...props} />
     case 'pegboard':

@@ -652,34 +652,6 @@ function Shoes({ item }: Props) {
   )
 }
 
-// 철제행거 + 걸린 드레스 셔츠 3벌·접은 옷 2더미·신발 2켤레를 한 덩어리로 그린다. 위치(행거 가운데 기준, 가로 x·앞 z, mm)와 높이는 플래너 배치에서 옮겼다.
-const HANGER_CONTENTS: { kind: 'shirt' | 'folded' | 'shoes'; w: number; d: number; h: number; x: number; z: number; y: number; turn: number }[] = [
-  { kind: 'shirt', w: 134, d: 451, h: 964, x: -257, z: 82, y: 734, turn: 0 },
-  { kind: 'shirt', w: 134, d: 451, h: 964, x: -174, z: 76, y: 734, turn: 0 },
-  { kind: 'shirt', w: 134, d: 451, h: 964, x: -76, z: 68, y: 734, turn: 0 },
-  { kind: 'folded', w: 233, d: 319, h: 200, x: 230, z: 0, y: 360, turn: 0 },
-  { kind: 'folded', w: 233, d: 319, h: 200, x: -27, z: 1, y: 360, turn: 0 },
-  { kind: 'shoes', w: 169, d: 228, h: 71, x: -257, z: 0, y: 50, turn: Math.PI },
-  { kind: 'shoes', w: 169, d: 228, h: 71, x: -76, z: 0, y: 50, turn: Math.PI },
-]
-
-export function HangerSet({ item }: Props) {
-  const parts: Record<'shirt' | 'folded' | 'shoes', ComponentType<Props>> = { shirt: Shirt, folded: FoldedClothes, shoes: Shoes }
-  return (
-    <group>
-      <WallHanger item={item} />
-      {HANGER_CONTENTS.map((part, index) => {
-        const Part = parts[part.kind]
-        return (
-          <group key={index} position={[part.x / M, part.y / M, part.z / M]} rotation={[0, part.turn, 0]}>
-            <Part item={{ ...item, w: part.w, d: part.d, h: part.h, tint: undefined }} />
-          </group>
-        )
-      })}
-    </group>
-  )
-}
-
 // PARENTESI: 천장에서 바닥까지 팽팽히 당긴 가는 케이블, 가운데 철봉에 달린 팔과 붉은 스포트라이트.
 function Parentesi({ item }: Props) {
   const d = item.d / M

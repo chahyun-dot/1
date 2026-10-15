@@ -84,8 +84,8 @@ export const ROUND_RUG_ID = 'X5S4t1X5DE143AD22764FF9'
 export const BEAT_LIGHT_ID = 'ZZHrOv2AC2EF05FF43243FB'
 export const CUSHION_ID = 'XjOO_Xy13478D0D91CD493D'
 export const HANGER_ID = 'YSBhD9T1E65915F80104295'
-// 행거(걸린 셔츠·옷·신발은 행거 모델 안에 들어 있다).
-export const HANGER_KEYS = [HANGER_ID]
+// 행거 + 걸린 셔츠·옷·신발. 앞의 것이 행거이고 나머지는 행거에 딸린 물건이다.
+export const HANGER_KEYS = [HANGER_ID, 'YV8EVEF2D36EE1DB1D44CAB', 'XX-zmmq45F1867DE7EE462B', 'ZFFQHal586565A1F38B473C']
 
 // 3D 에서만 뺀다(데모와 상품 종류 목록에는 그대로 있다).
 const HIDDEN_IN_STUDIO = new Set(['YSJfCSW3C8249DE736F456A', 'YneAflHA33DBE2534ED4DC7'])
