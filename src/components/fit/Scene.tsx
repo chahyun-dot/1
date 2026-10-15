@@ -3,10 +3,10 @@ import { Canvas, useThree, type ThreeEvent } from '@react-three/fiber'
 import { Html, Line, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import ItemModel from '@/components/fit/Models'
-import RoomShell from '@/components/fit/RoomShell'
+import RoomShell, { type OpeningKey } from '@/components/fit/RoomShell'
 import { DRAWER_PULL, cm, footprint, frontZone } from '@/lib/fit'
 import { fromWorld, toWorld } from '@/lib/room'
-import type { FitResult, Item, Level, Rect, Room } from '@/lib/types'
+import type { FitResult, Item, Level, Opening, Rect, Room } from '@/lib/types'
 
 export type View = 'persp' | 'top'
 
@@ -37,6 +37,8 @@ type SceneProps = {
   onReady?: () => void
   // true 면 가구를 눌러도 바로 상세로 가지 않고, 가구 위에 뜨는 "제품 상세 페이지 이동" 버튼으로 간다. 러그도 눌러 고를 수 있다.
   detailButton?: boolean
+  // 있으면 문·창도 끌어서 벽을 따라(다른 벽으로도) 옮길 수 있다.
+  onOpeningMove?: (key: OpeningKey, next: Opening) => void
 }
 
 const CLICK_SLOP = 5
@@ -236,8 +238,9 @@ function DraggableItem({
   )
 }
 
-export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, isDrawerOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady, detailButton = false }: SceneProps) {
+export default function Scene({ room, items, selectedId, focus, fit, view, drawersOpen, isDrawerOpen, showFrontZone = true, distance = 1, onSelect, onMove, onOpenDetail, canOpenDetail = (item) => item.model === 'desk', onReady, detailButton = false, onOpeningMove }: SceneProps) {
   const [dragging, setDragging] = useState(false)
+  const [activeOpening, setActiveOpening] = useState<OpeningKey | null>(null)
 
   useEffect(() => () => {
     document.body.style.cursor = ''
@@ -248,7 +251,11 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
       shadows
       dpr={[1, 2]}
       camera={{ fov: 24, near: 0.1, far: 200, position: [-10.8, 8, 10.8] }}
-      onPointerMissed={(event) => event.button === 0 && onSelect(null)}
+      onPointerMissed={(event) => {
+        if (event.button !== 0) return
+        onSelect(null)
+        setActiveOpening(null)
+      }}
       onCreated={() => requestAnimationFrame(() => requestAnimationFrame(() => onReady?.()))}
     >
       <color attach="background" args={['#2b2c2f']} />
@@ -265,7 +272,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
         shadow-bias={-0.0004}
       />
 
-      <RoomShell room={room} />
+      <RoomShell room={room} openingControl={onOpeningMove ? { active: activeOpening, onSelect: (key) => { setActiveOpening(key); if (key) onSelect(null) }, onMove: onOpeningMove, onDragChange: setDragging } : undefined} />
 
       {items.map((item) => (
         <DraggableItem

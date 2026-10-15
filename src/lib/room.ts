@@ -1,4 +1,4 @@
-import type { Rect, Room, Side } from '@/lib/types'
+import type { Opening, Rect, Room, Side } from '@/lib/types'
 
 export const WALL_THICKNESS = 160
 export const DOOR_HEIGHT = 2100
@@ -67,3 +67,16 @@ export const fromWorld = (room: Room, wx: number, wz: number): [number, number] 
   wx * 1000 + room.w / 2,
   wz * 1000 + room.d / 2,
 ]
+
+// 문·창을 끌 때: 점(방 좌표)에 가장 가까운 벽으로 옮기고 그 벽을 따라 위치를 맞춘다. grab 은 처음 잡은 자리가 구멍 가운데에서 벗어난 만큼(같은 벽에서만 쓴다).
+export const retargetOpening = (room: Room, opening: Opening, point: [number, number], grab = 0): Opening => {
+  const [x, z] = point
+  const dist: Record<Side, number> = { '-x': x, '+x': room.w - x, '-z': z, '+z': room.d - z }
+  const side = (Object.keys(dist) as Side[]).reduce((best, s) => (dist[s] < dist[best] ? s : best), '-x' as Side)
+  const alongX = side === '-z' || side === '+z'
+  const length = opening.to - opening.from
+  const wallLength = alongX ? room.w : room.d
+  const center = (alongX ? x : z) - (side === opening.side ? grab : 0)
+  const from = Math.round(Math.max(0, Math.min(wallLength - length, center - length / 2)))
+  return { ...opening, side, from, to: from + length }
+}

@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from 'react'
-import { useFrame } from '@react-three/fiber'
-import { Grid, Html } from '@react-three/drei'
+import { useEffect, useMemo, useRef } from 'react'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
+import { Grid, Html, Line } from '@react-three/drei'
 import * as THREE from 'three'
-import { CURTAIN_GAP, DOOR_HEIGHT, WALL_THICKNESS, doorSpan, isWideRoom, toWorld, windowSpan } from '@/lib/room'
+import { CURTAIN_GAP, DOOR_HEIGHT, WALL_THICKNESS, doorSpan, fromWorld, isWideRoom, retargetOpening, toWorld, windowSpan } from '@/lib/room'
 import ItemModel, { OpenBox } from '@/components/fit/Models'
 import type { Item, Opening, Room, Side } from '@/lib/types'
 
@@ -241,8 +241,25 @@ const wallPieces = (room: Room, length: number, cuts: Opening[]): Piece[] => {
 // 구멍이 난 벽 안쪽을 보는 방향(앞)이 가구 모델의 +z 가 되도록 돌린다.
 const FACING: Record<Side, number> = { '-x': Math.PI / 2, '+x': -Math.PI / 2, '-z': 0, '+z': Math.PI }
 
-function OpeningModel({ room, opening, kind }: { room: Room; opening: Opening; kind: 'door' | 'window' }) {
+export type OpeningKind = 'door' | 'window'
+export type OpeningKey = { kind: OpeningKind; index: number }
+
+// 문·창을 끌어 옮기는 데 필요한 것(없으면 구멍은 고정이다).
+export type OpeningControl = {
+  active: OpeningKey | null
+  onSelect: (key: OpeningKey | null) => void
+  onMove: (key: OpeningKey, next: Opening) => void
+  onDragChange: (dragging: boolean) => void
+}
+
+function OpeningModel({ room, opening, kind, index, control }: { room: Room; opening: Opening; kind: OpeningKind; index: number; control?: OpeningControl }) {
   const t = WALL_THICKNESS / M
+  const drag = useRef<{ grab: number; side: Side } | null>(null)
+  const hit = useRef(new THREE.Vector3())
+  // 구멍 가운데 높이의 수평면에서 점을 읽어야 시점이 비스듬해도 벽을 따라 정확히 따라온다.
+  const plane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 1, 0), -((opening.bottom + opening.top) / 2) / M), [opening.bottom, opening.top])
+  const pointOf = (event: ThreeEvent<PointerEvent>) => (event.ray.intersectPlane(plane, hit.current) ? fromWorld(room, hit.current.x, hit.current.z) : null)
+  const alongOf = (side: Side, point: [number, number]) => (side === '-z' || side === '+z' ? point[0] : point[1])
   const mid = (opening.from + opening.to) / 2
   const alongX = opening.side === '-z' || opening.side === '+z'
   const [wx, wz] = alongX ? toWorld(room, mid, 0) : toWorld(room, 0, mid)
@@ -264,9 +281,51 @@ function OpeningModel({ room, opening, kind }: { room: Room; opening: Opening; k
     rot: 0,
     color: '#d9d5cc',
   }
+  const active = control?.active?.kind === kind && control.active.index === index
+  const handlers = control
+    ? {
+        onPointerDown: (event: ThreeEvent<PointerEvent>) => {
+          if (event.button !== 0) return
+          event.stopPropagation()
+          control.onSelect({ kind, index })
+          const point = pointOf(event)
+          if (!point) return
+          drag.current = { grab: alongOf(opening.side, point) - mid, side: opening.side }
+          ;(event.target as unknown as Element).setPointerCapture(event.pointerId)
+          control.onDragChange(true)
+          document.body.style.cursor = 'grabbing'
+        },
+        onPointerMove: (event: ThreeEvent<PointerEvent>) => {
+          if (!drag.current) return
+          event.stopPropagation()
+          const point = pointOf(event)
+          if (!point) return
+          const start = drag.current
+          const next = retargetOpening(room, opening, point, opening.side === start.side ? start.grab : 0)
+          if (next.side !== opening.side || next.from !== opening.from) control.onMove({ kind, index }, next)
+        },
+        onPointerUp: (event: ThreeEvent<PointerEvent>) => {
+          if (!drag.current) return
+          drag.current = null
+          ;(event.target as unknown as Element).releasePointerCapture(event.pointerId)
+          control.onDragChange(false)
+          document.body.style.cursor = 'grab'
+        },
+        onPointerOver: (event: ThreeEvent<PointerEvent>) => {
+          event.stopPropagation()
+          if (!drag.current) document.body.style.cursor = 'grab'
+        },
+        onPointerOut: () => {
+          if (!drag.current) document.body.style.cursor = ''
+        },
+      }
+    : {}
+  const w = item.w / M
+  const h = item.h / M
   return (
-    <group position={position} rotation={[0, FACING[opening.side], 0]}>
+    <group position={position} rotation={[0, FACING[opening.side], 0]} {...handlers}>
       <ItemModel item={item} />
+      {active && <Line points={[[-w / 2, 0, 0.06], [w / 2, 0, 0.06], [w / 2, h, 0.06], [-w / 2, h, 0.06], [-w / 2, 0, 0.06]]} color="#35c5f0" lineWidth={2.5} />}
     </group>
   )
 }
@@ -285,7 +344,7 @@ function DoorSwing({ room, door }: { room: Room; door: Opening }) {
   )
 }
 
-function CustomShell({ room, floorMaterials }: { room: Room; floorMaterials: THREE.Material[] }) {
+function CustomShell({ room, floorMaterials, control }: { room: Room; floorMaterials: THREE.Material[]; control?: OpeningControl }) {
   const { door, windows } = room.openings!
   const cuts = [door, ...windows]
   const on = (side: Side) => cuts.filter((cut) => cut.side === side)
@@ -301,22 +360,22 @@ function CustomShell({ room, floorMaterials }: { room: Room; floorMaterials: THR
       <Wall room={room} side="-x" pieces={wallPieces(room, room.d, on('-x'))} />
       <Wall room={room} side="+x" pieces={wallPieces(room, room.d, on('+x'))} />
 
-      <OpeningModel room={room} opening={door} kind="door" />
+      <OpeningModel room={room} opening={door} kind="door" index={0} control={control} />
       {windows.map((win, index) => (
-        <OpeningModel key={index} room={room} opening={win} kind="window" />
+        <OpeningModel key={index} room={room} opening={win} kind="window" index={index} control={control} />
       ))}
       <DoorSwing room={room} door={door} />
     </group>
   )
 }
 
-export default function RoomShell({ room }: { room: Room }) {
+export default function RoomShell({ room, openingControl }: { room: Room; openingControl?: OpeningControl }) {
   const floorMaterials = useMemo(() => {
     const side = new THREE.MeshStandardMaterial({ color: '#202124', roughness: 0.9 })
     const top = new THREE.MeshStandardMaterial({ map: plankTexture(room), roughness: 0.85, emissive: '#2a2b2e' })
     return [side, side, top, side, side, side]
   }, [room])
-  if (room.openings) return <CustomShell room={room} floorMaterials={floorMaterials} />
+  if (room.openings) return <CustomShell room={room} floorMaterials={floorMaterials} control={openingControl} />
   const wide = isWideRoom(room)
   const door = doorSpan(room)
   const win = windowSpan(room)
