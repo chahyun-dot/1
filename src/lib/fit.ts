@@ -239,6 +239,25 @@ const rests = (top: Item, base: Item) => {
   return (overlapW * overlapD) / ((a.maxX - a.minX) * (a.maxZ - a.minZ)) >= 0.6
 }
 
+// 가구를 끌어 옮길 때 같이 따라가는 물건: base 위(base 높이 안)에 놓인 물건과 그 위에 다시 놓인 물건들.
+// 바닥에 놓인 것과 벽에 높이 걸린 것은 따라가지 않는다(base 의 높이 범위를 넘는 것).
+export const itemsOn = (base: Item, items: Item[]): Item[] => {
+  const found = new Map<string, Item>()
+  const queue = [base]
+  while (queue.length) {
+    const under = queue.shift()!
+    items.forEach((item) => {
+      if (item.id === base.id || found.has(item.id) || item.kind === 'rug') return
+      const bottom = under.elevation ?? 0
+      const lift = item.elevation ?? 0
+      if (lift > bottom + under.h + 60 || !rests(item, under)) return
+      found.set(item.id, item)
+      queue.push(item)
+    })
+  }
+  return [...found.values()]
+}
+
 // 데모용: 서랍 전용 규칙 없이, 고른 가구 하나의 위치 문제와 앞뒤좌우 여유만 본다.
 // 창턱 위로 100mm 이하로 살짝 걸친 가구(책상 위 모니터암 등)는 커튼 라인에 닿는 것으로 보지 않는다.
 const SILL_TOLERANCE = 100

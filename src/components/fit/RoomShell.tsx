@@ -325,6 +325,13 @@ function OpeningModel({ room, opening, kind, index, control }: { room: Room; ope
   return (
     <group position={position} rotation={[0, FACING[opening.side], 0]} {...handlers}>
       <ItemModel item={item} />
+      {/* 창은 블라인드에 가려 잡기 어려워서, 창턱 아래 벽에 붙은 작은 손잡이로도 끌 수 있다(블라인드 아래 가장자리에 가리지 않게 조금 낮게). */}
+      {control && kind === 'window' && (
+        <mesh position={[0, -0.2, t / 2 + 0.012]} castShadow>
+          <boxGeometry args={[0.4, 0.09, 0.03]} />
+          <meshStandardMaterial color={active ? '#35c5f0' : '#b4b9bf'} roughness={0.5} />
+        </mesh>
+      )}
       {active && <Line points={[[-w / 2, 0, 0.06], [w / 2, 0, 0.06], [w / 2, h, 0.06], [-w / 2, h, 0.06], [-w / 2, 0, 0.06]]} color="#35c5f0" lineWidth={2.5} />}
     </group>
   )

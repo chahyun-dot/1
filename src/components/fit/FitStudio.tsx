@@ -9,10 +9,9 @@ import { COLORS, PRODUCT, WHEEL_DEFAULT, WHEEL_MAX, WHEEL_MIN, colorOf, type Col
 import { GALLERY, galleryUrl } from '@/data/ohou'
 import { BED_FRAME_COLORS, BED_SET_SUFFIX, BUNDLE_OF, COLOR_OPTIONS, DEMO_FURNITURE, FURNITURE, MODEL_BY_FURNITURE, categoryOf, hasSize, type ColorOption, type Furniture, type FurnitureCategory } from '@/data/furniture'
 import { BED_ID, CLUSTERS, DINING_CHAIR_ID, DRAWER_ID, HANGER_KEYS, MAX_WINDOWS, SOFA_ID, STUDIO_DIMS, STUDIO_PRESET, TABLE_ID, clusterOf, keyOf, studioItems, studioRoom, type ClusterId, type RoomDims } from '@/data/studioLayout'
-import { retargetOpening } from '@/lib/room'
 import { DESK_TOP, legInner, maxLegGap, placeBesideDesk, placeUnderDesk, underOffsets, undersideOf, type UnderOffsets } from '@/lib/desk'
 import { placeAround, type AroundSide } from '@/lib/cluster'
-import { DRAWER_PULL, backToWall, clampToRoom, cm, evaluate, findFreeSpot, measureFurniture } from '@/lib/fit'
+import { DRAWER_PULL, backToWall, clampToRoom, cm, evaluate, findFreeSpot, itemsOn, measureFurniture } from '@/lib/fit'
 import type { FitResult, Item, Level, Opening, Rot } from '@/lib/types'
 
 // 데모와 "내 공간에 맞는지 확인하기" 팝업을 합친 화면(데모 2번).
@@ -343,49 +342,26 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     say('처음 배치로 되돌렸어요')
   }
 
-  // 문·창을 끌어 옮긴다. 다른 문·창과 겹치는 자리로는 옮기지 않는다. 창을 옮기면 그 창의 블라인드도 같이 옮겨 걸린다.
-  const SIDE_OF_ROT: Record<number, Opening['side']> = { 0: '-z', 1: '-x', 2: '+z', 3: '+x' }
-  const ROT_OF_SIDE: Record<Opening['side'], Rot> = { '-z': 0, '-x': 1, '+z': 2, '+x': 3 }
-  const alongWall = (side: Opening['side'], x: number, z: number) => (side === '-z' || side === '+z' ? x : z)
-  // 창 구멍에 걸린 블라인드(같은 벽에서 창 폭 안에 있는 것)를 찾는다.
-  const blindsOf = (win: Opening) =>
-    items.filter((item) => item.model === 'blind' && SIDE_OF_ROT[item.rot] === win.side && alongWall(win.side, item.x, item.z) >= win.from - 30 && alongWall(win.side, item.x, item.z) <= win.to + 30)
-
+  // 문·창을 끌어 옮긴다. 다른 문·창과 겹치는 자리로는 옮기지 않는다. 블라인드는 창과 따로 옮긴다.
   const moveOpening = (key: OpeningKey, next: Opening) => {
     const open = room.openings
     if (!open) return
     const current = key.kind === 'door' ? open.door : open.windows[key.index]
     const others = key.kind === 'door' ? open.windows : [open.door, ...open.windows.filter((_, index) => index !== key.index)]
     if (!current || others.some((other) => other.side === next.side && next.from < other.to + 20 && next.to > other.from - 20)) return
-    if (key.kind === 'window') {
-      const hung = new Set(blindsOf(current).map((item) => item.id))
-      const mid = (next.from + next.to) / 2
-      setItems((prev) =>
-        prev.map((item) => {
-          if (!hung.has(item.id)) return item
-          const rot = ROT_OF_SIDE[next.side]
-          const half = item.d / 2
-          const x = next.side === '-x' ? half : next.side === '+x' ? room.w - half : mid
-          const z = next.side === '-z' ? half : next.side === '+z' ? room.d - half : mid
-          return { ...item, rot, x, z }
-        }),
-      )
-    }
     setMovedOpenings((prev) => (key.kind === 'door' ? { ...prev, door: next } : { ...prev, windows: { ...prev.windows, [key.index]: next } }))
   }
 
-  // 블라인드를 끌면 그 창을 같이 옮긴다(창은 블라인드에 가려 직접 잡기 어렵다).
-  const moveItemOrWindow = (id: string, x: number, z: number) => {
-    const item = items.find((entry) => entry.id === id)
-    const open = room.openings
-    if (item?.model === 'blind' && open) {
-      const index = open.windows.findIndex((win) => blindsOf(win).some((blind) => blind.id === id))
-      if (index >= 0) {
-        moveOpening({ kind: 'window', index }, retargetOpening(room, open.windows[index], [x, z], 0))
-        return
-      }
-    }
-    updateItem(id, (entry) => clampTo(entry, x, z))
+  // 가구를 끌면 그 위에 올려 둔 물건도 같이 옮겨진다. 위에 놓인 물건만 끌면 그 물건만 옮겨진다.
+  const moveWithFollowers = (id: string, x: number, z: number) => {
+    const base = items.find((entry) => entry.id === id)
+    if (!base) return
+    const moved = clampTo(base, x, z)
+    const dx = moved.x - base.x
+    const dz = moved.z - base.z
+    if (dx === 0 && dz === 0) return
+    const followers = new Set(itemsOn(base, items).map((entry) => entry.id))
+    setItems((prev) => prev.map((entry) => (entry.id === id ? moved : followers.has(entry.id) ? clampTo(entry, entry.x + dx, entry.z + dz) : entry)))
   }
 
   const openDetail = (id: ClusterId, memberId?: string) => {
@@ -685,7 +661,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
               {!mount ? null : inDetail && cluster!.id === 'desk' && desk ? (
                 <DetailScene key="desk" desk={desk} product={product} drawersOpen={isOpen(productId)} showDims={showDims} autoRotate={autoRotate} onMove={moveProduct} extras={deskChairs} onMoveExtra={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
               ) : inDetail ? (
-                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onMoveMember={(id, x, z) => updateItem(id, (item) => clampTo(item, x, z))} onReady={() => setReady(true)} />
+                <ClusterScene key={cluster!.id} members={members} gaps={gaps} showDims={showDims} autoRotate={autoRotate} isDrawerOpen={(item) => isOpen(item.id)} onMoveMember={moveWithFollowers} onReady={() => setReady(true)} />
               ) : (
                 <Scene
                   key="room"
@@ -703,7 +679,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   isDrawerOpen={(item) => isOpen(item.id)}
                   showFrontZone={target?.kind === 'product'}
                   onSelect={setSelectedId}
-                  onMove={moveItemOrWindow}
+                  onMove={moveWithFollowers}
                   onOpenDetail={(id) => {
                     const clicked = items.find((item) => item.id === id)
                     const found = clicked ? clusterOf(clicked) : null
