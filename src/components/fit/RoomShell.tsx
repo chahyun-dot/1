@@ -20,21 +20,21 @@ type WallProps = {
 
 const TILE = 0.4
 
-// 밝은 오크 마루판: 판마다 이음매 위치와 밝기가 조금씩 다르다.
+// 어두운 마루판: 판마다 이음매 위치와 밝기가 조금씩 다르다.
 function plankTexture(room: Room) {
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = 512
   const ctx = canvas.getContext('2d')!
-  const tones = ['#d8c3a0', '#d1bb97', '#ddc9a7', '#ccb58f']
+  const tones = ['#55575c', '#4f5155', '#5a5c61', '#4b4d51']
   for (let row = 0; row < 8; row++) {
     const offset = (row * 97) % 256
     for (let k = -1; k < 3; k++) {
       ctx.fillStyle = tones[(row * 3 + k + 8) % tones.length]
       ctx.fillRect(offset + k * 256, row * 64, 256, 64)
-      ctx.fillStyle = '#b79f78'
+      ctx.fillStyle = '#34353a'
       ctx.fillRect(offset + k * 256, row * 64, 2, 64)
     }
-    ctx.fillStyle = '#b79f78'
+    ctx.fillStyle = '#34353a'
     ctx.fillRect(0, row * 64 + 62, 512, 2)
   }
   const texture = new THREE.CanvasTexture(canvas)
@@ -312,8 +312,8 @@ function CustomShell({ room, floorMaterials }: { room: Room; floorMaterials: THR
 
 export default function RoomShell({ room }: { room: Room }) {
   const floorMaterials = useMemo(() => {
-    const side = new THREE.MeshStandardMaterial({ color: '#cbb694', roughness: 0.9 })
-    const top = new THREE.MeshStandardMaterial({ map: plankTexture(room), roughness: 0.85, emissive: '#3a3328' })
+    const side = new THREE.MeshStandardMaterial({ color: '#202124', roughness: 0.9 })
+    const top = new THREE.MeshStandardMaterial({ map: plankTexture(room), roughness: 0.85, emissive: '#2a2b2e' })
     return [side, side, top, side, side, side]
   }, [room])
   if (room.openings) return <CustomShell room={room} floorMaterials={floorMaterials} />
