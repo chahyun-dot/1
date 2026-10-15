@@ -22,6 +22,8 @@ type Props = {
   onColor?: (id: ColorId) => void
   onClose: () => void
   onDone?: (summary: FitSummary) => void
+  // 상품 페이지의 "내 공간에 맞는지 확인하기" 버튼으로 열 때는 방 전체가 아니라 책상 상세 화면으로 시작한다("방 전체" 버튼으로 방 화면으로 간다).
+  startInDetail?: boolean
 }
 
 type Tab = 'space' | 'all' | 'custom'
@@ -202,7 +204,7 @@ function Section({ children }: { children: ReactNode }) {
   return <section className="border-b border-border-subtle px-5 py-5">{children}</section>
 }
 
-export default function FitStudio({ colorId: colorFromPage, onColor, onClose, onDone }: Props) {
+export default function FitStudio({ colorId: colorFromPage, onColor, onClose, onDone, startInDetail = false }: Props) {
   const [colorId, setColorId] = useState<ColorId>(colorFromPage ?? 'white')
   const [dims, setDims] = useState<RoomDims>(STUDIO_DIMS)
   const [presetId, setPresetId] = useState<string | null>(STUDIO_PRESET.id)
@@ -227,7 +229,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const [gapsOpen, setGapsOpen] = useState(false)
   const [tab, setTab] = useState<Tab>('space')
   const [sub, setSub] = useState<'placed' | 'catalog'>('placed')
-  const [detail, setDetail] = useState<ClusterId | null>(null)
+  const [detail, setDetail] = useState<ClusterId | null>(startInDetail ? 'desk' : null)
   const [ready, setReady] = useState(false)
   const [mount, setMount] = useState(false)
   const [detailTab, setDetailTab] = useState<DetailTab>('members')

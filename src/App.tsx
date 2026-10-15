@@ -116,7 +116,7 @@ export default function App() {
       <TopButton />
       {fitShown && (
         <Suspense fallback={<ModalLoading />}>
-          {useOldFit() ? <FitModal colorId={colorId} onColor={setColorId} onClose={closeFit} /> : <FitStudio colorId={colorId} onColor={setColorId} onClose={closeFit} />}
+          {useOldFit() ? <FitModal colorId={colorId} onColor={setColorId} onClose={closeFit} /> : <FitStudio colorId={colorId} onColor={setColorId} onClose={closeFit} startInDetail={!demo2} />}
         </Suspense>
       )}
     </>
