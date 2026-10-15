@@ -250,6 +250,8 @@ export type OpeningControl = {
   onSelect: (key: OpeningKey | null) => void
   onMove: (key: OpeningKey, next: Opening) => void
   onDragChange: (dragging: boolean) => void
+  // 창 손잡이는 평소엔 숨기고 블라인드를 골랐을 때(창이 블라인드에 가려질 때)나 창을 골랐을 때만 보인다.
+  showHandles: boolean
 }
 
 function OpeningModel({ room, opening, kind, index, control }: { room: Room; opening: Opening; kind: OpeningKind; index: number; control?: OpeningControl }) {
@@ -326,7 +328,7 @@ function OpeningModel({ room, opening, kind, index, control }: { room: Room; ope
     <group position={position} rotation={[0, FACING[opening.side], 0]} {...handlers}>
       <ItemModel item={item} />
       {/* 창은 블라인드에 가려 잡기 어려워서, 창턱 아래 벽에 붙은 작은 손잡이로도 끌 수 있다(블라인드 아래 가장자리에 가리지 않게 조금 낮게). */}
-      {control && kind === 'window' && (
+      {control && kind === 'window' && (active || control.showHandles) && (
         <mesh position={[0, -0.2, t / 2 + 0.012]} castShadow>
           <boxGeometry args={[0.4, 0.09, 0.03]} />
           <meshStandardMaterial color={active ? '#35c5f0' : '#b4b9bf'} roughness={0.5} />

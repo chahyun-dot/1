@@ -326,9 +326,27 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
   const updateItem = (id: string, patch: (item: Item) => Item) => setItems((prev) => prev.map((item) => (item.id === id ? patch(item) : item)))
   const clampTo = (item: Item, x: number, z: number) => ({ ...item, ...clampToRoom(item, x, z, room) })
 
+  // 가구(base)를 nextBase 로 바꾼다. 그 위에 올려 둔 물건은 가구에 고정된 것처럼 같은 간격 그대로 따라간다
+  // (옮기면 같은 만큼 이동, 돌리면 가구 가운데를 중심으로 같이 돌고, 벽에 막혀 덜 움직이면 같이 덜 움직인다).
+  const commitBase = (base: Item, nextBase: Item, rotated = false) => {
+    const followers = new Map(itemsOn(base, items).map((entry) => [entry.id, entry]))
+    setItems((prev) =>
+      prev.map((entry) => {
+        if (entry.id === base.id) return nextBase
+        const follower = followers.get(entry.id)
+        if (!follower) return entry
+        if (!rotated) return { ...follower, x: follower.x + nextBase.x - base.x, z: follower.z + nextBase.z - base.z }
+        // 90° 돌리면 가구 가운데에서 잰 간격(rx, rz)도 같은 방향으로 90° 돈다.
+        const rx = follower.x - base.x
+        const rz = follower.z - base.z
+        return { ...follower, x: nextBase.x + rz, z: nextBase.z - rx, rot: ((follower.rot + 1) % 4) as Rot, yaw: follower.yaw !== undefined ? follower.yaw + 90 : undefined }
+      }),
+    )
+  }
+
   const rotateSelected = () => {
     if (!selected) return
-    updateItem(selected.id, (item) => clampTo({ ...item, rot: ((item.rot + 1) % 4) as Rot }, item.x, item.z))
+    commitBase(selected, clampTo({ ...selected, rot: ((selected.rot + 1) % 4) as Rot }, selected.x, selected.z), true)
   }
 
   const reset = () => {
@@ -357,11 +375,8 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
     const base = items.find((entry) => entry.id === id)
     if (!base) return
     const moved = clampTo(base, x, z)
-    const dx = moved.x - base.x
-    const dz = moved.z - base.z
-    if (dx === 0 && dz === 0) return
-    const followers = new Set(itemsOn(base, items).map((entry) => entry.id))
-    setItems((prev) => prev.map((entry) => (entry.id === id ? moved : followers.has(entry.id) ? clampTo(entry, entry.x + dx, entry.z + dz) : entry)))
+    if (moved.x === base.x && moved.z === base.z) return
+    commitBase(base, moved)
   }
 
   const openDetail = (id: ClusterId, memberId?: string) => {
@@ -754,7 +769,7 @@ export default function FitStudio({ colorId: colorFromPage, onColor, onClose, on
                   <>
                     <StageButton icon="rotate_90_degrees_cw" label="90° 회전 (R)" onClick={rotateSelected} disabled={!selected} />
                     <span className="text-border-default">|</span>
-                    <StageButton icon="vertical_align_top" label="벽에 붙이기" onClick={() => selected && updateItem(selected.id, (item) => backToWall(item, room))} disabled={!selected} />
+                    <StageButton icon="vertical_align_top" label="벽에 붙이기" onClick={() => selected && commitBase(selected, backToWall(selected, room))} disabled={!selected} />
                     <span className="text-border-default">|</span>
                     {selected && (selected.kind === 'product' || selected.model === 'drawerunit') && (
                       <>

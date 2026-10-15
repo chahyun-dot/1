@@ -272,7 +272,7 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
         shadow-bias={-0.0004}
       />
 
-      <RoomShell room={room} openingControl={onOpeningMove ? { active: activeOpening, onSelect: (key) => { setActiveOpening(key); if (key) onSelect(null) }, onMove: onOpeningMove, onDragChange: setDragging } : undefined} />
+      <RoomShell room={room} openingControl={onOpeningMove ? { active: activeOpening, onSelect: (key) => { setActiveOpening(key); if (key) onSelect(null) }, onMove: onOpeningMove, onDragChange: setDragging, showHandles: items.find((entry) => entry.id === selectedId)?.model === 'blind' } : undefined} />
 
       {items.map((item) => (
         <DraggableItem
@@ -281,7 +281,10 @@ export default function Scene({ room, items, selectedId, focus, fit, view, drawe
           item={item}
           selected={item.id === selectedId}
           drawersOpen={isDrawerOpen ? isDrawerOpen(item) : drawersOpen && item.kind === 'product'}
-          onSelect={onSelect}
+          onSelect={(id) => {
+            setActiveOpening(null)
+            onSelect(id)
+          }}
           onMove={onMove}
           onDragChange={setDragging}
           onClick={canOpenDetail(item) ? () => onOpenDetail(item.id) : undefined}
