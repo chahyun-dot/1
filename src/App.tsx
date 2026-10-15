@@ -23,9 +23,9 @@ const FitDemo = lazy(() => import('@/components/demo/FitDemo'))
 const ModelPreview = lazy(() => import('@/components/demo/ModelPreview'))
 
 // 주소 끝이 #/furniture 이면 가구 목록, #/demo 이면 데모 페이지, #/models 이면 3D 모델 미리보기를 상품 페이지 대신 보여 준다.
-type Route = 'home' | 'furniture' | 'demo' | 'demo2' | 'models'
+type Route = 'home' | 'furniture' | 'demo' | 'demo2' | 'desk' | 'models'
 
-const ROUTES: Record<string, Route> = { '#/furniture': 'furniture', '#/demo': 'demo', '#/demo2': 'demo2', '#/models': 'models' }
+const ROUTES: Record<string, Route> = { '#/furniture': 'furniture', '#/demo': 'demo', '#/demo2': 'demo2', '#/desk': 'desk', '#/models': 'models' }
 
 // 주소 뒤에 ?fit=old 를 붙이면 합치기 전 "내 공간에 맞는지 확인하기" 팝업을 연다.
 const useOldFit = () => new URLSearchParams(window.location.search).get('fit') === 'old'
@@ -64,13 +64,15 @@ export default function App() {
   const openFit = () => setFitOpen(true)
 
   const demo2 = route === 'demo2'
-  const fitShown = fitOpen || demo2
+  // #/desk 는 상품 페이지 버튼과 같이 책상 상세부터 팝업을 연다.
+  const direct = demo2 || route === 'desk'
+  const fitShown = fitOpen || direct
   const closeFit = () => {
     setFitOpen(false)
-    if (demo2) window.location.hash = '#/'
+    if (direct) window.location.hash = '#/'
   }
 
-  if (route !== 'home' && !demo2) {
+  if (route !== 'home' && !direct) {
     return (
       <Suspense fallback={<ModalLoading />}>
         {route === 'furniture' ? <FurnitureCatalog /> : route === 'models' ? <ModelPreview /> : <FitDemo />}
